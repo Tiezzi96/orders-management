@@ -13,4 +13,4 @@ jobs:
          with:
             java-version: 1.8
       -  name: Build with maven
-         run: mvn -f orders-management/pom.xml clean verify
+         run: mvn clean verify
