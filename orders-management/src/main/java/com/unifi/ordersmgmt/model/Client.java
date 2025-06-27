@@ -2,6 +2,8 @@ package com.unifi.ordersmgmt.model;
 
 import java.util.Objects;
 
+import javax.annotation.Generated;
+
 public class Client extends BaseElement {
 
 	private String name;
@@ -22,11 +24,12 @@ public class Client extends BaseElement {
 		this.name = name;
 		this.identifier = null;
 	}
-	
+	@Generated("jacoco") // <- exclude setter and getter method
 	public String getName() {
 		return name;
 	}
-
+	
+	@Generated("jacoco") // <- exclude setter and getter method
 	public void setName(String name) {
 		this.name = name;
 	}
