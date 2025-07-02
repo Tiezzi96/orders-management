@@ -18,7 +18,12 @@ jobs:
         run: mvn clean verify -Pjacoco -DrepoToken=$COVERALLS_REPO_TOKEN coveralls:report
         env: 
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-   
+      - name: Upload compiled classes
+        uses: actions/upload-artifact@v4
+        with:
+           name: compiled-classes
+           path: orders-management/target
+
    
    sonarcloud:
       runs-on: ubuntu-latest
@@ -32,7 +37,11 @@ jobs:
         with:
            distribution: 'temurin'
            java-version: 17
-
+      - name: Download compiled classes
+        uses: actions/download-artifact@v4
+        with:
+           name: compiled-classes
+           path: orders-management/target
       - name: Cache SonarCloud package
         uses: actions/cache@v3
         with:
@@ -45,4 +54,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn sonar:sonar -Dsonar.projectKey=Tiezzi96_orders-management -Dsonar.organization=tiezzi96 -Dsonar.host.url=https://sonarcloud.io -Dsonar.junit.reportPaths=target/surefire-reports -Dsonar.login=${SONAR_TOKEN}
+        run: mvn sonar:sonar -Dsonar.projectKey=Tiezzi96_orders-management -Dsonar.organization=tiezzi96 -Dsonar.host.url=https://sonarcloud.io -Dsonar.junit.reportPaths=target/surefire-reports -Dsonar.java.binaries=target/classes -Dsonar.login=${SONAR_TOKEN}
