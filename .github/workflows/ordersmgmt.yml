@@ -45,4 +45,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn clean verify sonar:sonar -Dsonar.projectKey=Tiezzi96_orders-management -Dsonar.organization=tiezzi96 -Dsonar.host.url=https://sonarcloud.io -Dsonar.junit.reportPaths=target/surefire-reports -Dsonar.login=${SONAR_TOKEN}
+        run: mvn sonar:sonar -Dsonar.projectKey=Tiezzi96_orders-management -Dsonar.organization=tiezzi96 -Dsonar.host.url=https://sonarcloud.io -Dsonar.junit.reportPaths=target/surefire-reports -Dsonar.login=${SONAR_TOKEN}
