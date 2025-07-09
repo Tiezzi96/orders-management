@@ -2,8 +2,11 @@ package com.unifi.ordersmgmt.repository.mongo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.junit.After;
@@ -111,6 +114,90 @@ public class ClientMongoRepositoryTest {
 		List<Client> clients = clientRepository.findAll();
 		System.out.println(clients);
 		assertThat(clients).containsExactly(firstClient, secondClient);
+	}
+	
+	@Test
+	public void testFindByIdNotFound() {
+		Client clientFound = clientRepository.findById("CLIENT-00001");
+		assertThat(clientFound).isNull();
+	}
+
+	@Test
+	public void testFindByIdIsFound() {
+		String cod1 = "CLIENT-00001";
+		String cod2 = "CLIENT-00002";
+		System.out.println("cod1: " + cod1);
+		Client firstClient = new Client(cod1, "first client");
+		Client secondClient = new Client(cod2, "second client");
+		Document firstClientDoc = new Document().append("id", firstClient.getIdentifier()).append("name",
+				firstClient.getName());
+		clientCollection.insertOne(firstClientDoc);
+		Document secondClientDoc = new Document().append("id", secondClient.getIdentifier()).append("name",
+				secondClient.getName());
+		clientCollection.insertOne(secondClientDoc);
+		Client clientFound = clientRepository.findById(firstClient.getIdentifier());
+		assertThat(clientFound).isEqualTo(new Client(cod1, "first client"));
+	}
+
+	@Test
+	public void testSave() {
+		String cod1 = "CLIENT-00001";
+		Client newClient = new Client(cod1, "firstClient");
+		Client clientSaved = clientRepository.save(newClient);
+		assertThat(clientSaved).isEqualTo(new Client(cod1, "firstClient"));
+
+		assertThat(clientSaved.getIdentifier()).isEqualTo(cod1);
+		assertThat(clientSaved.getName()).isEqualTo("firstClient");
+
+		assertThat(clientSaved.getIdentifier()).isNotNull();
+		List<Client> clientsInDatabase = getAllClientsFromDB();
+		assertThat(clientsInDatabase).containsExactly(new Client(cod1, "firstClient"));
+	}
+
+	@Test
+	public void testSaveWhenIdentifierIsNull() {
+		when(seqGen.generateCodiceCliente(startSession)).thenReturn("CLIENT-00001");
+		Client newClient = new Client("firstClient");
+		Client clientSaved = clientRepository.save(newClient);
+		String cod1 = "CLIENT-00001";
+		assertThat(clientSaved).isEqualTo(new Client(cod1, "firstClient"));
+
+		assertThat(clientSaved.getIdentifier()).isEqualTo(cod1);
+		assertThat(clientSaved.getName()).isEqualTo("firstClient");
+
+		assertThat(clientSaved.getIdentifier()).isNotNull();
+		List<Client> clientsInDatabase = getAllClientsFromDB();
+		assertThat(clientsInDatabase).containsExactly(new Client(cod1, "firstClient"));
+	}
+
+	@Test
+	public void testDeleteWhenClientNotExistInDB() {
+		String cod1 = "CLIENT-00001";
+		Client removed = clientRepository.delete(cod1);
+		assertThat(removed).isNull();
+	}
+
+	@Test
+	public void testDeleteWhenClientExistsInDB() {
+		String cod1 = "CLIENT-00001";
+		String cod2 = "CLIENT-00002";
+		Client firstClient = new Client(cod1, "firstClient");
+		Client secondClient = new Client(cod2, "secondClient");
+		Document firstClientDoc = new Document().append("id", firstClient.getIdentifier()).append("name",
+				firstClient.getName());
+		clientCollection.insertOne(firstClientDoc);
+		Document secondClientDoc = new Document().append("id", secondClient.getIdentifier()).append("name",
+				secondClient.getName());
+		clientCollection.insertOne(secondClientDoc);
+		Client removed = clientRepository.delete(cod1);
+		assertThat(removed).isEqualTo(new Client(cod1, "firstClient"));
+		List<Client> clientsInDatabase = getAllClientsFromDB();
+		assertThat(clientsInDatabase).containsExactly(new Client(cod2, "secondClient"));
+	}
+
+	private List<Client> getAllClientsFromDB() {
+		return StreamSupport.stream(clientCollection.find().spliterator(), false)
+				.map(d -> new Client(d.get("id").toString(), d.getString("name"))).collect(Collectors.toList());
 	}
 
 }

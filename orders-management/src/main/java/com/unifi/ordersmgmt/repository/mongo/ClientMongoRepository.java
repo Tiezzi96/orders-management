@@ -11,6 +11,7 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.repository.ClientRepository;
 
@@ -47,18 +48,35 @@ public class ClientMongoRepository implements ClientRepository {
 	@Override
 	public Client findById(String id) {
 		// TODO Auto-generated method stub
+		Document d = clientCollection.find(clientSession, Filters.eq("id", id)).first();
+		if (d != null) {
+			return new Client(d.getString("id"), d.getString("name"));
+		}
 		return null;
 	}
 
 	@Override
-	public Client save(Client obj) {
+	public Client save(Client clientToSave) {
 		// TODO Auto-generated method stub
-		return null;
+		if (clientToSave.getIdentifier() == null) {
+			clientToSave.setIdentifier(seqGen.generateCodiceCliente(clientSession));
+		}
+		System.out.println("CLIENT TO SAVE: "+clientToSave);
+		Document doc = new Document().append("id", clientToSave.getIdentifier()).append("name", clientToSave.getName());
+		clientCollection.insertOne(clientSession, doc);
+		Client saved = new Client(doc.getString("id").toString(), doc.getString("name").toString());
+		return saved;
 	}
 
 	@Override
-	public Client delete(String id) {
-		// TODO Auto-generated method stub
+	public Client delete(String idToDelete) {
+		Client clientToDelete = findById(idToDelete);
+		
+		if(clientToDelete!=null) {
+			clientCollection.deleteOne(clientSession, Filters.eq("id", idToDelete));
+			return clientToDelete;
+			
+		}
 		return null;
 	}
 
