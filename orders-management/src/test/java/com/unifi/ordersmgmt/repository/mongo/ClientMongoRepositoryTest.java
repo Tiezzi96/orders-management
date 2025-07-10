@@ -1,7 +1,6 @@
 package com.unifi.ordersmgmt.repository.mongo;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
