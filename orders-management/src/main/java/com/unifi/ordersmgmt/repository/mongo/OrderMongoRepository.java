@@ -13,12 +13,13 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.repository.ClientRepository;
 import com.unifi.ordersmgmt.repository.OrderRepository;
 
-public class OrderMongoRepository implements OrderRepository{
+public class OrderMongoRepository implements OrderRepository {
 
 	private ClientSession clientSession;
 	private MongoCollection<Document> orderCollection;
@@ -35,7 +36,7 @@ public class OrderMongoRepository implements OrderRepository{
 			database.createCollection(collectionOrderName);
 		}
 		orderCollection = database.getCollection(collectionOrderName);
-		this.seqGen =seqGen;
+		this.seqGen = seqGen;
 
 	}
 
@@ -43,15 +44,22 @@ public class OrderMongoRepository implements OrderRepository{
 	public List<Order> findAll() {
 		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
-				.map(d -> new Order(d.get("id").toString(), clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()),
-						d.getDate("date"), d.getDouble("price")))
+				.map(d -> new Order(d.get("id").toString(),
+						clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
+						d.getDouble("price")))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public Order findById(String id) {
 		// TODO Auto-generated method stub
-		return null;
+		Document docFound = orderCollection.find(clientSession, Filters.eq("id", id)).first();
+		if (docFound == null) {
+			return null;
+		}
+		return new Order(docFound.get("id").toString(),
+				clientMongoRepository.findById(((DBRef) docFound.get("client")).getId().toString()),
+				docFound.getDate("date"), docFound.getDouble("price"));
 	}
 
 	@Override

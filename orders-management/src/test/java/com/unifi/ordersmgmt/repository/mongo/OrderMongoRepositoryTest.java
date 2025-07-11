@@ -130,5 +130,32 @@ public class OrderMongoRepositoryTest {
 		System.out.println(orders);
 		assertThat(orders).containsExactly(firstOrder, secondOrder);
 	}
+	
+	@Test
+	public void testFindByIdNotFound() {
+		Order orderFound = orderRepository.findById("ORDER-00001");
+		assertThat(orderFound).isNull();
+	}
+
+	@Test
+	public void testFindByIdIsFound() {
+		String cod1 = "ORDER-00001";
+		String cod2 = "ORDER-00002";
+		System.out.println("cod1: " + cod1);
+		Client firstClient = new Client("CLIENT-00001", "first client");
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(firstClient);
+		Order firstOrder = new Order(cod1, firstClient, new Date(), 10.0);
+		Order secondOrder = new Order(cod2, firstClient, new Date(), 20.0);
+		Document firstOrderDoc = new Document().append("id", firstOrder.getIdentifier())
+				.append("client", new DBRef("client", firstClient.getIdentifier())).append("date", firstOrder.getDate())
+				.append("price", firstOrder.getPrice());
+		orderCollection.insertOne(firstOrderDoc);
+		Document secondOrderDoc = new Document().append("id", secondOrder.getIdentifier())
+				.append("client", new DBRef("client", firstClient.getIdentifier())).append("date", firstOrder.getDate())
+				.append("price", secondOrder.getPrice());
+		orderCollection.insertOne(secondOrderDoc);
+		Order orderFound = orderRepository.findById(firstOrder.getIdentifier());
+		assertThat(orderFound).isEqualTo(new Order(cod1, firstClient, firstOrder.getDate(), firstOrder.getPrice()));
+	}
 
 }
