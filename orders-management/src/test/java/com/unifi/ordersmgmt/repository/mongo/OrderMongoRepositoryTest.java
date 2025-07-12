@@ -4,8 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.junit.After;
@@ -156,6 +159,81 @@ public class OrderMongoRepositoryTest {
 		orderCollection.insertOne(secondOrderDoc);
 		Order orderFound = orderRepository.findById(firstOrder.getIdentifier());
 		assertThat(orderFound).isEqualTo(new Order(cod1, firstClient, firstOrder.getDate(), firstOrder.getPrice()));
+	}
+	
+	@Test
+	public void testSave() {
+		String cod1 = "ORDER-00001";
+		Client newClient = new Client("CLIENT-00001", "firstClient");
+		Order newOrder = new Order("", newClient, new Date(), 10.0);
+		System.out.println("new Order: " + newOrder);
+		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
+		Order orderSaved = orderRepository.save(newOrder);
+		assertThat(orderSaved)
+				.isEqualTo(new Order(cod1, newOrder.getClient(), newOrder.getDate(), newOrder.getPrice()));
+		assertThat(orderSaved.getIdentifier()).isNotNull();
+		List<Order> ordersInDatabase = getAllOrdersFromDB();
+		System.out.println(ordersInDatabase);
+		assertThat(ordersInDatabase).containsExactly(new Order(cod1, newClient, newOrder.getDate(), 10.0));
+	}
+	@Test
+	public void testSaveWhenOrderIdIsEmpty() {
+		String cod1 = "ORDER-00001";
+		Client newClient = new Client("CLIENT-00001", "firstClient");
+		Order newOrder = new Order(cod1, newClient, new Date(), 10.0);
+		System.out.println("new Order: " + newOrder);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
+		Order orderSaved = orderRepository.save(newOrder);
+		assertThat(orderSaved)
+				.isEqualTo(new Order(cod1, newOrder.getClient(), newOrder.getDate(), newOrder.getPrice()));
+		assertThat(orderSaved.getIdentifier()).isNotNull();
+		List<Order> ordersInDatabase = getAllOrdersFromDB();
+		System.out.println(ordersInDatabase);
+		assertThat(ordersInDatabase).containsExactly(new Order(cod1, newClient, newOrder.getDate(), 10.0));
+	}
+
+	@Test
+	public void testDeleteWhenOrderNotExistInDB() {
+		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
+		Order orderRemoved = orderRepository.delete(seqGen.generateCodiceCliente(session));
+		assertThat(orderRemoved).isNull();
+
+	}
+
+	@Test
+	public void testDeleteWhenOrderExistInDB() {
+		String orderID = insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
+		Date currentDate = new Date(); // Data corrente
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(currentDate);
+		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 anno
+		Date previousDate = calendar.getTime();
+		Order orderDeleted = orderRepository.delete(orderID);
+		List<Order> ordersInDatabase = getAllOrdersFromDB();
+		assertThat(orderDeleted).isNotNull();
+		assertThat(ordersInDatabase).isEmpty();
+
+	}
+	
+	private List<Order> getAllOrdersFromDB() {
+		// TODO Auto-generated method stub
+		return StreamSupport.stream(orderCollection.find().spliterator(), false)
+				.map(d -> new Order(d.getString("id"),
+						new Client(((DBRef) d.get("client")).getId().toString(), "firstClient"), (Date) d.get("date"),
+						Double.valueOf(d.getDouble("price"))))
+				.collect(Collectors.toList());
+	}
+
+	private String insertNewOrderInDB(Client client, Date date, double price, int index) {
+		// TODO Auto-generated method stub
+		String orderID = String.format("ORDER-0000%d", index);
+		Document orderToInsert = new Document().append("id", orderID)
+				.append("client", new DBRef("client", client.getIdentifier())).append("date", date)
+				.append("price", price);
+		System.out.println("doc" + orderToInsert);
+		orderCollection.insertOne(orderToInsert);
+		return orderID;
 	}
 
 }

@@ -65,12 +65,31 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public Order save(Order obj) {
 		// TODO Auto-generated method stub
-		return null;
+		if (obj.getIdentifier().trim().isEmpty()) {
+			obj.setIdentifier(seqGen.generateCodiceCliente(clientSession));
+			System.out.println("Order id" + obj.getIdentifier());
+		}
+		Document docToInsert = new Document().append("id", obj.getIdentifier())
+				.append("client", new DBRef("client", obj.getClient().getIdentifier())).append("date", obj.getDate())
+				.append("price", obj.getPrice());
+		orderCollection.insertOne(clientSession, docToInsert);
+		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier().toString()))
+				.first();
+		System.out.println("DOC INSERTED: " + docInserted);
+		Order orderInserted = new Order(docInserted.get("id").toString(),
+				clientMongoRepository.findById(((DBRef) docInserted.get("client")).getId().toString()),
+				docInserted.getDate("date"), docInserted.getDouble("price"));
+		return orderInserted;
 	}
 
 	@Override
 	public Order delete(String id) {
 		// TODO Auto-generated method stub
+		Order orderToDelete = findById(id);
+		if (orderToDelete != null) {
+			orderCollection.deleteOne(clientSession, Filters.eq("id", orderToDelete.getIdentifier()));
+			return orderToDelete;
+		}
 		return null;
 	}
 
