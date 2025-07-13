@@ -307,6 +307,132 @@ public class OrderMongoRepositoryTest {
 		assertThat(years).containsExactly(2023, 2024, 2025);
 	}
 	
+	@Test
+	public void testFindOrderByClientAndYearWhenDBContainsOnlyOrdersOfClientAndYearSelected() throws Exception {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+		Date date1 = new Date();
+		Date date2 = new Date();
+
+		insertNewOrderInDB(newClient, date1, 10, 1);
+		insertNewOrderInDB(newClient, date2, 20.5, 2);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
+		List<Order> years = orderRepository.findOrdersByClientAndYear(newClient, 2025);
+
+		assertThat(years).containsExactly(new Order("ORDER-00001", newClient, date1, 10),
+				new Order("ORDER-00002", newClient, date2, 20.5));
+	}
+
+	@Test
+	public void testFindOrderByClientAndYearWhenDBContainsOrdersOfClientSelectedAndDifferentYears() throws Exception {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+		Date date1 = new Date();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		insertNewOrderInDB(newClient, date1, 10, 1);
+		insertNewOrderInDB(newClient, date2, 20.5, 2);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
+		List<Order> years = orderRepository.findOrdersByClientAndYear(newClient, 2025);
+
+		assertThat(years).containsExactly(new Order("ORDER-00001", newClient, date1, 10));
+	}
+
+	@Test
+	public void testFindOrderByClientAndYearWhenDBContainsOrdersOfDifferentClientAndYearSelected() throws Exception {
+		Client clientSelected = new Client("CLIENT-00001", "first Client");
+		Client secondClient = new Client("CLIENT-00002", "second Client");
+		Date date1 = new Date();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		insertNewOrderInDB(clientSelected, date1, 10, 1);
+		insertNewOrderInDB(secondClient, date1, 20.5, 2);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(clientSelected);
+
+		when(clientMongoRepository.findById("CLIENT-00002")).thenReturn(secondClient);
+		List<Order> years = orderRepository.findOrdersByClientAndYear(clientSelected, 2025);
+
+		assertThat(years).containsExactly(new Order("ORDER-00001", clientSelected, date1, 10));
+	}
+
+	@Test
+	public void testFindOrderByClientAndYearWhenDBContainsOnlyOrdersOfDifferentClientsAndYears() throws Exception {
+		Client clientSelected = new Client("CLIENT-00001", "first Client");
+		Client secondClient = new Client("CLIENT-00002", "second Client");
+		Client thirdClient = new Client("CLIENT-00003", "third Client");
+
+		Date date1 = new Date();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		insertNewOrderInDB(secondClient, date1, 10, 1);
+		insertNewOrderInDB(thirdClient, date2, 20.5, 2);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(clientSelected);
+
+		when(clientMongoRepository.findById("CLIENT-00002")).thenReturn(secondClient);
+
+		when(clientMongoRepository.findById("CLIENT-00003")).thenReturn(thirdClient);
+		List<Order> years = orderRepository.findOrdersByClientAndYear(clientSelected, 2025);
+
+		assertThat(years).isEmpty();
+	}
+
+	@Test
+	public void testDeleteOrdersByClient() throws Exception {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+		Client secondClient = new Client("CLIENT-00002", "second Client");
+		Date date1 = new Date();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		insertNewOrderInDB(newClient, date1, 10, 1);
+		insertNewOrderInDB(secondClient, date2, 20.5, 2);
+		insertNewOrderInDB(newClient, date2, 15, 3);
+		when(clientMongoRepository.findById(newClient.getIdentifier())).thenReturn(newClient);
+		List<Order> ordersRemoved = orderRepository.removeOrdersByClient(newClient.getIdentifier());
+
+		assertThat(ordersRemoved).isNotEmpty();
+
+		List<Order> ordersRemainInDB = getAllOrdersFromDB();
+		assertThat(ordersRemainInDB).containsExactly(new Order("ORDER-00002", secondClient, date2, 20.5));
+	}
+
+	@Test
+	public void testDeleteOrdersByClientWhenClientIsNotInDB() throws Exception {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+		Client secondClient = new Client("CLIENT-00002", "second Client");
+		Date date1 = new Date();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		insertNewOrderInDB(newClient, date1, 10, 1);
+		insertNewOrderInDB(newClient, date2, 15, 2);
+		when(clientMongoRepository.findById(secondClient.getIdentifier())).thenReturn(secondClient);
+		List<Order> ordersRemoved = orderRepository.removeOrdersByClient(secondClient.getIdentifier());
+		List<Order> ordersRemainInDB = getAllOrdersFromDB();
+		assertThat(ordersRemoved).isNull();
+		assertThat(ordersRemainInDB).containsExactly(new Order("ORDER-00001", newClient, date1, 10),
+				new Order("ORDER-00002", newClient, date2, 15));
+	}
+
+	@Test
+	public void testFindOrderByClientAndYearWhenDBIsEmpty() {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+
+		List<Order> years = orderRepository.findOrdersByClientAndYear(newClient, 2025);
+		assertThat(years).isEmpty();
+	}
+	
 	private List<Order> getAllOrdersFromDB() {
 		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find().spliterator(), false)

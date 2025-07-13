@@ -136,7 +136,37 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public List<Order> removeOrdersByClient(String clientId) {
 		// TODO Auto-generated method stub
+		List<Order> ordersToRemove = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false).filter(d -> {
+			return ((DBRef) d.get("client")).getId().toString().equals(clientId);
+		}).map(d -> new Order(d.getString("id"),
+				clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
+				d.getDouble("price"))).collect(Collectors.toList());
+		if (!ordersToRemove.isEmpty()) {
+			for (Order order : ordersToRemove) {
+				Document docToremove = new Document().append("id", order.getIdentifier())
+						.append("client", new DBRef("client", clientId)).append("date", order.getDate())
+						.append("price", order.getPrice());
+				orderCollection.deleteOne(clientSession, docToremove);
+			}
+			return ordersToRemove;
+		}
 		return null;
+	}
+
+
+	@Override
+	public List<Order> findOrdersByClientAndYear(Client client, int year) {
+		// TODO Auto-generated method stub
+		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false).filter(d -> {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(d.getDate("date"));
+			return calendar.get(Calendar.YEAR) == year
+					&& ((DBRef) d.get("client")).getId().toString().equals(client.getIdentifier().toString());
+		}).map(d -> new Order(d.getString("id"),
+				clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
+				d.getDouble("price"))).collect(Collectors.toList());
+
+		return orders;
 	}
 
 	@Override
@@ -144,11 +174,4 @@ public class OrderMongoRepository implements OrderRepository {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public List<Order> findOrdersByClientAndYear(Client client, int year) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
