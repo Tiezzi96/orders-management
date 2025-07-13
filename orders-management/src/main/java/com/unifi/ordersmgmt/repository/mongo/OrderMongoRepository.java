@@ -1,8 +1,12 @@
 package com.unifi.ordersmgmt.repository.mongo;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -96,13 +100,37 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public List<Order> findOrderByYear(int year) {
 		// TODO Auto-generated method stub
-		return null;
+
+		for (Document doc : orderCollection.find()) {
+			System.out.println("oi " + ((DBRef) doc.get("client")).getId());
+			System.out.println("oi string " + ((DBRef) doc.get("client")).getId().toString());
+		}
+		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
+				.filter(d -> {
+					Date dataOrdine = d.getDate("date");
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(dataOrdine);
+					return cal.get(Calendar.YEAR) == year;
+				})
+				.map(d -> new Order(d.get("id").toString(),
+						clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
+						d.getDouble("price")))
+				.collect(Collectors.toList());
+		return orders;
 	}
 
 	@Override
 	public List<Integer> getYearsOfOrders() {
 		// TODO Auto-generated method stub
-		return null;
+		Set<Integer> setOfYears = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
+				.map(d -> {
+					Date date = d.getDate("date");
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(date);
+					return calendar.get(Calendar.YEAR);
+				}).collect(Collectors.toCollection(TreeSet::new));
+		List<Integer> years = new ArrayList<>(setOfYears);
+		return years;
 	}
 
 	@Override

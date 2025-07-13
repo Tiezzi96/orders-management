@@ -3,6 +3,8 @@ package com.unifi.ordersmgmt.repository.mongo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -214,6 +216,95 @@ public class OrderMongoRepositoryTest {
 		assertThat(orderDeleted).isNotNull();
 		assertThat(ordersInDatabase).isEmpty();
 
+	}
+	
+	@Test
+	public void testFindOrdersByYearWhenDBIsEmpty() {
+		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
+		assertThat(ordersOfYearSelected).isEmpty();
+	}
+
+	@Test
+	public void testFindOrdersByYearWhenDBContainsOrdersOfTheYearSelected() {
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
+		Date currentDate = new Date(); // Data corrente
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(currentDate);
+		calendar.add(Calendar.DAY_OF_MONTH, -1); // Rimuovi 1 giorno
+		Date previousDate = calendar.getTime();
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 2);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
+		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
+		System.out.println(ordersOfYearSelected);
+		assertThat(ordersOfYearSelected).containsExactly(
+				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), currentDate, 10.0),
+				new Order("ORDER-00002", new Client("CLIENT-00001", "firstClient"), previousDate, 20.0));
+	}
+
+	@Test
+	public void testFindOrdersByYearWhenDBContainsOrdersOfDifferentYears() {
+		Date currentDate = new Date(); // Data corrente
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), currentDate, 10.0, 1);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(currentDate);
+		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 giorno
+		Date previousDate = calendar.getTime();
+		System.out.println(previousDate);
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 1);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
+		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
+
+		System.out.println("ciao: " + ordersOfYearSelected);
+		assertThat(ordersOfYearSelected).containsExactly(
+				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), currentDate, 10.0));
+
+	}
+
+	@Test
+	public void testFindOrdersByYearWhenDBContainsOrdersOfLimitsOfYears() {
+		LocalDate initCurrentYear = LocalDate.of(2025, 1, 1);
+		Date firstDayCurrentYear = Date.from(initCurrentYear.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		LocalDate finishCurrentYear = LocalDate.of(2025, 12, 31);
+		Date lastDayCurrentYear = Date.from(finishCurrentYear.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		LocalDate initPreviousYear = LocalDate.of(2024, 1, 1);
+		Date firstDayPreviousYear = Date.from(initPreviousYear.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		LocalDate finishPreviousYear = LocalDate.of(2024, 12, 31);
+		Date lastDayPreviousYear = Date.from(finishPreviousYear.atStartOfDay(ZoneId.systemDefault()).toInstant());
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), firstDayCurrentYear, 10.0, 1);
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), lastDayCurrentYear, 20.0, 2);
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), firstDayPreviousYear, 30.0, 3);
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), lastDayPreviousYear, 40.0, 3);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
+		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
+
+		System.out.println("ciao: " + ordersOfYearSelected);
+		assertThat(ordersOfYearSelected).containsExactly(
+				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), firstDayCurrentYear, 10.0),
+				new Order("ORDER-00002", new Client("CLIENT-00001", "firstClient"), lastDayCurrentYear, 20.0));
+	}
+
+	@Test
+	public void testGetYearsOfOrderWhenDBIsEmpty() throws Exception {
+		List<Integer> years = orderRepository.getYearsOfOrders();
+		assertThat(years).isEmpty();
+	}
+
+	@Test
+	public void testGetYearsOfOrderWhenDBIsNotEmpty() throws Exception {
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
+		Date currentDate = new Date(); // Data corrente
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(currentDate);
+		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 giorno
+		Date previousDate = calendar.getTime();
+		calendar.add(Calendar.YEAR, -1);
+		Date twoYearsAgoDate = calendar.getTime();
+		System.out.println(previousDate);
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 1);
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), twoYearsAgoDate, 30.0, 2);
+
+		List<Integer> years = orderRepository.getYearsOfOrders();
+		assertThat(years).containsExactly(2023, 2024, 2025);
 	}
 	
 	private List<Order> getAllOrdersFromDB() {
