@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -31,6 +33,8 @@ public class ClientMongoRepositoryTest {
 	@SuppressWarnings("resource")
 	public static final MongoDBContainer mongo = new MongoDBContainer("mongo:4.4.3").withExposedPorts(27017)
 			.withCommand("--replSet rs0");
+
+	private static final Logger logger = LogManager.getLogger(ClientMongoRepositoryTest.class);
 
 	private MongoClient mongoClient;
 	private ClientMongoRepository clientRepository;
@@ -67,7 +71,8 @@ public class ClientMongoRepositoryTest {
 		// until-do-done loop keeps running until isMaster is set to true.
 		mongo.execInContainer("/bin/bash", "-c",
 				"until mongo --eval 'rs.isMaster()' | grep ismaster | grep true > /dev/null 2>&1; do sleep 1; done");
-		System.out.println("Replica set URL: " + mongo.getReplicaSetUrl());
+		logger.info("Replica set URL: {}", mongo.getReplicaSetUrl());
+
 	}
 
 	@AfterClass
@@ -101,7 +106,7 @@ public class ClientMongoRepositoryTest {
 	public void testFindAllClientsWhenDBIsNotEmpty() {
 		String cod1 = "CLIENT-00001";
 		String cod2 = "CLIENT-00002";
-		System.out.println("cod1: " + cod1);
+		logger.info("cod1: {}", cod1);
 		Client firstClient = new Client(cod1, "first client");
 		Client secondClient = new Client(cod2, "second client");
 		Document firstClientDoc = new Document().append("id", firstClient.getIdentifier()).append("name",
@@ -111,7 +116,7 @@ public class ClientMongoRepositoryTest {
 				secondClient.getName());
 		clientCollection.insertOne(secondClientDoc);
 		List<Client> clients = clientRepository.findAll();
-		System.out.println(clients);
+		logger.debug("clients in database: {}", clients);
 		assertThat(clients).containsExactly(firstClient, secondClient);
 	}
 	
@@ -125,7 +130,7 @@ public class ClientMongoRepositoryTest {
 	public void testFindByIdIsFound() {
 		String cod1 = "CLIENT-00001";
 		String cod2 = "CLIENT-00002";
-		System.out.println("cod1: " + cod1);
+		logger.info("cod1: {}", cod1);
 		Client firstClient = new Client(cod1, "first client");
 		Client secondClient = new Client(cod2, "second client");
 		Document firstClientDoc = new Document().append("id", firstClient.getIdentifier()).append("name",
