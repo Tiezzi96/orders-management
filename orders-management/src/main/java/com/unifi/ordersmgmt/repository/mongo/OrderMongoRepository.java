@@ -26,6 +26,8 @@ import com.unifi.ordersmgmt.repository.OrderRepository;
 
 public class OrderMongoRepository implements OrderRepository {
 
+	private static final String PRICE = "price";
+	private static final String CLIENT = "client";
 	private ClientSession clientSession;
 	private MongoCollection<Document> orderCollection;
 
@@ -50,8 +52,8 @@ public class OrderMongoRepository implements OrderRepository {
 		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.map(d -> new Order(d.get("id").toString(),
-						clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
-						d.getDouble("price")))
+						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+						d.getDouble(PRICE)))
 				.collect(Collectors.toList());
 	}
 
@@ -63,8 +65,8 @@ public class OrderMongoRepository implements OrderRepository {
 			return null;
 		}
 		return new Order(docFound.get("id").toString(),
-				clientMongoRepository.findById(((DBRef) docFound.get("client")).getId().toString()),
-				docFound.getDate("date"), docFound.getDouble("price"));
+				clientMongoRepository.findById(((DBRef) docFound.get(CLIENT)).getId().toString()),
+				docFound.getDate("date"), docFound.getDouble(PRICE));
 	}
 
 	@Override
@@ -75,15 +77,15 @@ public class OrderMongoRepository implements OrderRepository {
 			System.out.println("Order id" + obj.getIdentifier());
 		}
 		Document docToInsert = new Document().append("id", obj.getIdentifier())
-				.append("client", new DBRef("client", obj.getClient().getIdentifier())).append("date", obj.getDate())
-				.append("price", obj.getPrice());
+				.append(CLIENT, new DBRef(CLIENT, obj.getClient().getIdentifier())).append("date", obj.getDate())
+				.append(PRICE, obj.getPrice());
 		orderCollection.insertOne(clientSession, docToInsert);
 		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier().toString()))
 				.first();
 		System.out.println("DOC INSERTED: " + docInserted);
 		Order orderInserted = new Order(docInserted.get("id").toString(),
-				clientMongoRepository.findById(((DBRef) docInserted.get("client")).getId().toString()),
-				docInserted.getDate("date"), docInserted.getDouble("price"));
+				clientMongoRepository.findById(((DBRef) docInserted.get(CLIENT)).getId().toString()),
+				docInserted.getDate("date"), docInserted.getDouble(PRICE));
 		return orderInserted;
 	}
 
@@ -103,8 +105,8 @@ public class OrderMongoRepository implements OrderRepository {
 		// TODO Auto-generated method stub
 
 		for (Document doc : orderCollection.find()) {
-			System.out.println("oi " + ((DBRef) doc.get("client")).getId());
-			System.out.println("oi string " + ((DBRef) doc.get("client")).getId().toString());
+			System.out.println("oi " + ((DBRef) doc.get(CLIENT)).getId());
+			System.out.println("oi string " + ((DBRef) doc.get(CLIENT)).getId().toString());
 		}
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> {
@@ -114,8 +116,8 @@ public class OrderMongoRepository implements OrderRepository {
 					return cal.get(Calendar.YEAR) == year;
 				})
 				.map(d -> new Order(d.get("id").toString(),
-						clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
-						d.getDouble("price")))
+						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+						d.getDouble(PRICE)))
 				.collect(Collectors.toList());
 		return orders;
 	}
@@ -138,15 +140,15 @@ public class OrderMongoRepository implements OrderRepository {
 	public List<Order> removeOrdersByClient(String clientId) {
 		// TODO Auto-generated method stub
 		List<Order> ordersToRemove = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false).filter(d -> {
-			return ((DBRef) d.get("client")).getId().toString().equals(clientId);
+			return ((DBRef) d.get(CLIENT)).getId().toString().equals(clientId);
 		}).map(d -> new Order(d.getString("id"),
-				clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
-				d.getDouble("price"))).collect(Collectors.toList());
+				clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+				d.getDouble(PRICE))).collect(Collectors.toList());
 		if (!ordersToRemove.isEmpty()) {
 			for (Order order : ordersToRemove) {
 				Document docToremove = new Document().append("id", order.getIdentifier())
-						.append("client", new DBRef("client", clientId)).append("date", order.getDate())
-						.append("price", order.getPrice());
+						.append(CLIENT, new DBRef(CLIENT, clientId)).append("date", order.getDate())
+						.append(PRICE, order.getPrice());
 				orderCollection.deleteOne(clientSession, docToremove);
 			}
 			return ordersToRemove;
@@ -162,10 +164,10 @@ public class OrderMongoRepository implements OrderRepository {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(d.getDate("date"));
 			return calendar.get(Calendar.YEAR) == year
-					&& ((DBRef) d.get("client")).getId().toString().equals(client.getIdentifier().toString());
+					&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier().toString());
 		}).map(d -> new Order(d.getString("id"),
-				clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
-				d.getDouble("price"))).collect(Collectors.toList());
+				clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+				d.getDouble(PRICE))).collect(Collectors.toList());
 
 		return orders;
 	}
@@ -177,15 +179,15 @@ public class OrderMongoRepository implements OrderRepository {
 		Order orderToModify = findById(orderID);
 		if (orderToModify != null) {
 			Document docOfUpdates = new Document();
-			if (updates.get("client") != null) {
-				Client clientModify = (Client) updates.get("client");
-				docOfUpdates.append("client", new DBRef("client", clientModify.getIdentifier()));
+			if (updates.get(CLIENT) != null) {
+				Client clientModify = (Client) updates.get(CLIENT);
+				docOfUpdates.append(CLIENT, new DBRef(CLIENT, clientModify.getIdentifier()));
 			}
 			if (updates.get("date") != null) {
 				docOfUpdates.append("date", (Date) updates.get("date"));
 			}
-			if (updates.get("price") != null) {
-				docOfUpdates.append("price", Double.valueOf(updates.get("price").toString()));
+			if (updates.get(PRICE) != null) {
+				docOfUpdates.append(PRICE, Double.valueOf(updates.get(PRICE).toString()));
 			}
 			Document docModified = new Document("$set", docOfUpdates);
 			UpdateResult result = orderCollection.updateOne(clientSession,Filters.eq("id", orderID), docModified);
