@@ -10,6 +10,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import com.mongodb.DBRef;
@@ -26,6 +28,7 @@ import com.unifi.ordersmgmt.repository.OrderRepository;
 
 public class OrderMongoRepository implements OrderRepository {
 
+	private static final Logger logger = LogManager.getLogger(OrderMongoRepository.class);
 	private static final String PRICE = "price";
 	private static final String CLIENT = "client";
 	private ClientSession clientSession;
@@ -74,7 +77,8 @@ public class OrderMongoRepository implements OrderRepository {
 		// TODO Auto-generated method stub
 		if (obj.getIdentifier().trim().isEmpty()) {
 			obj.setIdentifier(seqGen.generateCodiceCliente(clientSession));
-			System.out.println("Order id" + obj.getIdentifier());
+			logger.info("Generated new order id {}", obj.getIdentifier());
+			//System.out.println("Order id" + obj.getIdentifier());
 		}
 		Document docToInsert = new Document().append("id", obj.getIdentifier())
 				.append(CLIENT, new DBRef(CLIENT, obj.getClient().getIdentifier())).append("date", obj.getDate())
@@ -82,7 +86,8 @@ public class OrderMongoRepository implements OrderRepository {
 		orderCollection.insertOne(clientSession, docToInsert);
 		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier().toString()))
 				.first();
-		System.out.println("DOC INSERTED: " + docInserted);
+		//System.out.println("DOC INSERTED: " + docInserted);
+		logger.info("Inserted order document: {}", docToInsert);
 		Order orderInserted = new Order(docInserted.get("id").toString(),
 				clientMongoRepository.findById(((DBRef) docInserted.get(CLIENT)).getId().toString()),
 				docInserted.getDate("date"), docInserted.getDouble(PRICE));
@@ -119,6 +124,7 @@ public class OrderMongoRepository implements OrderRepository {
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
 						d.getDouble(PRICE)))
 				.collect(Collectors.toList());
+		logger.info("Found {} orders for year {}", orders.size(), year);
 		return orders;
 	}
 
@@ -139,11 +145,14 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public List<Order> removeOrdersByClient(String clientId) {
 		// TODO Auto-generated method stub
-		List<Order> ordersToRemove = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false).filter(d -> {
-			return ((DBRef) d.get(CLIENT)).getId().toString().equals(clientId);
-		}).map(d -> new Order(d.getString("id"),
-				clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
-				d.getDouble(PRICE))).collect(Collectors.toList());
+		List<Order> ordersToRemove = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
+				.filter(d -> {
+					return ((DBRef) d.get(CLIENT)).getId().toString().equals(clientId);
+				})
+				.map(d -> new Order(d.getString("id"),
+						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+						d.getDouble(PRICE)))
+				.collect(Collectors.toList());
 		if (!ordersToRemove.isEmpty()) {
 			for (Order order : ordersToRemove) {
 				Document docToremove = new Document().append("id", order.getIdentifier())
@@ -156,18 +165,20 @@ public class OrderMongoRepository implements OrderRepository {
 		return null;
 	}
 
-
 	@Override
 	public List<Order> findOrdersByClientAndYear(Client client, int year) {
 		// TODO Auto-generated method stub
-		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false).filter(d -> {
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(d.getDate("date"));
-			return calendar.get(Calendar.YEAR) == year
-					&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier().toString());
-		}).map(d -> new Order(d.getString("id"),
-				clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
-				d.getDouble(PRICE))).collect(Collectors.toList());
+		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
+				.filter(d -> {
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(d.getDate("date"));
+					return calendar.get(Calendar.YEAR) == year
+							&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier().toString());
+				})
+				.map(d -> new Order(d.getString("id"),
+						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+						d.getDouble(PRICE)))
+				.collect(Collectors.toList());
 
 		return orders;
 	}
@@ -190,9 +201,10 @@ public class OrderMongoRepository implements OrderRepository {
 				docOfUpdates.append(PRICE, Double.valueOf(updates.get(PRICE).toString()));
 			}
 			Document docModified = new Document("$set", docOfUpdates);
-			UpdateResult result = orderCollection.updateOne(clientSession,Filters.eq("id", orderID), docModified);
-			System.out.println("Matched count: " + result.getMatchedCount());
-			System.out.println("Modified count: " + result.getModifiedCount());
+			UpdateResult result = orderCollection.updateOne(clientSession, Filters.eq("id", orderID), docModified);
+
+			logger.info("Matched count: {}", result.getMatchedCount());
+			logger.info("Modified count: {}", result.getModifiedCount());
 			Order orderModified = findById(orderID);
 			return orderModified;
 		}

@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +43,9 @@ public class OrderMongoRepositoryTest {
 			.withCommand("--replSet rs0");
 	@Mock
 	public ClientMongoRepository clientMongoRepository;
-
+	
+	private static final Logger logger = LogManager.getLogger(OrderMongoRepositoryTest.class); 
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		mongo.start();
@@ -51,7 +55,8 @@ public class OrderMongoRepositoryTest {
 		// Attendi finché il nodo non diventa primary
 		mongo.execInContainer("/bin/bash", "-c",
 				"until mongo --eval 'rs.isMaster()' | grep ismaster | grep true > /dev/null 2>&1; do sleep 1; done");
-		System.out.println("Replica set URL: " + mongo.getReplicaSetUrl());
+		//System.out.println("Replica set URL: " + mongo.getReplicaSetUrl());
+		logger.info("Replica set URL: {}", mongo.getReplicaSetUrl());
 	}
 
 	private MongoClient mongoClient;
@@ -120,7 +125,8 @@ public class OrderMongoRepositoryTest {
 	public void testFindAllOrdersWhenDBIsNotEmpty() {
 		String cod1 = "ORDER-00001";
 		String cod2 = "ORDER-00002";
-		System.out.println("cod1: " + cod1);
+		//System.out.println("cod1: " + cod1);
+		logger.info("cod1: {}", cod1);
 		Client client = new Client("CLIENT-00001", "client");
 		Order firstOrder = new Order(cod1, client, new Date(), 10);
 		Order secondOrder = new Order(cod2, client, new Date(), 20);
@@ -134,7 +140,8 @@ public class OrderMongoRepositoryTest {
 		orderCollection.insertOne(firstOrderDoc);
 		orderCollection.insertOne(secondOrderDoc);
 		List<Order> orders = orderRepository.findAll();
-		System.out.println(orders);
+		//System.out.println(orders);
+		logger.debug("Orders contained in DB: {}", orders);
 		assertThat(orders).containsExactly(firstOrder, secondOrder);
 	}
 	
@@ -148,7 +155,8 @@ public class OrderMongoRepositoryTest {
 	public void testFindByIdIsFound() {
 		String cod1 = "ORDER-00001";
 		String cod2 = "ORDER-00002";
-		System.out.println("cod1: " + cod1);
+		//System.out.println("cod1: " + cod1);
+		logger.info("cod1: {}", cod1);
 		Client firstClient = new Client("CLIENT-00001", "first client");
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(firstClient);
 		Order firstOrder = new Order(cod1, firstClient, new Date(), 10.0);
@@ -170,7 +178,8 @@ public class OrderMongoRepositoryTest {
 		String cod1 = "ORDER-00001";
 		Client newClient = new Client("CLIENT-00001", "firstClient");
 		Order newOrder = new Order("", newClient, new Date(), 10.0);
-		System.out.println("new Order: " + newOrder);
+		//System.out.println("new Order: " + newOrder);
+		logger.info("new Order: {}", newOrder);
 		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
 		Order orderSaved = orderRepository.save(newOrder);
@@ -178,7 +187,8 @@ public class OrderMongoRepositoryTest {
 				.isEqualTo(new Order(cod1, newOrder.getClient(), newOrder.getDate(), newOrder.getPrice()));
 		assertThat(orderSaved.getIdentifier()).isNotNull();
 		List<Order> ordersInDatabase = getAllOrdersFromDB();
-		System.out.println(ordersInDatabase);
+		//System.out.println(ordersInDatabase);
+		logger.debug("Orders in Database: {}", ordersInDatabase);
 		assertThat(ordersInDatabase).containsExactly(new Order(cod1, newClient, newOrder.getDate(), 10.0));
 	}
 	@Test
@@ -186,14 +196,15 @@ public class OrderMongoRepositoryTest {
 		String cod1 = "ORDER-00001";
 		Client newClient = new Client("CLIENT-00001", "firstClient");
 		Order newOrder = new Order(cod1, newClient, new Date(), 10.0);
-		System.out.println("new Order: " + newOrder);
+		//System.out.println("new Order: " + newOrder);
+		logger.info("new Order: {}", newOrder);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
 		Order orderSaved = orderRepository.save(newOrder);
 		assertThat(orderSaved)
 				.isEqualTo(new Order(cod1, newOrder.getClient(), newOrder.getDate(), newOrder.getPrice()));
 		assertThat(orderSaved.getIdentifier()).isNotNull();
 		List<Order> ordersInDatabase = getAllOrdersFromDB();
-		System.out.println(ordersInDatabase);
+		logger.debug("Orders in Database: {}", ordersInDatabase);
 		assertThat(ordersInDatabase).containsExactly(new Order(cod1, newClient, newOrder.getDate(), 10.0));
 	}
 
@@ -237,7 +248,9 @@ public class OrderMongoRepositoryTest {
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 2);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
 		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
-		System.out.println(ordersOfYearSelected);
+		//System.out.println(ordersOfYearSelected);
+		logger.debug("Orders of Year Selected: {}", ordersOfYearSelected);
+
 		assertThat(ordersOfYearSelected).containsExactly(
 				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), currentDate, 10.0),
 				new Order("ORDER-00002", new Client("CLIENT-00001", "firstClient"), previousDate, 20.0));
@@ -251,12 +264,14 @@ public class OrderMongoRepositoryTest {
 		calendar.setTime(currentDate);
 		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 giorno
 		Date previousDate = calendar.getTime();
-		System.out.println(previousDate);
+		//System.out.println(previousDate);
+		logger.info("previous Date : {}", previousDate);
+
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 1);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
 		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
 
-		System.out.println("ciao: " + ordersOfYearSelected);
+		logger.debug("Orders of Year Selected: {}", ordersOfYearSelected);
 		assertThat(ordersOfYearSelected).containsExactly(
 				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), currentDate, 10.0));
 
@@ -279,7 +294,7 @@ public class OrderMongoRepositoryTest {
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
 		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
 
-		System.out.println("ciao: " + ordersOfYearSelected);
+		logger.debug("Orders of Year Selected: {}", ordersOfYearSelected);
 		assertThat(ordersOfYearSelected).containsExactly(
 				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), firstDayCurrentYear, 10.0),
 				new Order("ORDER-00002", new Client("CLIENT-00001", "firstClient"), lastDayCurrentYear, 20.0));
@@ -301,7 +316,7 @@ public class OrderMongoRepositoryTest {
 		Date previousDate = calendar.getTime();
 		calendar.add(Calendar.YEAR, -1);
 		Date twoYearsAgoDate = calendar.getTime();
-		System.out.println(previousDate);
+		logger.info("revious date: {}", previousDate);
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 1);
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), twoYearsAgoDate, 30.0, 2);
 
@@ -494,7 +509,8 @@ public class OrderMongoRepositoryTest {
 		Document orderToInsert = new Document().append("id", orderID)
 				.append("client", new DBRef("client", client.getIdentifier())).append("date", date)
 				.append("price", price);
-		System.out.println("doc" + orderToInsert);
+		//System.out.println("doc" + orderToInsert);
+		logger.debug("Doc to insert: {}", orderToInsert);
 		orderCollection.insertOne(orderToInsert);
 		return orderID;
 	}
