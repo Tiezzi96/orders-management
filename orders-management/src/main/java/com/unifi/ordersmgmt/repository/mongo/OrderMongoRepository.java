@@ -18,6 +18,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.repository.ClientRepository;
@@ -172,6 +173,27 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public Order updateOrder(String orderID, Map<String, Object> updates) {
 		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub
+		Order orderToModify = findById(orderID);
+		if (orderToModify != null) {
+			Document docOfUpdates = new Document();
+			if (updates.get("client") != null) {
+				Client clientModify = (Client) updates.get("client");
+				docOfUpdates.append("client", new DBRef("client", clientModify.getIdentifier()));
+			}
+			if (updates.get("date") != null) {
+				docOfUpdates.append("date", (Date) updates.get("date"));
+			}
+			if (updates.get("price") != null) {
+				docOfUpdates.append("price", Double.valueOf(updates.get("price").toString()));
+			}
+			Document docModified = new Document("$set", docOfUpdates);
+			UpdateResult result = orderCollection.updateOne(clientSession,Filters.eq("id", orderID), docModified);
+			System.out.println("Matched count: " + result.getMatchedCount());
+			System.out.println("Modified count: " + result.getModifiedCount());
+			Order orderModified = findById(orderID);
+			return orderModified;
+		}
 		return null;
 	}
 }

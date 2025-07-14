@@ -8,7 +8,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -431,6 +433,50 @@ public class OrderMongoRepositoryTest {
 
 		List<Order> years = orderRepository.findOrdersByClientAndYear(newClient, 2025);
 		assertThat(years).isEmpty();
+	}
+	
+	@Test
+	public void testModifyOrderWhenOrderExistInDB() {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+		Date date1 = new Date();
+		String orderID = insertNewOrderInDB(newClient, date1, 10, 1);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		updates.put("date", date2);
+		updates.put("price", 20.5);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
+		Order orderModified = orderRepository.updateOrder(orderID, updates);
+		assertThat(orderModified).isEqualTo(new Order(orderID, newClient, (Date) updates.get("date"),
+				Double.valueOf(updates.get("price").toString())));
+
+	}
+
+	@Test
+	public void testModifyClientOfTheOrderWhenOrderExistInDB() {
+		Client newClient = new Client("CLIENT-00001", "new Client");
+		Client secondClient = new Client("CLIENT-00002", "second Client");
+		Date date1 = new Date();
+		String orderID = insertNewOrderInDB(newClient, date1, 10, 1);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("client", secondClient);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
+		when(clientMongoRepository.findById("CLIENT-00002")).thenReturn(secondClient);
+		Order orderModified = orderRepository.updateOrder(orderID, updates);
+		assertThat(orderModified).isEqualTo(new Order(orderID, secondClient, date1, 10));
+
+	}
+
+	@Test
+	public void testModifyOrderWhenOrderNotExistInDB() {
+		String orderID = "ORDER-00001";
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Order orderModified = orderRepository.updateOrder(orderID, updates);
+		assertThat(orderModified).isNull();
+
 	}
 	
 	private List<Order> getAllOrdersFromDB() {
