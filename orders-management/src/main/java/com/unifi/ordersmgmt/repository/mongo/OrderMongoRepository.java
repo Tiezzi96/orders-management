@@ -37,11 +37,11 @@ public class OrderMongoRepository implements OrderRepository {
 	private ClientRepository clientMongoRepository;
 	private OrderSequenceGenerator seqGen;
 
-	public OrderMongoRepository(MongoClient mongoClient, ClientSession clientSession, String DBName,
+	public OrderMongoRepository(MongoClient mongoClient, ClientSession clientSession, String dbName,
 			String collectionOrderName, ClientRepository clientMongoRepository, OrderSequenceGenerator seqGen) {
 		this.clientMongoRepository = clientMongoRepository;
 		this.clientSession = clientSession;
-		MongoDatabase database = mongoClient.getDatabase(DBName);
+		MongoDatabase database = mongoClient.getDatabase(dbName);
 		if (!database.listCollectionNames().into(new ArrayList<String>()).contains(collectionOrderName)) {
 			database.createCollection(collectionOrderName);
 		}
@@ -78,15 +78,13 @@ public class OrderMongoRepository implements OrderRepository {
 		if (obj.getIdentifier().trim().isEmpty()) {
 			obj.setIdentifier(seqGen.generateCodiceCliente(clientSession));
 			logger.info("Generated new order id {}", obj.getIdentifier());
-			//System.out.println("Order id" + obj.getIdentifier());
 		}
 		Document docToInsert = new Document().append("id", obj.getIdentifier())
 				.append(CLIENT, new DBRef(CLIENT, obj.getClient().getIdentifier())).append("date", obj.getDate())
 				.append(PRICE, obj.getPrice());
 		orderCollection.insertOne(clientSession, docToInsert);
-		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier().toString()))
+		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier()))
 				.first();
-		//System.out.println("DOC INSERTED: " + docInserted);
 		logger.info("Inserted order document: {}", docToInsert);
 		Order orderInserted = new Order(docInserted.get("id").toString(),
 				clientMongoRepository.findById(((DBRef) docInserted.get(CLIENT)).getId().toString()),
@@ -108,11 +106,6 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public List<Order> findOrderByYear(int year) {
 		// TODO Auto-generated method stub
-
-		for (Document doc : orderCollection.find()) {
-			System.out.println("oi " + ((DBRef) doc.get(CLIENT)).getId());
-			System.out.println("oi string " + ((DBRef) doc.get(CLIENT)).getId().toString());
-		}
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> {
 					Date dataOrdine = d.getDate("date");
@@ -146,9 +139,7 @@ public class OrderMongoRepository implements OrderRepository {
 	public List<Order> removeOrdersByClient(String clientId) {
 		// TODO Auto-generated method stub
 		List<Order> ordersToRemove = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
-				.filter(d -> {
-					return ((DBRef) d.get(CLIENT)).getId().toString().equals(clientId);
-				})
+				.filter(d -> ((DBRef) d.get(CLIENT)).getId().toString().equals(clientId))
 				.map(d -> new Order(d.getString("id"),
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
 						d.getDouble(PRICE)))
@@ -162,7 +153,8 @@ public class OrderMongoRepository implements OrderRepository {
 			}
 			return ordersToRemove;
 		}
-		return null;
+		List<Order> emptyList = new ArrayList<Order>();
+		return emptyList;
 	}
 
 	@Override
@@ -173,7 +165,7 @@ public class OrderMongoRepository implements OrderRepository {
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(d.getDate("date"));
 					return calendar.get(Calendar.YEAR) == year
-							&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier().toString());
+							&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
 				})
 				.map(d -> new Order(d.getString("id"),
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
@@ -186,7 +178,6 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public Order updateOrder(String orderID, Map<String, Object> updates) {
 		// TODO Auto-generated method stub
-		// TODO Auto-generated method stub
 		Order orderToModify = findById(orderID);
 		if (orderToModify != null) {
 			Document docOfUpdates = new Document();
@@ -195,7 +186,7 @@ public class OrderMongoRepository implements OrderRepository {
 				docOfUpdates.append(CLIENT, new DBRef(CLIENT, clientModify.getIdentifier()));
 			}
 			if (updates.get("date") != null) {
-				docOfUpdates.append("date", (Date) updates.get("date"));
+				docOfUpdates.append("date", updates.get("date"));
 			}
 			if (updates.get(PRICE) != null) {
 				docOfUpdates.append(PRICE, Double.valueOf(updates.get(PRICE).toString()));

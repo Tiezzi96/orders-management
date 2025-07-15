@@ -13,8 +13,8 @@ import com.mongodb.client.model.Updates;
 public class ClientSequenceGenerator {
 	private final MongoDatabase db;
 
-	public ClientSequenceGenerator(MongoClient client, String DBName) {
-		this.db = client.getDatabase(DBName);
+	public ClientSequenceGenerator(MongoClient client, String dbName) {
+		this.db = client.getDatabase(dbName);
 
 	}
 

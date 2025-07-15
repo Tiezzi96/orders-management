@@ -57,7 +57,7 @@ public class ClientMongoRepositoryTest {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		mongoClient.close();
 	}
 

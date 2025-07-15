@@ -43,9 +43,9 @@ public class OrderMongoRepositoryTest {
 			.withCommand("--replSet rs0");
 	@Mock
 	public ClientMongoRepository clientMongoRepository;
-	
-	private static final Logger logger = LogManager.getLogger(OrderMongoRepositoryTest.class); 
-	
+
+	private static final Logger logger = LogManager.getLogger(OrderMongoRepositoryTest.class);
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		mongo.start();
@@ -82,7 +82,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		mongoClient.close();
 		session.close();
 	}
@@ -141,7 +141,7 @@ public class OrderMongoRepositoryTest {
 		logger.debug("Orders contained in DB: {}", orders);
 		assertThat(orders).containsExactly(firstOrder, secondOrder);
 	}
-	
+
 	@Test
 	public void testFindByIdNotFound() {
 		Order orderFound = orderRepository.findById("ORDER-00001");
@@ -168,7 +168,7 @@ public class OrderMongoRepositoryTest {
 		Order orderFound = orderRepository.findById(firstOrder.getIdentifier());
 		assertThat(orderFound).isEqualTo(new Order(cod1, firstClient, firstOrder.getDate(), firstOrder.getPrice()));
 	}
-	
+
 	@Test
 	public void testSave() {
 		String cod1 = "ORDER-00001";
@@ -185,6 +185,7 @@ public class OrderMongoRepositoryTest {
 		logger.debug("Orders in Database: {}", ordersInDatabase);
 		assertThat(ordersInDatabase).containsExactly(new Order(cod1, newClient, newOrder.getDate(), 10.0));
 	}
+
 	@Test
 	public void testSaveWhenOrderIdIsEmpty() {
 		String cod1 = "ORDER-00001";
@@ -222,7 +223,7 @@ public class OrderMongoRepositoryTest {
 		assertThat(ordersInDatabase).isEmpty();
 
 	}
-	
+
 	@Test
 	public void testFindOrdersByYearWhenDBIsEmpty() {
 		List<Order> ordersOfYearSelected = orderRepository.findOrderByYear(2025);
@@ -291,13 +292,13 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testGetYearsOfOrderWhenDBIsEmpty() throws Exception {
+	public void testGetYearsOfOrderWhenDBIsEmpty() {
 		List<Integer> years = orderRepository.getYearsOfOrders();
 		assertThat(years).isEmpty();
 	}
 
 	@Test
-	public void testGetYearsOfOrderWhenDBIsNotEmpty() throws Exception {
+	public void testGetYearsOfOrderWhenDBIsNotEmpty() {
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
 		Date currentDate = new Date(); // Data corrente
 		Calendar calendar = Calendar.getInstance();
@@ -313,9 +314,9 @@ public class OrderMongoRepositoryTest {
 		List<Integer> years = orderRepository.getYearsOfOrders();
 		assertThat(years).containsExactly(2023, 2024, 2025);
 	}
-	
+
 	@Test
-	public void testFindOrderByClientAndYearWhenDBContainsOnlyOrdersOfClientAndYearSelected() throws Exception {
+	public void testFindOrderByClientAndYearWhenDBContainsOnlyOrdersOfClientAndYearSelected() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
 		Date date1 = new Date();
 		Date date2 = new Date();
@@ -330,7 +331,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testFindOrderByClientAndYearWhenDBContainsOrdersOfClientSelectedAndDifferentYears() throws Exception {
+	public void testFindOrderByClientAndYearWhenDBContainsOrdersOfClientSelectedAndDifferentYears() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
 		Date date1 = new Date();
 		Date date2 = new Date();
@@ -347,7 +348,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testFindOrderByClientAndYearWhenDBContainsOrdersOfDifferentClientAndYearSelected() throws Exception {
+	public void testFindOrderByClientAndYearWhenDBContainsOrdersOfDifferentClientAndYearSelected() {
 		Client clientSelected = new Client("CLIENT-00001", "first Client");
 		Client secondClient = new Client("CLIENT-00002", "second Client");
 		Date date1 = new Date();
@@ -367,7 +368,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testFindOrderByClientAndYearWhenDBContainsOnlyOrdersOfDifferentClientsAndYears() throws Exception {
+	public void testFindOrderByClientAndYearWhenDBContainsOnlyOrdersOfDifferentClientsAndYears() {
 		Client clientSelected = new Client("CLIENT-00001", "first Client");
 		Client secondClient = new Client("CLIENT-00002", "second Client");
 		Client thirdClient = new Client("CLIENT-00003", "third Client");
@@ -391,7 +392,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteOrdersByClient() throws Exception {
+	public void testDeleteOrdersByClient() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
 		Client secondClient = new Client("CLIENT-00002", "second Client");
 		Date date1 = new Date();
@@ -413,7 +414,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteOrdersByClientWhenClientIsNotInDB() throws Exception {
+	public void testDeleteOrdersByClientWhenClientIsNotInDB() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
 		Client secondClient = new Client("CLIENT-00002", "second Client");
 		Date date1 = new Date();
@@ -427,7 +428,7 @@ public class OrderMongoRepositoryTest {
 		when(clientMongoRepository.findById(secondClient.getIdentifier())).thenReturn(secondClient);
 		List<Order> ordersRemoved = orderRepository.removeOrdersByClient(secondClient.getIdentifier());
 		List<Order> ordersRemainInDB = getAllOrdersFromDB();
-		assertThat(ordersRemoved).isNull();
+		assertThat(ordersRemoved).isEmpty();
 		assertThat(ordersRemainInDB).containsExactly(new Order("ORDER-00001", newClient, date1, 10),
 				new Order("ORDER-00002", newClient, date2, 15));
 	}
@@ -439,7 +440,7 @@ public class OrderMongoRepositoryTest {
 		List<Order> years = orderRepository.findOrdersByClientAndYear(newClient, 2025);
 		assertThat(years).isEmpty();
 	}
-	
+
 	@Test
 	public void testModifyOrderWhenOrderExistInDB() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
@@ -483,13 +484,13 @@ public class OrderMongoRepositoryTest {
 		assertThat(orderModified).isNull();
 
 	}
-	
+
 	private List<Order> getAllOrdersFromDB() {
 		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find().spliterator(), false)
 				.map(d -> new Order(d.getString("id"),
 						new Client(((DBRef) d.get("client")).getId().toString(), "firstClient"), (Date) d.get("date"),
-						Double.valueOf(d.getDouble("price"))))
+						d.getDouble("price")))
 				.collect(Collectors.toList());
 	}
 
