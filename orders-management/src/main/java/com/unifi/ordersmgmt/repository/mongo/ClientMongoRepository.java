@@ -82,5 +82,11 @@ public class ClientMongoRepository implements ClientRepository {
 		}
 		return null;
 	}
+	
+	@Override 
+	public ClientSession getSession() {
+		// TODO Auto-generated method stub
+		return clientSession;
+	}
 
 }
