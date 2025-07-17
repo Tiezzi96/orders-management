@@ -52,7 +52,6 @@ public class MongoTransactionManagerTest {
 
 	private MongoClient mongoClient;
 	private MongoTransactionManager transactionManager;
-	private ClientSession clientSession;
 
 	private MongoCollection<Document> clientCollection;
 	private MongoCollection<Document> orderCollection;

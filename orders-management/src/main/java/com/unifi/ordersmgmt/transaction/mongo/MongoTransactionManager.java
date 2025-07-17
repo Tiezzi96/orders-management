@@ -58,7 +58,7 @@ public class MongoTransactionManager implements TransactionManager {
 			return clientSession.withTransaction(body, options);
 		} catch (MongoException e) {
 			// TODO: handle exception
-			logger.info("eccezione lanciata: {}", e);
+			logger.info("eccezione lanciata: {}", e.getMessage(), e);
 			throw e;
 		}
 
