@@ -101,6 +101,7 @@ public class ClientMongoRepositoryTest {
 		List<Client> clients = clientRepository.findAll();
 		assertThat(clients).isEmpty();
 	}
+	
 
 	@Test
 	public void testFindAllClientsWhenDBIsNotEmpty() {
