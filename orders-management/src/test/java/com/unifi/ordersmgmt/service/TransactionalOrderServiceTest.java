@@ -2,8 +2,11 @@ package com.unifi.ordersmgmt.service;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +21,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.unifi.ordersmgmt.exception.NotFoundClientException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.repository.ClientRepository;
@@ -84,6 +88,78 @@ public class TransactionalOrderServiceTest {
 		verify(orderRepo).getYearsOfOrders();
 		assertThat(years).containsExactly(2025, 2024);
 
+	}
+	
+	@Test
+	public void testfindallOrdersByClientByYearSuccess() {
+		// Arrange
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
+		Order order2 = new Order("ORDER-00002", client,
+				Date.from(LocalDate.of(2024, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 50.0);
+
+		when(orderRepo.findOrdersByClientAndYear(client, 2024)).thenReturn(asList(order, order2));
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+
+		List<Order> years = orderService.findallOrdersByClientByYear(client, 2024);
+
+		verify(orderRepo).findOrdersByClientAndYear(client, 2024);
+		assertThat(years).containsExactly(order, order2);
+
+	}
+
+	@Test
+	public void testfindallOrdersByClientByYearWhenClientNoExists() {
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
+		Order order2 = new Order("ORDER-00002", client,
+				Date.from(LocalDate.of(2024, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 50.0);
+
+		when(orderRepo.findOrdersByClientAndYear(client, 2024)).thenReturn(asList(order, order2));
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(null);
+
+		assertThatExceptionOfType(NotFoundClientException.class)
+				.isThrownBy(() -> orderService.findallOrdersByClientByYear(client, 2024));
+
+		verify(orderRepo, never()).findOrdersByClientAndYear(client, 2024);
+
+	}
+	
+	
+	@Test
+	public void testAddOrderShouldSaveOrderWhenClientExists() {
+		// Arrange
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
+
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+		when(orderRepo.save(order)).thenReturn(order);
+
+		// Act
+		Order orderSaved = orderService.addOrder(order);
+
+		// Assert
+		assertThat(order).isEqualTo(orderSaved);
+		assertThat(orderSaved).isNotNull();
+		verify(clientRepo, times(2)).findById(client.getIdentifier());
+		verify(orderRepo).save(order);
+	}
+
+	@Test
+	public void testAddOrderShouldNotSaveOrderWhenClientNoExists() {
+		// Arrange
+		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
+		Order order = new Order("ORDER-00001", clientNotExist, new Date(), 100.0);
+
+		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);
+		when(orderRepo.save(order)).thenReturn(order);
+
+		// Assert
+		assertThatExceptionOfType(NotFoundClientException.class).isThrownBy(() -> orderService.addOrder(order));
+		verify(clientRepo, times(2)).findById(clientNotExist.getIdentifier());
+		verify(orderRepo, never()).save(any());
 	}
 
 }
