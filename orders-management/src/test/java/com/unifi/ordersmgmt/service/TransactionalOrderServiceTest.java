@@ -13,7 +13,9 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -212,6 +214,96 @@ public class TransactionalOrderServiceTest {
 		verify(clientRepo).findById(client.getIdentifier());
 		verify(orderRepo).findById(orderNotExist.getIdentifier());
 		verify(orderRepo, never()).delete(any());
+	}
+	
+	@Test
+	public void testUpdateOrderShouldUpdateOrderWhenClientAndOrderExist() {
+		// Arrange
+		Client client1 = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client1, new Date(), 100.0);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("client", client1);
+		updates.put("price", 120.0);
+		Order orderModified = new Order("ORDER-00001", client1, order.getDate(), 120.0);
+
+		when(clientRepo.findById(client1.getIdentifier())).thenReturn(client1);
+		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
+		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(orderModified);
+
+		// Act
+		Order orderUpdated= orderService.updateOrder(order, updates);
+
+		// Assert
+		verify(clientRepo, times(2)).findById(client1.getIdentifier());
+		verify(orderRepo).updateOrder(order.getIdentifier(), updates);
+		assertThat(orderUpdated).isEqualTo(orderModified);
+	}
+
+	@Test
+	public void testUpdateOrderShouldNotUpdateOrderWhenClientNoExists() {
+		// Arrange
+		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
+		Client clientOriginal = new Client("CLIENT-00002", "client ");
+		Order order = new Order("ORDER-00001", clientOriginal, new Date(), 100.0);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("client", clientNotExist);
+		updates.put("price", 120.0);
+
+		when(clientRepo.findById(clientOriginal.getIdentifier())).thenReturn(clientOriginal);
+		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);
+		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
+		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(null);
+
+		// Assert
+		assertThatExceptionOfType(NotFoundClientException.class)
+				.isThrownBy(() -> orderService.updateOrder(order, updates));
+		verify(clientRepo).findById(clientNotExist.getIdentifier());
+		verify(orderRepo, never()).updateOrder(any(), any());
+	}
+
+	@Test
+	public void testUpdateOrderShouldNotUpdateOrderWhenOriginalClientNoExists() {
+		// Arrange
+		Client clientForUpdate = new Client("CLIENT-00001", "client");
+		Client clientOriginal = new Client("CLIENT-00002", "Client Not Exist");
+		Order order = new Order("ORDER-00001", clientOriginal, new Date(), 100.0);
+		Order orderWithoutClient = new Order("ORDER-00001", null, new Date(), 100.0);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("client", clientForUpdate);
+		updates.put("price", 120.0);
+
+		when(clientRepo.findById(order.getClient().getIdentifier())).thenReturn(null);
+		when(clientRepo.findById(clientOriginal.getIdentifier())).thenReturn(null);
+		when(clientRepo.findById(clientForUpdate.getIdentifier())).thenReturn(clientForUpdate);
+		when(orderRepo.findById(order.getIdentifier())).thenReturn(orderWithoutClient);
+		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(null);
+
+		// Assert
+		assertThatExceptionOfType(NotFoundClientException.class)
+				.isThrownBy(() -> orderService.updateOrder(order, updates));
+		verify(clientRepo).findById(clientOriginal.getIdentifier());
+		verify(orderRepo, never()).updateOrder(any(), any());
+	}
+
+	@Test
+	public void testupdateOrderShouldNotDeleteOrderWhenOrderNoExists() {
+		// Arrange
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Client client2 = new Client("CLIENT-00002", "Client 2");
+		Order orderNotExist = new Order("ORDER-00001", client, new Date(), 100.0);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("client", client2);
+		updates.put("price", 120.0);
+
+		when(orderRepo.findById(orderNotExist.getIdentifier())).thenReturn(null);
+		when(orderRepo.updateOrder(orderNotExist.getIdentifier(), updates)).thenReturn(null);
+
+		// Assert
+		assertThatExceptionOfType(NotFoundOrderException.class)
+				.isThrownBy(() -> orderService.updateOrder(orderNotExist, updates));
+
+		verify(orderRepo).findById(orderNotExist.getIdentifier());
+		verify(orderRepo, never()).updateOrder(any(), any());
 	}
 
 }

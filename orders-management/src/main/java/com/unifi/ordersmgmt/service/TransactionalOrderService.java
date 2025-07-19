@@ -89,9 +89,26 @@ public class TransactionalOrderService implements OrderService {
 	}
 
 	@Override
-	public Order updateOrder(Order order, Map<String, Object> updates) {
+	public Order updateOrder(Order orderToModify, Map<String, Object> updates) {
 		// TODO Auto-generated method stub
-		return null;
+		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
+			if (orderRepo.findById(orderToModify.getIdentifier()) == null) {
+				throw new NotFoundOrderException(
+						String.format("L'ordine con id %s non è presente nel database", orderToModify.getIdentifier()));
+			}
+			if (clientRepo.findById(orderToModify.getClient().getIdentifier()) == null) {
+				throw new NotFoundClientException(
+						String.format("Il cliente originale con id %s non è presente nel database",
+								orderToModify.getClient().getIdentifier()));
+			}
+			logger.info("client of the order to modify: {}", orderToModify.getClient());
+			logger.info("ID of the client of the order to modify: {}", orderToModify.getClient().getIdentifier());
+			if (clientRepo.findById(((Client) updates.get("client")).getIdentifier()) == null) {
+				throw new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
+						((Client) updates.get("client")).getIdentifier()));
+			}
+			return orderRepo.updateOrder(orderToModify.getIdentifier(), updates);
+		});
 	}
 
 }
