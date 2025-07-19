@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
+import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.transaction.TransactionManager;
@@ -67,6 +68,17 @@ public class TransactionalOrderService implements OrderService {
 	@Override
 	public void removeOrder(Order order) {
 		// TODO Auto-generated method stub
+		mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
+			if (clientRepo.findById(order.getClient().getIdentifier()) == null) {
+				throw new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
+						order.getClient().getIdentifier()));
+			}
+			if (orderRepo.findById(order.getIdentifier()) == null) {
+				throw new NotFoundOrderException(
+						String.format("L'ordine con id %s non è presente nel database", order.getIdentifier()));
+			}
+			return orderRepo.delete(order.getIdentifier());
+		});
 
 	}
 

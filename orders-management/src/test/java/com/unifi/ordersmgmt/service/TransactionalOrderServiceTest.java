@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
+import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.repository.ClientRepository;
@@ -160,6 +161,57 @@ public class TransactionalOrderServiceTest {
 		assertThatExceptionOfType(NotFoundClientException.class).isThrownBy(() -> orderService.addOrder(order));
 		verify(clientRepo, times(2)).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).save(any());
+	}
+	
+	@Test
+	public void testRemoveOrderShouldRemoveOrderWhenClientAndOrderExist() {
+		// Arrange
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
+
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
+		when(orderRepo.delete(order.getIdentifier())).thenReturn(order);
+
+		// Act
+		orderService.removeOrder(order);
+
+		// Assert
+		verify(clientRepo).findById(client.getIdentifier());
+		verify(orderRepo).delete(order.getIdentifier());
+	}
+
+	@Test
+	public void testDeleteOrderShouldNotDeleteOrderWhenClientNoExists() {
+		// Arrange
+		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
+		Order order = new Order("ORDER-00001", clientNotExist, new Date(), 100.0);
+
+		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);
+		when(orderRepo.delete(order.getIdentifier())).thenReturn(order);
+
+		// Assert
+		assertThatExceptionOfType(NotFoundClientException.class).isThrownBy(() -> orderService.removeOrder(order));
+		verify(clientRepo).findById(clientNotExist.getIdentifier());
+		verify(orderRepo, never()).delete(any());
+	}
+
+	@Test
+	public void testDeleteOrderShouldNotDeleteOrderWhenOrderNoExists() {
+		// Arrange
+		Client client = new Client("CLIENT-00001", "Client Not Exist");
+		Order orderNotExist = new Order("ORDER-00001", client, new Date(), 100.0);
+
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+		when(orderRepo.findById(orderNotExist.getIdentifier())).thenReturn(null);
+		when(orderRepo.delete(orderNotExist.getIdentifier())).thenReturn(null);
+
+		// Assert
+		assertThatExceptionOfType(NotFoundOrderException.class)
+				.isThrownBy(() -> orderService.removeOrder(orderNotExist));
+		verify(clientRepo).findById(client.getIdentifier());
+		verify(orderRepo).findById(orderNotExist.getIdentifier());
+		verify(orderRepo, never()).delete(any());
 	}
 
 }
