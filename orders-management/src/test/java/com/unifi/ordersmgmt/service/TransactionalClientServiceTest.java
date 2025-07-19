@@ -2,7 +2,6 @@ package com.unifi.ordersmgmt.service;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,10 +31,11 @@ public class TransactionalClientServiceTest {
 	private ClientRepository clientRepo;
 	@Mock
 	private OrderRepository orderRepo;
+	private AutoCloseable closeable;
 
 	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.openMocks(this);
+	public void setUp() {
+		closeable = MockitoAnnotations.openMocks(this);
 		clientService = new TransactionalClientService(mongoTransactionManager);
 		when(mongoTransactionManager.executeTransaction(any())).thenAnswer(inv -> {
 			TransactionalFunction<Order> callback = inv.getArgument(0);
@@ -45,6 +45,7 @@ public class TransactionalClientServiceTest {
 
 	@After
 	public void tearDown() throws Exception {
+		closeable.close();
 	}
 
 	@Test

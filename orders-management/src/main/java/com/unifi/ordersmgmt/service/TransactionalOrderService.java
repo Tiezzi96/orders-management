@@ -14,6 +14,7 @@ import com.unifi.ordersmgmt.transaction.TransactionManager;
 
 public class TransactionalOrderService implements OrderService {
 
+	private static final String CLIENT_MESSAGE_EXCEPTION = "Il cliente con id %s non è presente nel database";
 	private TransactionManager mongoTransactionManager;
 	private static final Logger logger = LogManager.getLogger(TransactionalOrderService.class);
 
@@ -36,7 +37,7 @@ public class TransactionalOrderService implements OrderService {
 		{
 			if (clientRepo.findById(client.getIdentifier()) == null) {
 				throw new NotFoundClientException(
-						String.format("Il cliente con id %s non è presente nel database", client.getIdentifier()));
+						String.format(CLIENT_MESSAGE_EXCEPTION, client.getIdentifier()));
 			}
 			return orderRepo.findOrdersByClientAndYear(client, year);
 		});
@@ -56,7 +57,7 @@ public class TransactionalOrderService implements OrderService {
 					clientRepo.findById(order.getClient().getIdentifier()));
 
 			if (clientRepo.findById(order.getClient().getIdentifier()) == null) {
-				throw new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
+				throw new NotFoundClientException(String.format(CLIENT_MESSAGE_EXCEPTION,
 						order.getClient().getIdentifier()));
 			}
 			return orderRepo.save(order);
@@ -70,7 +71,7 @@ public class TransactionalOrderService implements OrderService {
 		// TODO Auto-generated method stub
 		mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(order.getClient().getIdentifier()) == null) {
-				throw new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
+				throw new NotFoundClientException(String.format(CLIENT_MESSAGE_EXCEPTION,
 						order.getClient().getIdentifier()));
 			}
 			if (orderRepo.findById(order.getIdentifier()) == null) {
@@ -104,7 +105,7 @@ public class TransactionalOrderService implements OrderService {
 			logger.info("client of the order to modify: {}", orderToModify.getClient());
 			logger.info("ID of the client of the order to modify: {}", orderToModify.getClient().getIdentifier());
 			if (clientRepo.findById(((Client) updates.get("client")).getIdentifier()) == null) {
-				throw new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
+				throw new NotFoundClientException(String.format(CLIENT_MESSAGE_EXCEPTION,
 						((Client) updates.get("client")).getIdentifier()));
 			}
 			return orderRepo.updateOrder(orderToModify.getIdentifier(), updates);

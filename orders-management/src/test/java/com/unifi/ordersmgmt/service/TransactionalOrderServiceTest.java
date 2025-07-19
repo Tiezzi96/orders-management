@@ -3,7 +3,6 @@ package com.unifi.ordersmgmt.service;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -45,9 +44,11 @@ public class TransactionalOrderServiceTest {
 	@Mock
 	private OrderRepository orderRepo;
 
+	private AutoCloseable closeable;
+
 	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.openMocks(this);
+	public void setUp() {
+		closeable = MockitoAnnotations.openMocks(this);
 		orderService = new TransactionalOrderService(mongoTransactionManager);
 		when(mongoTransactionManager.executeTransaction(any())).thenAnswer(inv -> {
 			TransactionalFunction<Order> callback = inv.getArgument(0);
@@ -57,6 +58,7 @@ public class TransactionalOrderServiceTest {
 
 	@After
 	public void tearDown() throws Exception {
+		closeable.close();
 	}
 
 	@Test
@@ -72,7 +74,7 @@ public class TransactionalOrderServiceTest {
 		verify(orderRepo).findOrderByYear(2025);
 
 	}
-	
+
 	@Test
 	public void testGetyearsofOrders() {
 		// Arrange
@@ -92,7 +94,7 @@ public class TransactionalOrderServiceTest {
 		assertThat(years).containsExactly(2025, 2024);
 
 	}
-	
+
 	@Test
 	public void testfindallOrdersByClientByYearSuccess() {
 		// Arrange
@@ -129,8 +131,7 @@ public class TransactionalOrderServiceTest {
 		verify(orderRepo, never()).findOrdersByClientAndYear(client, 2024);
 
 	}
-	
-	
+
 	@Test
 	public void testAddOrderShouldSaveOrderWhenClientExists() {
 		// Arrange
@@ -164,7 +165,7 @@ public class TransactionalOrderServiceTest {
 		verify(clientRepo, times(2)).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).save(any());
 	}
-	
+
 	@Test
 	public void testRemoveOrderShouldRemoveOrderWhenClientAndOrderExist() {
 		// Arrange
@@ -215,7 +216,7 @@ public class TransactionalOrderServiceTest {
 		verify(orderRepo).findById(orderNotExist.getIdentifier());
 		verify(orderRepo, never()).delete(any());
 	}
-	
+
 	@Test
 	public void testUpdateOrderShouldUpdateOrderWhenClientAndOrderExist() {
 		// Arrange
@@ -231,7 +232,7 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(orderModified);
 
 		// Act
-		Order orderUpdated= orderService.updateOrder(order, updates);
+		Order orderUpdated = orderService.updateOrder(order, updates);
 
 		// Assert
 		verify(clientRepo, times(2)).findById(client1.getIdentifier());
