@@ -24,12 +24,12 @@ public class Client extends BaseElement {
 		this.name = name;
 		this.identifier = null;
 	}
-	@Generated("jacoco") // <- exclude setter and getter method
+	
 	public String getName() {
 		return name;
 	}
 	
-	@Generated("jacoco") // <- exclude setter and getter method
+	
 	public void setName(String name) {
 		this.name = name;
 	}
