@@ -2,8 +2,6 @@ package com.unifi.ordersmgmt.model;
 
 import java.util.Objects;
 
-import javax.annotation.Generated;
-
 public class Client extends BaseElement {
 
 	private String name;
