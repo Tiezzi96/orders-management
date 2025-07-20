@@ -66,7 +66,7 @@ jobs:
       - name: Download compiled classes
         uses: actions/download-artifact@v4
         with:
-          name: compiled-classes-jkd-8
+          name: compiled-classes-jdk-8
           path: orders-management/target
         
       
