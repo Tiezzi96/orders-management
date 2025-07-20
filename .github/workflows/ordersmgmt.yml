@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         # test against several Java versions:
-        java: [ 8,11 ]
-    name: Build Orders Management Project with Java $${{ matrix.java }}
+        java: [ 8, 11 ]
+    name: Build Orders Management Project with Java ${{ matrix.java }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -20,7 +20,7 @@ jobs:
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v1
         with:
-          java-version: $${{ matrix.java }}
+          java-version: ${{ matrix.java }}
 
 
       - name: Cache Maven packages
