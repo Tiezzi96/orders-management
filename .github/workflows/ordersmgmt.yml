@@ -41,7 +41,7 @@ jobs:
       - name: Upload compiled classes
         uses: actions/upload-artifact@v4
         with:
-          name: compiled-classes
+          name: compiled-classes-jdk-${{ matrix.java }}
           path: orders-management/target
 
    
@@ -66,7 +66,7 @@ jobs:
       - name: Download compiled classes
         uses: actions/download-artifact@v4
         with:
-          name: compiled-classes
+          name: compiled-classes-jkd-8
           path: orders-management/target
         
       
