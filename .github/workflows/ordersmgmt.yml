@@ -5,13 +5,12 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
         # test against several Java versions:
         java: [ 8, 11 ]
-    name: Build Orders Management Project with Java ${{ matrix.java }} on ${{ matrix.os }}
+    name: Build Orders Management Project with Java ${{ matrix.java }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,7 +41,7 @@ jobs:
       - name: Upload compiled classes
         uses: actions/upload-artifact@v4
         with:
-          name: compiled-classes-jdk-${{ matrix.java }}-on-${{ matrix.os }}
+          name: compiled-classes-jdk-${{ matrix.java }}
           path: orders-management/target
 
    
@@ -67,7 +66,7 @@ jobs:
       - name: Download compiled classes
         uses: actions/download-artifact@v4
         with:
-          name: compiled-classes-jdk-8-on-ubuntu-latest
+          name: compiled-classes-jdk-8
           path: orders-management/target
         
       
