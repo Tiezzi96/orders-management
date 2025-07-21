@@ -72,7 +72,7 @@
 			<version>1.19.1</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency><!-- dependency per javax.utils.pair-->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -142,6 +142,40 @@
 						</execution>
 					</executions>
 				</plugin>
+				<plugin>
+					<groupId>org.pitest</groupId>
+					<artifactId>pitest-maven</artifactId>
+					<version>1.17.4</version>
+					<configuration>
+
+						<skipTests>${skipPitest}</skipTests>
+
+						<excludedClasses>
+							<param>com.unifi.ordersmgmt.model.*</param>
+						</excludedClasses>
+						<targetTests>
+							<param>com.unifi.ordersmgmt.*</param>
+						</targetTests>
+						<!-- Timeout aumentato per test più pesanti -->
+
+						<timeoutConstant>8000</timeoutConstant>
+						<timeoutFactor>1.5</timeoutFactor>
+
+						<!-- Logging dettagliato -->
+						<verbose>true</verbose>
+						<mutators>
+							<mutator>DEFAULTS</mutator>
+						</mutators>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>verify</phase>
+							<goals>
+								<goal>mutationCoverage</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -168,6 +202,17 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>pitest</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-maven</artifactId>
 					</plugin>
 				</plugins>
 			</build>
