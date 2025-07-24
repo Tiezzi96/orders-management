@@ -7,7 +7,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.assertj.swing.annotation.GUITest;
 import org.junit.After;
@@ -197,6 +199,82 @@ public class OrderControllerTest {
 		inOrder.verify(orderView).showOrderError("Ordine non più presente nel DB", newOrder);
 		inOrder.verify(orderView).orderRemoved(newOrder);
 
+	}
+	
+	@Test
+	public void testModifyOrderWhenOrderIsInDBAndClientIsInDB() throws Exception {
+		Order newOrder = new Order();
+		String orderId = newOrder.getIdentifier();
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date = new Date();
+		updates.put("price", 10.5);
+		updates.put("date", new Date());
+		Order orderModified = new Order(newOrder.getIdentifier(), newOrder.getClient(), date, 10.5);
+		when(orderService.updateOrder(newOrder, updates)).thenReturn(orderModified);
+		controller.modifyOrder(newOrder, updates);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).updateOrder(newOrder, updates);
+		inOrder.verify(orderView).orderUpdated(orderModified);
+	}
+
+	@Test
+	public void testModifyOrderWhenOrderIsNotInDB() throws Exception {
+		Client client = new Client();
+		Order orderRemoved = new Order("ORDER-00001", client, new Date(), 10.0);
+		String orderId = orderRemoved.getIdentifier();
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date = new Date();
+		updates.put("price", 10.5);
+		updates.put("date", new Date());
+		doThrow(new NotFoundOrderException("Order not Found")).when(orderService).updateOrder(orderRemoved, updates);
+		Order orderModified = new Order(orderRemoved.getIdentifier(), orderRemoved.getClient(), date, 10.5);
+		controller.modifyOrder(orderRemoved, updates);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).updateOrder(orderRemoved, updates);
+		inOrder.verify(orderView).showOrderError("Ordine non più presente nel DB", orderRemoved);
+		inOrder.verify(orderView).orderRemoved(orderRemoved);
+	}
+
+	@Test
+	public void testModifyOrderWhenOriginalClientIsNotInDB() throws Exception {
+		Client clientRemoved = new Client();
+		Order orderToModify = new Order("ORDER-00001", clientRemoved, new Date(), 10.0);
+		String orderId = orderToModify.getIdentifier();
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date = new Date();
+		updates.put("price", 10.5);
+		updates.put("date", new Date());
+		doThrow(new NotFoundClientException(String.format("Il cliente originale con id %s non è presente nel database",
+				clientRemoved.getIdentifier()))).when(orderService).updateOrder(orderToModify, updates);
+		Order orderModified = new Order(orderToModify.getIdentifier(), orderToModify.getClient(), date, 10.5);
+		controller.modifyOrder(orderToModify, updates);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).updateOrder(orderToModify, updates);
+		inOrder.verify(orderView).showErrorClient("Cliente non più presente nel DB", orderToModify.getClient());
+		inOrder.verify(orderView).clientRemoved(clientRemoved);
+		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
+	}
+	
+	@Test
+	public void testModifyOrderWhenClientForUpdateIsNotInDB() throws Exception {
+		Client clientOriginal = new Client();
+		Client clientForUpdate = new Client("2", "client not exists");
+		Order orderToModify = new Order("ORDER-00001", clientOriginal, new Date(), 10.0);
+		String orderId = orderToModify.getIdentifier();
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date = new Date();
+		updates.put("client", clientForUpdate);
+		updates.put("price", 10.5);
+		updates.put("date", new Date());
+		doThrow(new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
+				((Client)updates.get("client")).getIdentifier()))).when(orderService).updateOrder(orderToModify, updates);
+		Order orderModified = new Order(orderToModify.getIdentifier(), orderToModify.getClient(), date, 10.5);
+		controller.modifyOrder(orderToModify, updates);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).updateOrder(orderToModify, updates);
+		inOrder.verify(orderView).showErrorClient("Cliente non più presente nel DB", clientForUpdate);
+		inOrder.verify(orderView).clientRemoved(clientForUpdate);
+		inOrder.verify(orderView).removeOrdersByClient(clientForUpdate);
 	}
 
 }

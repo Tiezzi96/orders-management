@@ -1,5 +1,7 @@
 package com.unifi.ordersmgmt.controller;
 
+import java.util.Map;
+
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
 import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
@@ -106,6 +108,36 @@ public class OrderController {
 			orderView.showOrderError("Ordine non più presente nel DB", orderToDelete);
 			orderView.orderRemoved(orderToDelete);
 
+		}
+	}
+
+	public void modifyOrder(Order orderToModify, Map<String, Object> updates) {
+		// TODO Auto-generated method stub
+		try {
+			System.out.println("Order controller order to modify: "+orderToModify);
+			System.out.println("Order controller updates: "+updates);
+
+			Order orderModified = orderService.updateOrder(orderToModify, updates);
+			System.out.println("Order controller order modify: "+orderModified);
+			orderView.orderUpdated(orderModified);
+		} catch (NotFoundOrderException e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			orderView.showOrderError("Ordine non più presente nel DB", orderToModify);
+			orderView.orderRemoved(orderToModify);
+
+		} catch (NotFoundClientException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+			if (e.getMessage().contains("originale")){				
+				orderView.showErrorClient("Cliente non più presente nel DB", orderToModify.getClient());
+				orderView.clientRemoved(orderToModify.getClient());
+				orderView.removeOrdersByClient(orderToModify.getClient());
+			}else {				
+				orderView.showErrorClient("Cliente non più presente nel DB", ((Client)(updates.get("client"))));
+				orderView.clientRemoved(((Client)(updates.get("client"))));
+				orderView.removeOrdersByClient(((Client)(updates.get("client"))));
+			}
 		}
 	}
 }

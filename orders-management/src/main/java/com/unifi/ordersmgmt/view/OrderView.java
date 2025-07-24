@@ -27,6 +27,8 @@ public interface OrderView {
 
 	public void orderRemoved(Order orderRemoved);
 
+	public void orderUpdated(Order orderModified);
+
 }
 
 
