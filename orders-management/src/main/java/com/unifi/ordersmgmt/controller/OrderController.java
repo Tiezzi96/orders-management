@@ -2,6 +2,7 @@ package com.unifi.ordersmgmt.controller;
 
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
 import com.unifi.ordersmgmt.model.Client;
+import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.service.ClientService;
 import com.unifi.ordersmgmt.service.OrderService;
 import com.unifi.ordersmgmt.view.OrderView;
@@ -36,7 +37,6 @@ public class OrderController {
 	public void yearsOfTheOrders() {
 		orderView.setYearsOrders(orderService.findYearsOfOrders());
 
-		
 	}
 
 	public void findOrdersByYearAndClient(Client client, int year) {
@@ -45,13 +45,50 @@ public class OrderController {
 			orderView.showAllOrders(orderService.findallOrdersByClientByYear(client, year));
 		} catch (NotFoundClientException e) {
 			System.out.println("findOrdersByYearAndClient: exception thrown");
-
 			// TODO Auto-generated catch block
 			System.out.println("Client not found");
 			orderView.showErrorClient("Cliente non presente nel DB", client);
 			orderView.clientRemoved(client);
 		}
-		
+
+	}
+
+	public void addClient(Client client) {
+		// TODO Auto-generated method stub
+		Client saved = clientService.saveClient(client);
+		System.out.println("SAVED : "+saved);
+		orderView.clientAdded(saved);
+	}
+
+	public void deleteClient(Client clientToDelete) {
+		// TODO Auto-generated method stub
+		try {
+			clientService.removeClient(clientToDelete);
+			System.out.println("Executed remove client of: " +clientToDelete);
+			orderView.clientRemoved(clientToDelete);
+		} catch (NotFoundClientException e) {
+			// TODO Auto-generated catch block
+			orderView.showErrorClient("Cliente non più presente nel DB", clientToDelete);
+			orderView.clientRemoved(clientToDelete);
+		}
+
+	}
+
+	public void addOrder(Order order) {
+		// TODO Auto-generated method stub
+		try {
+			orderService.addOrder(order);
+			orderView.orderAdded(order);
+		} catch (NotFoundClientException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+			orderView.showErrorClient("Cliente non più presente nel DB", order.getClient());
+			orderView.clientRemoved(order.getClient());
+			orderView.removeOrdersByClient(order.getClient());
+		}
+		// TODO Auto-generated method stub
+
+
 	}
 
 }

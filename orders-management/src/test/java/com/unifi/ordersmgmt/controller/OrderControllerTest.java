@@ -2,17 +2,21 @@ package com.unifi.ordersmgmt.controller;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import java.util.List;
 
 import org.assertj.swing.annotation.GUITest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
@@ -96,6 +100,65 @@ public class OrderControllerTest {
 		when(orderService.findallOrdersByClientByYear(new Client(), 2024)).thenReturn(ordersByClientAndYear);
 		controller.findOrdersByYearAndClient(new Client(), 2024);
 		verify(orderView).showAllOrders(ordersByClientAndYear);
+	}
+	
+	
+	@Test
+	public void testDeleteClientWhenItIsPresentInDB() {
+		Client newClient = new Client();
+		controller.deleteClient(newClient);
+		InOrder inOrder = Mockito.inOrder(clientService, orderView);
+		inOrder.verify(clientService).removeClient(newClient);
+		inOrder.verify(orderView).clientRemoved(newClient);
+
+	}
+
+	@Test
+	public void testDeleteClientWhenItIsNotPresentInDB() {
+		Client newClient = new Client();
+		doThrow(new NotFoundClientException("Client not found")).when(clientService).removeClient(newClient);
+		controller.deleteClient(newClient);
+		InOrder inOrder = Mockito.inOrder(clientService, orderView);
+		inOrder.verify(clientService).removeClient(newClient);
+		inOrder.verify(orderView).showErrorClient("Cliente non più presente nel DB", newClient);
+		inOrder.verify(orderView).clientRemoved(newClient);
+
+	}
+
+	@Test
+	public void testAddNewClient() {
+		Client newClient = new Client("1", "client");
+		when(clientService.saveClient(newClient)).thenReturn(newClient);
+		controller.addClient(newClient);
+		InOrder inOrder = Mockito.inOrder(clientService, orderView);
+		inOrder.verify(clientService).saveClient(newClient);
+		inOrder.verify(orderView).clientAdded(newClient);
+
+	}
+
+	@Test
+	public void testAddOrderWhenClientIsInDB() {
+		Order newOrder = new Order();
+		controller.addOrder(newOrder);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).addOrder(newOrder);
+		inOrder.verify(orderView).orderAdded(newOrder);
+
+	}
+
+	@Test
+	public void testAddOrderWhenClientIsNotInDB() {
+		Client clientRemoved = new Client();
+		Order newOrder = new Order("ORDER-00001", clientRemoved, new Date(), 10.0);
+		doThrow(new NotFoundClientException("Client not Found")).when(orderService).addOrder(newOrder);
+		controller.addOrder(newOrder);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).addOrder(newOrder);
+		inOrder.verify(orderView).showErrorClient("Cliente non più presente nel DB", newOrder.getClient());
+		;
+		inOrder.verify(orderView).clientRemoved(clientRemoved);
+		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
+
 	}
 
 }

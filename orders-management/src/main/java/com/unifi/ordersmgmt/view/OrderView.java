@@ -17,6 +17,12 @@ public interface OrderView {
 
 	public void clientRemoved(Client clientRemoved);
 
+	public void clientAdded(Client clientAdded);
+
+	public void orderAdded(Order orderAdded);
+
+	public void removeOrdersByClient(Client client);
+
 }
 
 
