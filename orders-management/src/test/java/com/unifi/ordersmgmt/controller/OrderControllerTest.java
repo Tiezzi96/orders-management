@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.unifi.ordersmgmt.exception.NotFoundClientException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.service.ClientService;
@@ -69,6 +70,32 @@ public class OrderControllerTest {
 		when(orderService.allOrdersByYear(2024)).thenReturn(orders);
 		controller.allOrdersByYear(2024);
 		verify(orderView).showAllOrders(orders);
+	}
+	
+	@Test
+	public void testYearsOfOrders() {
+		List<Integer> years = asList(2024);
+		when(orderService.findYearsOfOrders()).thenReturn(years);
+		controller.yearsOfTheOrders();
+		verify(orderView).setYearsOrders(years);
+	}
+
+	@Test
+	public void testOrdersByClientAndYearWhenClientIsNotInDB() {
+		Client newClient = new Client("1", "client1");
+		when(orderService.findallOrdersByClientByYear(newClient, 2024))
+				.thenThrow(new NotFoundClientException("Client not found"));
+		controller.findOrdersByYearAndClient(newClient, 2024);
+		verify(orderView).showErrorClient("Cliente non presente nel DB", newClient);
+		verify(orderView).clientRemoved(newClient);
+	}
+
+	@Test
+	public void testOrdersByClientAndYear() {
+		List<Order> ordersByClientAndYear = asList(new Order());
+		when(orderService.findallOrdersByClientByYear(new Client(), 2024)).thenReturn(ordersByClientAndYear);
+		controller.findOrdersByYearAndClient(new Client(), 2024);
+		verify(orderView).showAllOrders(ordersByClientAndYear);
 	}
 
 }

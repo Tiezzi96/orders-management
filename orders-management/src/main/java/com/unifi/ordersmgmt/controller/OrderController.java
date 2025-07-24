@@ -1,5 +1,7 @@
 package com.unifi.ordersmgmt.controller;
 
+import com.unifi.ordersmgmt.exception.NotFoundClientException;
+import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.service.ClientService;
 import com.unifi.ordersmgmt.service.OrderService;
 import com.unifi.ordersmgmt.view.OrderView;
@@ -29,6 +31,27 @@ public class OrderController {
 	public void allOrdersByYear(int year) {
 		orderView.showAllOrders(orderService.allOrdersByYear(year));
 
+	}
+
+	public void yearsOfTheOrders() {
+		orderView.setYearsOrders(orderService.findYearsOfOrders());
+
+		
+	}
+
+	public void findOrdersByYearAndClient(Client client, int year) {
+		// TODO Auto-generated method stub
+		try {
+			orderView.showAllOrders(orderService.findallOrdersByClientByYear(client, year));
+		} catch (NotFoundClientException e) {
+			System.out.println("findOrdersByYearAndClient: exception thrown");
+
+			// TODO Auto-generated catch block
+			System.out.println("Client not found");
+			orderView.showErrorClient("Cliente non presente nel DB", client);
+			orderView.clientRemoved(client);
+		}
+		
 	}
 
 }

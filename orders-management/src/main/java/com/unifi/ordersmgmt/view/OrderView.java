@@ -13,6 +13,11 @@ public interface OrderView {
 
 	public void showAllOrders(List<Order> orders);
 
+	public void showErrorClient(String message, Client client);
+
+	public void clientRemoved(Client clientRemoved);
+
 }
+
 
 
