@@ -1,6 +1,7 @@
 package com.unifi.ordersmgmt.controller;
 
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
+import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.service.ClientService;
@@ -56,7 +57,7 @@ public class OrderController {
 	public void addClient(Client client) {
 		// TODO Auto-generated method stub
 		Client saved = clientService.saveClient(client);
-		System.out.println("SAVED : "+saved);
+		System.out.println("SAVED : " + saved);
 		orderView.clientAdded(saved);
 	}
 
@@ -64,7 +65,7 @@ public class OrderController {
 		// TODO Auto-generated method stub
 		try {
 			clientService.removeClient(clientToDelete);
-			System.out.println("Executed remove client of: " +clientToDelete);
+			System.out.println("Executed remove client of: " + clientToDelete);
 			orderView.clientRemoved(clientToDelete);
 		} catch (NotFoundClientException e) {
 			// TODO Auto-generated catch block
@@ -86,9 +87,25 @@ public class OrderController {
 			orderView.clientRemoved(order.getClient());
 			orderView.removeOrdersByClient(order.getClient());
 		}
-		// TODO Auto-generated method stub
-
 
 	}
 
+	public void deleteOrder(Order orderToDelete) {
+		try {
+			orderService.removeOrder(orderToDelete);
+			orderView.orderRemoved(orderToDelete);
+		} catch (NotFoundClientException e) {
+			// TODO Auto-generated catch block
+			System.out.println("not client: " + e.getMessage());
+			orderView.showErrorClient("Cliente non più presente nel DB", orderToDelete.getClient());
+			orderView.clientRemoved(orderToDelete.getClient());
+			orderView.removeOrdersByClient(orderToDelete.getClient());
+		} catch (NotFoundOrderException e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			orderView.showOrderError("Ordine non più presente nel DB", orderToDelete);
+			orderView.orderRemoved(orderToDelete);
+
+		}
+	}
 }

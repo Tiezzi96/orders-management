@@ -23,6 +23,10 @@ public interface OrderView {
 
 	public void removeOrdersByClient(Client client);
 
+	public void showOrderError(String message, Order order);
+
+	public void orderRemoved(Order orderRemoved);
+
 }
 
 

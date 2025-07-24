@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
+import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.service.ClientService;
@@ -158,6 +159,43 @@ public class OrderControllerTest {
 		;
 		inOrder.verify(orderView).clientRemoved(clientRemoved);
 		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
+
+	}
+	
+	@Test
+	public void testDeleteOrderWhenClientIsInDB() {
+		Order newOrder = new Order();
+		controller.deleteOrder(newOrder);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).removeOrder(newOrder);
+		inOrder.verify(orderView).orderRemoved(newOrder);
+
+	}
+
+	@Test
+	public void testDeleteOrderWhenClientIsNotInDB() {
+		Client clientRemoved = new Client();
+		Order newOrder = new Order("ORDER-00001", clientRemoved, new Date(), 10.0);
+		doThrow(new NotFoundClientException("Client not Found")).when(orderService).removeOrder(newOrder);
+		controller.deleteOrder(newOrder);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).removeOrder(newOrder);
+		inOrder.verify(orderView).showErrorClient("Cliente non più presente nel DB", newOrder.getClient());
+		inOrder.verify(orderView).clientRemoved(clientRemoved);
+		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
+
+	}
+
+	@Test
+	public void testDeleteOrderWhenOrderIsNotInDB() {
+		Client client = new Client();
+		Order newOrder = new Order("ORDER-00001", client, new Date(), 10.0);
+		doThrow(new NotFoundOrderException("Order not Found")).when(orderService).removeOrder(newOrder);
+		controller.deleteOrder(newOrder);
+		InOrder inOrder = Mockito.inOrder(orderService, orderView);
+		inOrder.verify(orderService).removeOrder(newOrder);
+		inOrder.verify(orderView).showOrderError("Ordine non più presente nel DB", newOrder);
+		inOrder.verify(orderView).orderRemoved(newOrder);
 
 	}
 
