@@ -46,7 +46,7 @@ public class Order extends BaseElement {
 
 	@Override
 	public String toString() {
-		return "Order{id='" + identifier + "', client=" + client.getIdentifier() + ", date=" + date + ", price=" + price
+		return "Order{id='" + identifier + "', client=" + (client != null && client.getIdentifier() != null ? client.getIdentifier() : "null")+", date=" + date + ", price=" + price
 				+ "}";
 	}
 
