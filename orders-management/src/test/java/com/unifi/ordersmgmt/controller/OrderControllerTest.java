@@ -220,7 +220,6 @@ public class OrderControllerTest {
 		Client client = new Client();
 		Order orderRemoved = new Order("ORDER-00001", client, new Date(), 10.0);
 		Map<String, Object> updates = new HashMap<String, Object>();
-		Date date = new Date();
 		updates.put("price", 10.5);
 		updates.put("date", new Date());
 		doThrow(new NotFoundOrderException("Order not Found")).when(orderService).updateOrder(orderRemoved, updates);
@@ -236,7 +235,6 @@ public class OrderControllerTest {
 		Client clientRemoved = new Client();
 		Order orderToModify = new Order("ORDER-00001", clientRemoved, new Date(), 10.0);
 		Map<String, Object> updates = new HashMap<String, Object>();
-		Date date = new Date();
 		updates.put("price", 10.5);
 		updates.put("date", new Date());
 		doThrow(new NotFoundClientException(String.format("Il cliente originale con id %s non è presente nel database",
@@ -255,7 +253,6 @@ public class OrderControllerTest {
 		Client clientForUpdate = new Client("2", "client not exists");
 		Order orderToModify = new Order("ORDER-00001", clientOriginal, new Date(), 10.0);
 		Map<String, Object> updates = new HashMap<String, Object>();
-		Date date = new Date();
 		updates.put("client", clientForUpdate);
 		updates.put("price", 10.5);
 		updates.put("date", new Date());

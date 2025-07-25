@@ -27,8 +27,6 @@ public class OrderController {
 
 	public void InitializeView() {
 		orderView.showAllClients(clientService.findAllClients());
-		logger.info("giorno :" + orderService.findYearsOfOrders());
-
 		orderView.setYearsOrders(orderService.findYearsOfOrders());
 
 	}
@@ -48,12 +46,10 @@ public class OrderController {
 	}
 
 	public void findOrdersByYearAndClient(Client client, int year) {
-		// TODO Auto-generated method stub
 		try {
 			orderView.showAllOrders(orderService.findallOrdersByClientByYear(client, year));
 		} catch (NotFoundClientException e) {
 			logger.debug("findOrdersByYearAndClient: exception thrown");
-			// TODO Auto-generated catch block
 			logger.debug("Client not found");
 			orderView.showErrorClient("Cliente non presente nel DB", client);
 			orderView.clientRemoved(client);
@@ -62,20 +58,17 @@ public class OrderController {
 	}
 
 	public void addClient(Client client) {
-		// TODO Auto-generated method stub
 		Client saved = clientService.saveClient(client);
 		logger.info("SAVED: {} ", saved);
 		orderView.clientAdded(saved);
 	}
 
 	public void deleteClient(Client clientToDelete) {
-		// TODO Auto-generated method stub
 		try {
 			clientService.removeClient(clientToDelete);
 			logger.info("Executed remove client of: {} ", clientToDelete);
 			orderView.clientRemoved(clientToDelete);
 		} catch (NotFoundClientException e) {
-			// TODO Auto-generated catch block
 			orderView.showErrorClient(CLIENT_ERROR_MESSAGE, clientToDelete);
 			orderView.clientRemoved(clientToDelete);
 		}
@@ -83,12 +76,10 @@ public class OrderController {
 	}
 
 	public void addOrder(Order order) {
-		// TODO Auto-generated method stub
 		try {
 			orderService.addOrder(order);
 			orderView.orderAdded(order);
 		} catch (NotFoundClientException e) {
-			// TODO Auto-generated catch block
 			logger.error(e.getMessage());
 			orderView.showErrorClient(CLIENT_ERROR_MESSAGE, order.getClient());
 			orderView.clientRemoved(order.getClient());
@@ -102,13 +93,11 @@ public class OrderController {
 			orderService.removeOrder(orderToDelete);
 			orderView.orderRemoved(orderToDelete);
 		} catch (NotFoundClientException e) {
-			// TODO Auto-generated catch block
 			logger.error("not client: {}", e.getMessage());
 			orderView.showErrorClient(CLIENT_ERROR_MESSAGE, orderToDelete.getClient());
 			orderView.clientRemoved(orderToDelete.getClient());
 			orderView.removeOrdersByClient(orderToDelete.getClient());
 		} catch (NotFoundOrderException e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
 			orderView.showOrderError("Ordine non più presente nel DB", orderToDelete);
 			orderView.orderRemoved(orderToDelete);
@@ -117,23 +106,19 @@ public class OrderController {
 	}
 
 	public void modifyOrder(Order orderToModify, Map<String, Object> updates) {
-		// TODO Auto-generated method stub
 		try {
-			System.out.println("Order controller order to modify: " + orderToModify);
-			System.out.println("Order controller updates: " + updates);
-
+			logger.info("Order controller order to modify: {}", orderToModify);
+			logger.info("Order controller updates: {}", updates);
 			Order orderModified = orderService.updateOrder(orderToModify, updates);
 			logger.info("Order controller order modify: {}", orderModified);
 			orderView.orderUpdated(orderModified);
 		} catch (NotFoundOrderException e) {
-			// TODO: handle exception
 			logger.error(e.getMessage());
 
 			orderView.showOrderError("Ordine non più presente nel DB", orderToModify);
 			orderView.orderRemoved(orderToModify);
 
 		} catch (NotFoundClientException e) {
-			// TODO Auto-generated catch block
 			logger.error(e.getMessage());
 
 			if (e.getMessage().contains("originale")) {
