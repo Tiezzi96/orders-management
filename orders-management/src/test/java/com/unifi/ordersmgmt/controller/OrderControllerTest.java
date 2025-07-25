@@ -157,7 +157,6 @@ public class OrderControllerTest {
 		InOrder inOrder = Mockito.inOrder(orderService, orderView);
 		inOrder.verify(orderService).addOrder(newOrder);
 		inOrder.verify(orderView).showErrorClient("Cliente non più presente nel DB", newOrder.getClient());
-		;
 		inOrder.verify(orderView).clientRemoved(clientRemoved);
 		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
 
@@ -201,7 +200,7 @@ public class OrderControllerTest {
 	}
 	
 	@Test
-	public void testModifyOrderWhenOrderIsInDBAndClientIsInDB() throws Exception {
+	public void testModifyOrderWhenOrderIsInDBAndClientIsInDB() {
 		Order newOrder = new Order();
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Date date = new Date();
@@ -216,7 +215,7 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void testModifyOrderWhenOrderIsNotInDB() throws Exception {
+	public void testModifyOrderWhenOrderIsNotInDB() {
 		Client client = new Client();
 		Order orderRemoved = new Order("ORDER-00001", client, new Date(), 10.0);
 		Map<String, Object> updates = new HashMap<String, Object>();
@@ -231,7 +230,7 @@ public class OrderControllerTest {
 	}
 
 	@Test
-	public void testModifyOrderWhenOriginalClientIsNotInDB() throws Exception {
+	public void testModifyOrderWhenOriginalClientIsNotInDB() {
 		Client clientRemoved = new Client();
 		Order orderToModify = new Order("ORDER-00001", clientRemoved, new Date(), 10.0);
 		Map<String, Object> updates = new HashMap<String, Object>();
@@ -248,7 +247,7 @@ public class OrderControllerTest {
 	}
 	
 	@Test
-	public void testModifyOrderWhenClientForUpdateIsNotInDB() throws Exception {
+	public void testModifyOrderWhenClientForUpdateIsNotInDB() {
 		Client clientOriginal = new Client();
 		Client clientForUpdate = new Client("2", "client not exists");
 		Order orderToModify = new Order("ORDER-00001", clientOriginal, new Date(), 10.0);
