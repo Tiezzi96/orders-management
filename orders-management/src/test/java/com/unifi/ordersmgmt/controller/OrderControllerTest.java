@@ -1,7 +1,6 @@
 package com.unifi.ordersmgmt.controller;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.assertj.swing.annotation.GUITest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,15 +39,16 @@ public class OrderControllerTest {
 	private OrderView orderView;
 	@InjectMocks
 	private OrderController controller;
+	private AutoCloseable closeable;
 
 	@After
 	public void tearDown() throws Exception {
-
+		closeable.close();
 	}
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.openMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
 	}
 	
 	@Test
@@ -204,7 +203,6 @@ public class OrderControllerTest {
 	@Test
 	public void testModifyOrderWhenOrderIsInDBAndClientIsInDB() throws Exception {
 		Order newOrder = new Order();
-		String orderId = newOrder.getIdentifier();
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Date date = new Date();
 		updates.put("price", 10.5);
@@ -221,13 +219,11 @@ public class OrderControllerTest {
 	public void testModifyOrderWhenOrderIsNotInDB() throws Exception {
 		Client client = new Client();
 		Order orderRemoved = new Order("ORDER-00001", client, new Date(), 10.0);
-		String orderId = orderRemoved.getIdentifier();
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Date date = new Date();
 		updates.put("price", 10.5);
 		updates.put("date", new Date());
 		doThrow(new NotFoundOrderException("Order not Found")).when(orderService).updateOrder(orderRemoved, updates);
-		Order orderModified = new Order(orderRemoved.getIdentifier(), orderRemoved.getClient(), date, 10.5);
 		controller.modifyOrder(orderRemoved, updates);
 		InOrder inOrder = Mockito.inOrder(orderService, orderView);
 		inOrder.verify(orderService).updateOrder(orderRemoved, updates);
@@ -239,14 +235,12 @@ public class OrderControllerTest {
 	public void testModifyOrderWhenOriginalClientIsNotInDB() throws Exception {
 		Client clientRemoved = new Client();
 		Order orderToModify = new Order("ORDER-00001", clientRemoved, new Date(), 10.0);
-		String orderId = orderToModify.getIdentifier();
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Date date = new Date();
 		updates.put("price", 10.5);
 		updates.put("date", new Date());
 		doThrow(new NotFoundClientException(String.format("Il cliente originale con id %s non è presente nel database",
 				clientRemoved.getIdentifier()))).when(orderService).updateOrder(orderToModify, updates);
-		Order orderModified = new Order(orderToModify.getIdentifier(), orderToModify.getClient(), date, 10.5);
 		controller.modifyOrder(orderToModify, updates);
 		InOrder inOrder = Mockito.inOrder(orderService, orderView);
 		inOrder.verify(orderService).updateOrder(orderToModify, updates);
@@ -260,7 +254,6 @@ public class OrderControllerTest {
 		Client clientOriginal = new Client();
 		Client clientForUpdate = new Client("2", "client not exists");
 		Order orderToModify = new Order("ORDER-00001", clientOriginal, new Date(), 10.0);
-		String orderId = orderToModify.getIdentifier();
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Date date = new Date();
 		updates.put("client", clientForUpdate);
@@ -268,7 +261,6 @@ public class OrderControllerTest {
 		updates.put("date", new Date());
 		doThrow(new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
 				((Client)updates.get("client")).getIdentifier()))).when(orderService).updateOrder(orderToModify, updates);
-		Order orderModified = new Order(orderToModify.getIdentifier(), orderToModify.getClient(), date, 10.5);
 		controller.modifyOrder(orderToModify, updates);
 		InOrder inOrder = Mockito.inOrder(orderService, orderView);
 		inOrder.verify(orderService).updateOrder(orderToModify, updates);
