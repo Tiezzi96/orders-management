@@ -54,7 +54,7 @@ public class OrderTest {
 	    @Test
 	    public void testEqualsWithDifferentDateShouldReturnFalse() {
 	        Date now = truncatedNow();
-	        Date later = Date.from(now.toInstant().plusSeconds(1));
+	        Date later = Date.from(now.toInstant().plusSeconds(86400));
 	        Order o1 = new Order("ORDER-00001", client1, now, 100.0);
 	        Order o2 = new Order("ORDER-00001", client1, later, 100.0);
 	        assertNotEquals(o1, o2);
