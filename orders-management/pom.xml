@@ -154,6 +154,10 @@
 							<param>com.unifi.ordersmgmt.model.*</param>
 							<param>com.unifi.ordersmgmt.view.swing.*</param>
 						</excludedClasses>
+
+						<excludedTestClasses>
+							<param>com.unifi.ordersmgmt.view.swing.OrderSwingViewTest</param>
+						</excludedTestClasses>
 						<targetTests>
 							<param>com.unifi.ordersmgmt.*</param>
 						</targetTests>
