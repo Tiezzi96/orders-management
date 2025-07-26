@@ -2,13 +2,16 @@ package com.unifi.ordersmgmt.view.swing;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -42,6 +45,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JButton btnNewClient;
 	private OrderController controller;
 	private JLabel lblrevenue;
+	private DefaultComboBoxModel comboboxClientsModel;
+	private JComboBox comboboxClients;
 
 	public OrderSwingView() {
 		// TODO Auto-generated constructor stub
@@ -64,7 +69,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_clientTitle.setForeground(Color.WHITE);
 		panel_clientTitle.setBounds(360, 0, 640, 58);
 		panel_clientTitle.setBackground(new Color(24, 103, 64));
-	
+
 		panel_clientManagement.add(panel_clientTitle);
 		panel_clientTitle.setLayout(null);
 
@@ -163,7 +168,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		btnNewClient.setBounds(360, 274, 312, 29);
 		btnNewClient.setName("btnAddClient");
 		panel_clientManagement.add(btnNewClient);
-		
+
 		JPanel panel_orderManagement = new JPanel();
 		panel_orderManagement.setBackground(Color.WHITE);
 		panel_orderManagement.setBounds(0, 360, 1000, 646);
@@ -186,11 +191,25 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblrevenue.setName("revenueLabel");
 		panel_revenueLabel.add(lblrevenue);
 		
+		//combobox selezione clienti
+		comboboxClientsModel = new DefaultComboBoxModel<>();
+		comboboxClients = new JComboBox<>(comboboxClientsModel);
+		comboboxClients.setName("comboboxClients");
+		comboboxClients.setBounds(99, 43, 193, 27);
+		panel_orderManagement.add(comboboxClients);
+
 	}
 
 	@Override
 	public void showAllClients(List<Client> clients) {
-		// TODO Auto-generated method stub
+		clientListModel.removeAllElements();
+		comboboxClients.removeAllItems();
+		for (Client client : clients) {
+			clientListModel.addElement(client);
+		}
+		for (Client client : clients) {
+			comboboxClients.addItem(client);
+		}
 
 	}
 
@@ -257,6 +276,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 	public void setOrderController(OrderController controller) {
 		// TODO Auto-generated method stub
 		this.controller = controller;
+	}
+
+	public DefaultListModel<Client> getClientListModel() {
+		return clientListModel;
+	}
+
+	public DefaultComboBoxModel<Client> getComboboxClientsModel() {
+		return comboboxClientsModel;
 	}
 
 }
