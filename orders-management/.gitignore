@@ -1,2 +1,4 @@
 /target/
 /failed-gui-tests/
+/.classpath
+/.project
