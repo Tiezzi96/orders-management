@@ -190,8 +190,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblrevenue.setHorizontalAlignment(SwingConstants.CENTER);
 		lblrevenue.setName("revenueLabel");
 		panel_revenueLabel.add(lblrevenue);
-		
-		//combobox selezione clienti
+
+		// combobox selezione clienti
 		comboboxClientsModel = new DefaultComboBoxModel<>();
 		comboboxClients = new JComboBox<>(comboboxClientsModel);
 		comboboxClients.setName("comboboxClients");
@@ -227,13 +227,18 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void showErrorClient(String message, Client client) {
-		// TODO Auto-generated method stub
+		paneClientError.setText(message + ": " + client.toString());
+
 
 	}
 
 	@Override
 	public void clientRemoved(Client clientRemoved) {
-		// TODO Auto-generated method stub
+		clientListModel.removeElement(clientRemoved);
+		comboboxClients.removeItem(clientRemoved);
+		System.out.println("client to remove: " + clientRemoved);
+		System.out.println("comboboxclients size: " + comboboxClients.getItemCount());
+		listClients.clearSelection();
 
 	}
 

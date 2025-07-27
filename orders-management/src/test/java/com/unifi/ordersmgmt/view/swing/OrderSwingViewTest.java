@@ -109,5 +109,37 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				secondClient.toString());
 
 	}
+	
+	@Test
+	@GUITest
+	public void testClientRemovedShouldRemovedClientSelectedFromListsAndCombobox() {
+		Client clientToRemove = new Client("1", "client to remove id");
+		Client anotherClient = new Client("2", "client id 2");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(clientToRemove);
+			orderSwingView.getClientListModel().addElement(anotherClient);
+			orderSwingView.getComboboxClientsModel().addElement(clientToRemove);
+			orderSwingView.getComboboxClientsModel().addElement(anotherClient);
+		});
+
+		window.list("clientsList").selectItem(0);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.clientRemoved(clientToRemove);
+		});
+		assertThat(window.list("clientsList").contents()).containsExactly(anotherClient.toString());
+		assertThat(window.comboBox("comboboxClients").contents()).containsExactly(anotherClient.toString());
+		window.list("clientsList").requireNoSelection();
+	}
+	
+	@Test
+	@GUITest
+	public void testShowErrorClientShouldShowErrorInTheClientErrorLabel() {
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.showErrorClient("error message", newClient);
+		});
+		window.textBox("panelClientErrorMessage").requireText("error message: " + newClient.toString());
+
+	}
 
 }
