@@ -1,4 +1,4 @@
 target/
 failed-gui-tests/
-.classpath
+orders-management/.classpath
 .project
