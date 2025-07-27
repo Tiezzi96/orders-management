@@ -1,4 +1,4 @@
-/target/
-/failed-gui-tests/
-/.classpath
-/.project
+target/
+failed-gui-tests/
+.classpath
+.project
