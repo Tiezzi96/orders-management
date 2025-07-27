@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.core.matcher.JLabelMatcher;
+import org.assertj.swing.core.matcher.JTextComponentMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.runner.GUITestRunner;
@@ -139,6 +140,63 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.showErrorClient("error message", newClient);
 		});
 		window.textBox("panelClientErrorMessage").requireText("error message: " + newClient.toString());
+
+	}
+	
+	
+	@Test
+	@GUITest
+	public void testWhenTextFieldAreNotEmptyAddClientButtonShouldBeEnabled() {
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).enterText("test");
+		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireEnabled();
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).setText("");
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).enterText("  ");
+		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
+	}
+
+	@Test
+	@GUITest
+	public void testClientAddedShouldAddedClientToListAndComboboxListAndResetTextFieldAndErrorClient() {
+		Client clientToAdd = new Client("1", "test 1");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.clientAdded(clientToAdd);
+		});
+		String[] clients = window.list("clientsList").contents();
+		assertThat(clients).containsExactly(clientToAdd.toString());
+		String[] clientsCombobox = window.comboBox("comboboxClients").contents();
+		assertThat(clientsCombobox).containsExactly(clientToAdd.toString());
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).requireText("");
+		window.textBox(JTextComponentMatcher.withName("panelClientErrorMessage")).requireText("");
+		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testClientAddedShouldAddedClientToListAndComboboxInOrderAndResetTextFieldAndErrorClient() {
+		Client firstClient = new Client("1", "first client id");
+		Client secondClient = new Client("2", "second client id");
+		Client thirdClient = new Client("3", "third client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().add(0, thirdClient);
+			orderSwingView.getComboboxClientsModel().addElement(thirdClient);
+			orderSwingView.getClientListModel().add(1, secondClient);
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+		});
+		window.list("clientsList").selectItem(0);
+		window.comboBox("comboboxClients").selectItem(0);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.clientAdded(firstClient);
+		});
+		assertThat(window.list("clientsList").contents()).containsExactly(firstClient.toString(),
+				secondClient.toString(), thirdClient.toString());
+		assertThat(window.comboBox("comboboxClients").contents()).containsExactly(firstClient.toString(),
+				secondClient.toString(), thirdClient.toString());
+		window.list("clientsList").requireSelectedItems(thirdClient.toString());
+		window.comboBox("comboboxClients").requireSelection(thirdClient.toString());
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).requireText("");
+		window.textBox(JTextComponentMatcher.withName("panelClientErrorMessage")).requireText("");
+		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
 
 	}
 

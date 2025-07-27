@@ -6,6 +6,8 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
@@ -25,6 +27,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import com.unifi.ordersmgmt.controller.OrderController;
 import com.unifi.ordersmgmt.model.Client;
@@ -35,7 +39,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	private JPanel contentPane;
 	private String FONT_TEXT = "Segoe UI";
-	private DefaultListModel clientListModel;
+	private DefaultListModel<Client> clientListModel;
 	private JList listClients;
 	private JButton btnRemoveClient;
 	private JTextPane paneClientError;
@@ -198,6 +202,34 @@ public class OrderSwingView extends JFrame implements OrderView {
 		comboboxClients.setBounds(99, 43, 193, 27);
 		panel_orderManagement.add(comboboxClients);
 
+		textFieldNewClient.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void removeUpdate(DocumentEvent e) { // TODO Auto-generatedmethod stub
+				checkTextBox();
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) { // TODO Auto-generatedmethod stub
+				checkTextBox();
+
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) { // TODO Auto-generated method stub
+
+			}
+
+			private void checkTextBox() {
+				if (!textFieldNewClient.getText().trim().isEmpty()) {
+					btnNewClient.setEnabled(true);
+				} else {
+					btnNewClient.setEnabled(false);
+				}
+			}
+
+		});
+
 	}
 
 	@Override
@@ -229,7 +261,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 	public void showErrorClient(String message, Client client) {
 		paneClientError.setText(message + ": " + client.toString());
 
-
 	}
 
 	@Override
@@ -245,7 +276,58 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void clientAdded(Client clientAdded) {
 		// TODO Auto-generated method stub
+		clientListModel.addElement(clientAdded);
+		// mantiene la selezione vecchia del comboboxclient dopo l'inserimento
+		Object selectedItem = comboboxClientsModel.getSelectedItem();
+		comboboxClientsModel.addElement(clientAdded);
+		comboboxClientsModel.setSelectedItem(selectedItem);
 
+		// Ordinare la lista e la combo box per ID dopo ogni aggiunta
+		sortClientsById();
+		textFieldNewClient.setText("");
+		paneClientError.setText("");
+
+	}
+
+	private void sortClientsById() {
+		// TODO Auto-generated method stub
+		Client selectedValue = null;
+		Client selectedItemValue = null;
+
+		System.out.println("listClients.getSelectedValue(): " + listClients.getSelectedValue());
+		System.out.println("comboboxClients.getSelectedItem(): " + comboboxClients.getSelectedItem());
+
+		if (listClients.getSelectedValue() != null) {
+			selectedValue = (Client) listClients.getSelectedValue();
+		}
+		if (comboboxClients.getSelectedItem() != null) {
+			selectedItemValue = (Client) comboboxClients.getSelectedItem();
+		}
+		List<Client> sortedClients = new ArrayList<>();
+
+		for (int i = 0; i < clientListModel.getSize(); i++) {
+			sortedClients.add(clientListModel.getElementAt(i));
+		}
+
+		// Ordina per ID numerico
+		sortedClients.sort(Comparator.comparing(Client::getIdentifier));
+
+		// Aggiorna la lista e la combo box con i clienti ordinati
+		clientListModel.clear();
+		comboboxClientsModel.removeAllElements();
+
+		for (Client client : sortedClients) {
+			clientListModel.addElement(client);
+			comboboxClientsModel.addElement(client);
+		}
+		if (selectedValue != null) {
+			listClients.setSelectedValue(selectedValue, true);
+
+		}
+		if (selectedItemValue != null) {
+			comboboxClients.setSelectedItem(selectedItemValue);
+		}
+		
 	}
 
 	@Override
