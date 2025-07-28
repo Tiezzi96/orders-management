@@ -3,6 +3,7 @@ package com.unifi.ordersmgmt.view.swing;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.verify;
 
 import java.util.regex.Pattern;
 
@@ -17,6 +18,7 @@ import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.assertj.swing.timing.Pause;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.unifi.ordersmgmt.controller.OrderController;
@@ -27,6 +29,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	private AutoCloseable autoCloseable;
 	private OrderSwingView orderSwingView;
+	@Mock
 	private OrderController orderController;
 	private FrameFixture window;
 
@@ -197,6 +200,47 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox(JTextComponentMatcher.withName("textField_clientName")).requireText("");
 		window.textBox(JTextComponentMatcher.withName("panelClientErrorMessage")).requireText("");
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
+
+	}
+	
+	@Test
+	@GUITest
+	public void testAddClientButtonShouldDelegateOrderControllerAddClientAndResetErrorLabel() {
+		// se il client non ha id verrà assegnato dal controller
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).enterText("test client 1");
+		window.button(JButtonMatcher.withText("Aggiungi cliente")).click();
+		verify(orderController).addClient(new Client("test client 1"));
+		window.textBox(JTextComponentMatcher.withName("panelClientErrorMessage")).requireText("");
+		window.textBox(JTextComponentMatcher.withName("textField_clientName")).requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteClientButtonShouldBeEnabledOnlyWhenAClientIsSelected() {
+		Client clientToDelete = new Client("1", "client to delete");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(clientToDelete);
+		});
+		window.list("clientsList").selectItem(0);
+		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireEnabled();
+		window.list("clientsList").clearSelection();
+		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireDisabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteClientButtonShouldDelegateToOrderControllerDeleteClient() {
+		Client firstClient = new Client("1", "first client id");
+		Client secondClient = new Client("2", "second client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+		});
+		window.list("clientsList").selectItem(0);
+		window.button(JButtonMatcher.withText("Rimuovi cliente")).click();
+		verify(orderController).deleteClient(new Client(firstClient.getIdentifier(), firstClient.getIdentifier()));
 
 	}
 

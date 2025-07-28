@@ -47,7 +47,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JTextField textFieldNewClient;
 	private JLabel lblClientName;
 	private JButton btnNewClient;
-	private OrderController controller;
+	private OrderController orderController;
 	private JLabel lblrevenue;
 	private DefaultComboBoxModel comboboxClientsModel;
 	private JComboBox comboboxClients;
@@ -230,6 +230,25 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		});
 
+		listClients.addListSelectionListener(e -> {
+			if (listClients.getSelectedIndex() != -1) {
+				btnRemoveClient.setEnabled(true);
+			} else {
+				btnRemoveClient.setEnabled(false);
+
+			}
+		});
+		
+		btnNewClient.addActionListener(e -> {
+			orderController.addClient(new Client(textFieldNewClient.getText()));
+			textFieldNewClient.setText("");
+			paneClientError.setText("");
+		});
+
+		btnRemoveClient.addActionListener(e -> {
+			orderController.deleteClient((Client) listClients.getSelectedValue());
+		});
+
 	}
 
 	@Override
@@ -327,7 +346,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		if (selectedItemValue != null) {
 			comboboxClients.setSelectedItem(selectedItemValue);
 		}
-		
+
 	}
 
 	@Override
@@ -362,7 +381,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	public void setOrderController(OrderController controller) {
 		// TODO Auto-generated method stub
-		this.controller = controller;
+		this.orderController = controller;
 	}
 
 	public DefaultListModel<Client> getClientListModel() {
