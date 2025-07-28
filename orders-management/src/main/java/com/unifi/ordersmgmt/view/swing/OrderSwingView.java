@@ -29,6 +29,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 
 import com.unifi.ordersmgmt.controller.OrderController;
 import com.unifi.ordersmgmt.model.Client;
@@ -201,34 +203,17 @@ public class OrderSwingView extends JFrame implements OrderView {
 		comboboxClients.setName("comboboxClients");
 		comboboxClients.setBounds(99, 43, 193, 27);
 		panel_orderManagement.add(comboboxClients);
-
-		textFieldNewClient.getDocument().addDocumentListener(new DocumentListener() {
-
-			@Override
-			public void removeUpdate(DocumentEvent e) { // TODO Auto-generatedmethod stub
-				checkTextBox();
+		
+		((AbstractDocument) textFieldNewClient.getDocument())
+		.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
+			if (!textFieldNewClient.getText().trim().isEmpty()) {
+				btnNewClient.setEnabled(true);
+			} else {
+				btnNewClient.setEnabled(false);
 			}
 
-			@Override
-			public void insertUpdate(DocumentEvent e) { // TODO Auto-generatedmethod stub
-				checkTextBox();
-
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) { // TODO Auto-generated method stub
-
-			}
-
-			private void checkTextBox() {
-				if (!textFieldNewClient.getText().trim().isEmpty()) {
-					btnNewClient.setEnabled(true);
-				} else {
-					btnNewClient.setEnabled(false);
-				}
-			}
-
-		});
+		}, ""));
+		
 
 		listClients.addListSelectionListener(e -> {
 			if (listClients.getSelectedIndex() != -1) {
@@ -249,6 +234,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 			orderController.deleteClient((Client) listClients.getSelectedValue());
 		});
 
+	}
+
+	private DocumentFilter createTextFilter(int maxLength, String regex, Runnable onChange, String spaces) {
+		// TODO Auto-generated method stub
+		return new TextDocumentFilter(maxLength, regex, onChange, spaces);
 	}
 
 	@Override
