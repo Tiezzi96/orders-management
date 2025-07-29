@@ -6,7 +6,10 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -20,6 +23,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
@@ -29,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.DocumentFilter;
 
@@ -39,6 +44,7 @@ import com.unifi.ordersmgmt.view.OrderView;
 
 public class OrderSwingView extends JFrame implements OrderView {
 
+	private static final Object NO_YEAR_ITEM = "-- Nessun anno --";
 	private JPanel contentPane;
 	private String FONT_TEXT = "Segoe UI";
 	private DefaultListModel<Client> clientListModel;
@@ -53,6 +59,10 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JLabel lblrevenue;
 	private DefaultComboBoxModel comboboxClientsModel;
 	private JComboBox comboboxClients;
+	private DefaultComboBoxModel comboboxYearsModel;
+	private JComboBox comboboxYears;
+	private JTable tableOrders;
+	private OrderTableModel orderTableModel;
 
 	public OrderSwingView() {
 		// TODO Auto-generated constructor stub
@@ -197,23 +207,92 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblrevenue.setName("revenueLabel");
 		panel_revenueLabel.add(lblrevenue);
 
+		JPanel panel_orderViewAndAdd = new JPanel();
+		// panel_orderViewAndAdd.setBackground(new Color(225, 225, 225));
+		panel_orderViewAndAdd.setBackground(new Color(207, 234, 217)); // #CFEAD9
+		panel_orderViewAndAdd.setBounds(0, 95, 360, 355);
+		panel_orderManagement.add(panel_orderViewAndAdd);
+		panel_orderViewAndAdd.setLayout(null);
+
+		JPanel panel_orderView = new JPanel();
+		panel_orderView.setBackground(Color.WHITE);
+		panel_orderView.setBounds(360, 0, 625, 450);
+		panel_orderManagement.add(panel_orderView);
+		panel_orderView.setLayout(null);
+
+		comboboxYearsModel = new DefaultComboBoxModel<>();
+		comboboxYears = new JComboBox<>(comboboxYearsModel);
+		comboboxYears.setBackground(Color.WHITE);
+		comboboxYears.setBounds(523, 20, 101, 27);
+		panel_orderView.add(comboboxYears);
+		comboboxYears.setFont(new Font(FONT_TEXT, Font.BOLD, 16));
+		comboboxYears.setName("yearsCombobox");
+		comboboxYears.setBorder(null);
+		comboboxYears.setBackground(new Color(245, 245, 245));
+
+		JScrollPane scrollPanelOrdersList = new JScrollPane();
+
+		// scrollPanelOrdersList.setBackground(new Color(235, 235, 235));
+		scrollPanelOrdersList.setBackground(new Color(207, 234, 217)); // #CFEAD9
+		scrollPanelOrdersList.getViewport().setBackground(new Color(207, 234, 217));
+
+		scrollPanelOrdersList.setBounds(3, 48, 620, 350);
+		scrollPanelOrdersList.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		orderTableModel = new OrderTableModel();
+
+		// orderTableModel = new DefaultTableModel();
+
+		tableOrders = new TableOrder(orderTableModel);
+		// orderTableModel.addOrder(new Order("ORDER-00001", new Client("CLIENT-00001",
+		// "Marta"), new Date(), 10.0));
+
+		// tableOrders.setBackground(Color.YELLOW);
+
+		tableOrders.setBorder(new EmptyBorder(0, 0, 0, 0));
+		tableOrders.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableOrders.setFont(new Font(FONT_TEXT, Font.PLAIN, 13));
+		tableOrders.setName("OrdersTable");
+		scrollPanelOrdersList.setViewportView(tableOrders);
+
+		panel_orderView.add(scrollPanelOrdersList);
+
 		// combobox selezione clienti
 		comboboxClientsModel = new DefaultComboBoxModel<>();
 		comboboxClients = new JComboBox<>(comboboxClientsModel);
 		comboboxClients.setName("comboboxClients");
 		comboboxClients.setBounds(99, 43, 193, 27);
 		panel_orderManagement.add(comboboxClients);
-		
-		((AbstractDocument) textFieldNewClient.getDocument())
-		.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
-			if (!textFieldNewClient.getText().trim().isEmpty()) {
-				btnNewClient.setEnabled(true);
-			} else {
-				btnNewClient.setEnabled(false);
-			}
 
-		}, ""));
-		
+		comboboxYears.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+
+				if (comboboxYears.getSelectedIndex() != -1) {
+					System.out.println("anno selezionato");
+					Integer actionSelected = (Integer) comboboxYears.getSelectedItem();
+					Client selectedValue = (Client) listClients.getSelectedValue();
+					System.out.println(selectedValue);
+					if (selectedValue != null) {
+						orderController.findOrdersByYearAndClient(selectedValue, actionSelected.intValue());
+					} else {
+						orderController.allOrdersByYear(actionSelected.intValue());
+					}
+				}
+
+			}
+		});
+
+		((AbstractDocument) textFieldNewClient.getDocument())
+				.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
+					if (!textFieldNewClient.getText().trim().isEmpty()) {
+						btnNewClient.setEnabled(true);
+					} else {
+						btnNewClient.setEnabled(false);
+					}
+
+				}, ""));
 
 		listClients.addListSelectionListener(e -> {
 			if (listClients.getSelectedIndex() != -1) {
@@ -223,7 +302,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 			}
 		});
-		
+
 		btnNewClient.addActionListener(e -> {
 			orderController.addClient(new Client(textFieldNewClient.getText()));
 			textFieldNewClient.setText("");
@@ -257,12 +336,27 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void setYearsOrders(List<Integer> yearsOfOrders) {
 		// TODO Auto-generated method stub
+		comboboxYearsModel.removeAllElements();
+		Collections.sort(yearsOfOrders, Collections.reverseOrder());
+		System.out.println("yearsOfTheOrders: " + yearsOfOrders);
+		if (!yearsOfOrders.contains(2025)) {
+			comboboxYearsModel.addElement(2025);
+		}
+		for (Integer integer : yearsOfOrders) {
+			comboboxYearsModel.addElement(integer);
+		}
+
+		comboboxYearsModel.addElement(NO_YEAR_ITEM);
 
 	}
 
 	@Override
 	public void showAllOrders(List<Order> orders) {
 		// TODO Auto-generated method stub
+		getOrderTableModel().removedAllOrders();
+		for (Order order : orders) {
+			orderTableModel.addOrder(order);
+		}
 
 	}
 
@@ -380,6 +474,21 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	public DefaultComboBoxModel<Client> getComboboxClientsModel() {
 		return comboboxClientsModel;
+	}
+
+	public DefaultComboBoxModel<Integer> getComboboxYearsModel() {
+		// TODO Auto-generated method stub
+		return comboboxYearsModel;
+	}
+
+	public OrderTableModel getOrderTableModel() {
+		// TODO Auto-generated method stub
+		return orderTableModel;
+	}
+
+	public JTable getOrderTable() {
+		// TODO Auto-generated method stub
+		return tableOrders;
 	}
 
 }
