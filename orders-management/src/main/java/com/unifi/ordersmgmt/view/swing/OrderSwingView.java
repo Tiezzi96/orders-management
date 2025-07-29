@@ -8,10 +8,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -44,7 +46,7 @@ import com.unifi.ordersmgmt.view.OrderView;
 
 public class OrderSwingView extends JFrame implements OrderView {
 
-	private static final Object NO_YEAR_ITEM = "-- Nessun anno --";
+	private static final String NO_YEAR_ITEM = "-- Nessun anno --";
 	private JPanel contentPane;
 	private String FONT_TEXT = "Segoe UI";
 	private DefaultListModel<Client> clientListModel;
@@ -63,6 +65,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JComboBox comboboxYears;
 	private JTable tableOrders;
 	private OrderTableModel orderTableModel;
+	private JTextPane panelOrderError;
 
 	public OrderSwingView() {
 		// TODO Auto-generated constructor stub
@@ -208,7 +211,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_revenueLabel.add(lblrevenue);
 
 		JPanel panel_orderViewAndAdd = new JPanel();
-		// panel_orderViewAndAdd.setBackground(new Color(225, 225, 225));
 		panel_orderViewAndAdd.setBackground(new Color(207, 234, 217)); // #CFEAD9
 		panel_orderViewAndAdd.setBounds(0, 95, 360, 355);
 		panel_orderManagement.add(panel_orderViewAndAdd);
@@ -232,7 +234,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		JScrollPane scrollPanelOrdersList = new JScrollPane();
 
-		// scrollPanelOrdersList.setBackground(new Color(235, 235, 235));
 		scrollPanelOrdersList.setBackground(new Color(207, 234, 217)); // #CFEAD9
 		scrollPanelOrdersList.getViewport().setBackground(new Color(207, 234, 217));
 
@@ -262,6 +263,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 		comboboxClients.setName("comboboxClients");
 		comboboxClients.setBounds(99, 43, 193, 27);
 		panel_orderManagement.add(comboboxClients);
+
+		panelOrderError = new JTextPane();
+		panelOrderError.setText("");
+		panelOrderError.setEditable(false);
+		panelOrderError.setForeground(new Color(255, 51, 51));
+		panelOrderError.setName("panelOrderErrorMessage");
+		panelOrderError.setBounds(10, 255, 340, 93);
+		panel_orderViewAndAdd.add(panelOrderError);
 
 		comboboxYears.addActionListener(new ActionListener() {
 
@@ -436,7 +445,58 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void orderAdded(Order orderAdded) {
 		// TODO Auto-generated method stub
+		Order orderSelected = getOrderTableModel().getOrderAt(tableOrders.getSelectedRow());
+		int yearOfOrder = orderAdded.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear();
 
+		Object selectedItem = getComboboxYearsModel().getSelectedItem();
+		System.out.println(":" + selectedItem);
+		int yearSelected = -1;
+		if (selectedItem != null) {
+			yearSelected = (Integer) selectedItem;
+			System.out.println("orderselected: " + orderSelected);
+			System.out.println("yearsoFOrder: " + yearOfOrder);
+			if (getComboboxYearsModel().getIndexOf(yearOfOrder) == -1) {
+				List<Integer> years = getAllElements(getComboboxYearsModel());
+				years.add(yearOfOrder);
+				System.out.println("years:" + years);
+				years.remove(Pattern.compile(NO_YEAR_ITEM));
+				Collections.sort(years);
+				Collections.reverse(years);
+				System.out.println(years);
+				getComboboxYearsModel().removeAllElements();
+				for (Integer integer : years) {
+					getComboboxYearsModel().addElement(integer);
+				}
+				getComboboxYearsModel().setSelectedItem(yearSelected);
+			}
+
+			if (yearSelected == yearOfOrder) {
+				getOrderTableModel().addOrder(orderAdded);
+				System.out.println("orderAdded function: orders: " + getOrderTableModel().getOrders());
+				// usa la deepCopy, si puo anche fare altro
+				List<Order> ordersList = new ArrayList<Order>(getOrderTableModel().getOrders());
+				showAllOrders(ordersList);
+
+			}
+			if (orderSelected != null) {
+				System.out.println("order select index");
+				int orderSelectedIndex = getOrderTableModel().getOrderIndex(orderSelected);
+				tableOrders.setRowSelectionInterval(orderSelectedIndex, orderSelectedIndex);
+			}
+
+		}
+		//reset error label
+		panelOrderError.setText("");
+
+	}
+
+	private static <T> List<T> getAllElements(DefaultComboBoxModel<T> comboboxModel) {
+		// TODO Auto-generated method stub
+		List<T> items = new ArrayList<>();
+		for (int iter = 0; iter < comboboxModel.getSize(); iter++) {
+			items.add(comboboxModel.getElementAt(iter));
+		}
+		return items;
 	}
 
 	@Override

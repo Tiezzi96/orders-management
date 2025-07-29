@@ -1,6 +1,7 @@
 package com.unifi.ordersmgmt.view.swing;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,6 +30,12 @@ public class OrderTableModel extends AbstractTableModel {
 		// TODO Auto-generated method stub
 		return columns.length;
 	}
+	
+	@Override
+	public String getColumnName(int column) {
+		// TODO Auto-generated method stub
+		return columns[column];
+	}
 
 	@Override
 	public int getRowCount() {
@@ -52,17 +59,34 @@ public class OrderTableModel extends AbstractTableModel {
 		}
 
 	}
-	
+
 	public void addOrder(Order order) {
 		orders.add(order);
 		System.out.println("ORDER: " + order);
 		Collections.sort(orders, Comparator.comparing(Order::getDate));
 		fireTableDataChanged();
 	}
-	
+
 	public void removedAllOrders() {
 		orders.clear();
 		fireTableStructureChanged();
+	}
+
+	public Order getOrderAt(int selectedRow) {
+		// TODO Auto-generated method stub
+		if (selectedRow == -1)
+			return null;
+		return orders.get(selectedRow);
+	}
+
+	public List<Order> getOrders() {
+		// TODO Auto-generated method stub
+		return orders;
+	}
+
+	public int getOrderIndex(Order orderSelected) {
+		// TODO Auto-generated method stub
+		return orders.indexOf(orderSelected);
 	}
 
 }

@@ -2,6 +2,7 @@ package com.unifi.ordersmgmt.view.swing;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.atIndex;
 import static org.assertj.swing.data.TableCell.row;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
@@ -55,14 +56,14 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		window = new FrameFixture(robot(), orderSwingView);
 		window.show();
-	    // serve per consentire al OS di dare la priorità alla finestra 
+		// serve per consentire al OS di dare la priorità alla finestra
 		GuiActionRunner.execute(() -> {
-			orderSwingView.setAlwaysOnTop(true); 
-			orderSwingView.toFront(); 
-			orderSwingView.requestFocus(); 
+			orderSwingView.setAlwaysOnTop(true);
+			orderSwingView.toFront();
+			orderSwingView.requestFocus();
 		});
 
-		Pause.pause(300); 
+		Pause.pause(300);
 
 		// Rimuove alwaysOnTop dopo il focus
 		GuiActionRunner.execute(() -> orderSwingView.setAlwaysOnTop(false));
@@ -88,10 +89,20 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireDisabled();
 		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.comboBox("comboboxClients");
+		window.comboBox("yearsCombobox");
+		window.textBox("panelOrderErrorMessage").requireText("");
+		window.textBox("panelOrderErrorMessage").requireNotEditable();
+		
 
+		window.table("OrdersTable").requireColumnCount(4);
+		window.table("OrdersTable").requireColumnNamed("Data");
+		window.table("OrdersTable").requireColumnNamed("Importo ($)");
+		window.table("OrdersTable").requireColumnNamed("Cliente");
+		window.table("OrdersTable").requireColumnNamed("Id");
+		
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testShowAllClientsShouldAddClientsInOrderToComboboxAndClientsList() {
@@ -123,7 +134,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				secondClient.toString());
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testClientRemovedShouldRemovedClientSelectedFromListsAndCombobox() {
@@ -144,7 +155,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		assertThat(window.comboBox("comboboxClients").contents()).containsExactly(anotherClient.toString());
 		window.list("clientsList").requireNoSelection();
 	}
-	
+
 	@Test
 	@GUITest
 	public void testShowErrorClientShouldShowErrorInTheClientErrorLabel() {
@@ -155,8 +166,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("panelClientErrorMessage").requireText("error message: " + newClient.toString());
 
 	}
-	
-	
+
 	@Test
 	@GUITest
 	public void testWhenTextFieldAreNotEmptyAddClientButtonShouldBeEnabled() {
@@ -212,7 +222,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testAddClientButtonShouldDelegateOrderControllerAddClientAndResetErrorLabel() {
@@ -253,7 +263,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		verify(orderController).deleteClient(new Client(firstClient.getIdentifier(), firstClient.getIdentifier()));
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testShowAllOrdersAddOrdersToOrderTable() {
@@ -315,7 +325,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				secondOrder.getClient().getName(), secondOrder.getDate().toString(),
 				String.valueOf(secondOrder.getPrice()));
 	}
-	
 
 	@Test
 	@GUITest
@@ -368,7 +377,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		System.out.println("value: " + window.list("clientsList").item(1).value());
 		verify(orderController).findOrdersByYearAndClient(secondClient, 2024);
 	}
-	
+
 	@Test
 	@GUITest
 	public void testSwitchOrderSelectionTable() {
@@ -377,9 +386,10 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		LocalDateTime nextlocalDateTime = LocalDateTime.of(2025, 1, 3, 0, 0, 0);
 		Order orderToAddPrevious = new Order("1", firstClient,
 				Date.from(previouslocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
-		Order orderToAddNext = new Order("3", null, //testo il caso in cui il client non è presente e graficamente è riportato "--" nella tabella
+		Order orderToAddNext = new Order("3", null, // testo il caso in cui il client non è presente e graficamente è
+													// riportato "--" nella tabella
 				Date.from(nextlocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 20);
-		
+
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
@@ -387,44 +397,127 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getOrderTableModel().addOrder(orderToAddPrevious);
 			orderSwingView.getOrderTableModel().addOrder(orderToAddNext);
 		});
-		
-		 //Caso 1: click ripetuto sulla stessa riga (Deselezione)
-	    window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
-	    window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
-	    window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
-	    assertThat(window.table("OrdersTable").selectionValue()).isNull();
 
-	    // Abilitazione della selezione multipla per testare toggle ed extend 
-	    GuiActionRunner.execute(() -> {
-	        orderSwingView.getOrderTable().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-	    });
+		// Caso 1: click ripetuto sulla stessa riga (Deselezione)
+		window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
+		assertThat(window.table("OrdersTable").selectionValue()).isNull();
 
-	    // Caso 2: CTRL + click su riga selezionata => toggle == true, extend == false
-	    window.table("OrdersTable").selectRows(0);
-	    window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
-	    window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
-	    window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+		// Abilitazione della selezione multipla per testare toggle ed extend
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTable().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		});
 
-	    // Caso 3: CTRL + click su riga diversa => toggle == true, extend == false
-	    window.table("OrdersTable").selectRows(0);
-	    window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
-	    window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
-	    window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+		// Caso 2: CTRL + click su riga selezionata => toggle == true, extend == false
+		window.table("OrdersTable").selectRows(0);
+		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
 
-	    // Caso 4: SHIFT + click => toggle == false, extend == true
-	    window.table("OrdersTable").selectRows(0);
-	    window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
-	    window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
-	    window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
+		// Caso 3: CTRL + click su riga diversa => toggle == true, extend == false
+		window.table("OrdersTable").selectRows(0);
+		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
 
-	    // Caso 5: SHIFT + CTRL + click => toggle == true, extend == true
-	    window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
-	    window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
-	    window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
-	    window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
-	    window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
-				
-		
+		// Caso 4: SHIFT + click => toggle == false, extend == true
+		window.table("OrdersTable").selectRows(0);
+		window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
+
+		// Caso 5: SHIFT + CTRL + click => toggle == true, extend == true
+		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderAddedWhenItsYearIsSelectedAndResetErrorLabel() {
+		Client firstClient = new Client("1", "first client id");
+		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderToAdd = new Order("1", firstClient,
+				Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2024);
+			orderSwingView.orderAdded(orderToAdd);
+		});
+		window.table("OrdersTable").requireRowCount(1);
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(orderToAdd.getIdentifier().toString(),
+				orderToAdd.getClient().getName(), orderToAdd.getDate().toString(),
+				String.valueOf(orderToAdd.getPrice()));
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderAddedInOrderWhenItsYearIsSelectedAndResetErrorLabel_MantainingOrderPreSelected() {
+		Client firstClient = new Client("1", "first client id");
+		LocalDateTime previouslocalDateTime = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
+		LocalDateTime currentlocalDateTime = LocalDateTime.of(2025, 1, 2, 0, 0, 0);
+		LocalDateTime nextlocalDateTime = LocalDateTime.of(2025, 1, 3, 0, 0, 0);
+		Order orderToAddPrevious = new Order("1", firstClient,
+				Date.from(previouslocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		Order orderToAddNext = new Order("3", firstClient,
+				Date.from(nextlocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 20);
+		Order orderToAddCurrent = new Order("2", firstClient,
+				Date.from(currentlocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 30);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
+			orderSwingView.getOrderTableModel().addOrder(orderToAddPrevious);
+			orderSwingView.getOrderTableModel().addOrder(orderToAddNext);
+		});
+		window.table("OrdersTable").selectRows(1);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderAdded(orderToAddCurrent);
+		});
+		window.table("OrdersTable").requireRowCount(3);
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(
+				orderToAddPrevious.getIdentifier().toString(), orderToAddPrevious.getClient().getName(),
+				orderToAddPrevious.getDate().toString(), String.valueOf(orderToAddPrevious.getPrice()));
+		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(
+				orderToAddCurrent.getIdentifier().toString(), orderToAddCurrent.getClient().getName(),
+				orderToAddCurrent.getDate().toString(), String.valueOf(orderToAddCurrent.getPrice()));
+		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderToAddNext.getIdentifier().toString(),
+				orderToAddNext.getClient().getName(), orderToAddNext.getDate().toString(),
+				String.valueOf(orderToAddNext.getPrice()));
+		// check if order preselected is always selected
+		window.table("OrdersTable").requireSelectedRows(2);
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderAddedWhenItsYearsIsNotSelectedAndResetErrorLabel() {
+		Client firstClient = new Client("1", "first client id");
+		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderToAdd = new Order("1", firstClient,
+				Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2022);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
+			orderSwingView.orderAdded(orderToAdd);
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", "2022");
+		String[][] contents = window.table("OrdersTable").contents();
+		assertThat(contents)
+				.doesNotContain(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
+		window.comboBox("yearsCombobox").requireSelection("2025");
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
 
 	}
 
