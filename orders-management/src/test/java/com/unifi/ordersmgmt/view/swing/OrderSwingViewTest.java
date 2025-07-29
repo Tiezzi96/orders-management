@@ -7,16 +7,24 @@ import static org.assertj.swing.data.TableCell.row;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import javax.swing.Action;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.JTextComponent;
 
 import org.assertj.swing.annotation.GUITest;
+import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.core.matcher.JLabelMatcher;
@@ -85,15 +93,23 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("panelClientErrorMessage").requireText("");
 		window.textBox("panelClientErrorMessage").requireNotEditable();
 		window.textBox("textField_clientName").requireEnabled();
+		
+		window.textBox("textField_clientName").requireEnabled();
+		window.textBox("textField_dayOfDateOrder").requireEnabled();
+		window.textBox("textField_monthOfDateOrder").requireEnabled();
+		window.textBox("textField_yearOfDateOrder").requireEnabled();
+		window.textBox("textField_revenueOrder").requireEnabled();
+		
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireDisabled();
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
 		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.comboBox("comboboxClients");
 		window.comboBox("yearsCombobox");
 		window.textBox("panelOrderErrorMessage").requireText("");
 		window.textBox("panelOrderErrorMessage").requireNotEditable();
 		
-
+		
 		window.table("OrdersTable").requireColumnCount(4);
 		window.table("OrdersTable").requireColumnNamed("Data");
 		window.table("OrdersTable").requireColumnNamed("Importo ($)");
@@ -518,6 +534,138 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
 		window.comboBox("yearsCombobox").requireSelection("2025");
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+	
+	@Test
+	@GUITest
+	public void testControlThatOnlyCorrectValueIsInsertedInDateAndPriceTextFields() throws Exception {
+		window.textBox("textField_dayOfDateOrder").enterText("day");
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_dayOfDateOrder").enterText("203");
+		window.textBox("textField_dayOfDateOrder").requireText("20");
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("2 3");
+		window.textBox("textField_dayOfDateOrder").requireText("23");
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("20");
+		window.textBox("textField_dayOfDateOrder").requireText("20");
+
+		
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").enterText("month");
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").enterText("123");
+		window.textBox("textField_monthOfDateOrder").requireText("12");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").enterText("1 2");
+		window.textBox("textField_monthOfDateOrder").requireText("12");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").enterText("12");
+		window.textBox("textField_monthOfDateOrder").requireText("12");
+
+		window.textBox("textField_yearOfDateOrder").enterText("year");
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").enterText("20253");
+		window.textBox("textField_yearOfDateOrder").requireText("2025");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("2 0 25");
+		window.textBox("textField_yearOfDateOrder").requireText("2025");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_yearOfDateOrder").requireText("2025");
+
+	}
+
+	@RunsInEDT
+	@Test
+	@GUITest
+	public void testControlThatOnlyCorrectValueIsInsertedInPriceTextField() {
+		window.textBox("textField_revenueOrder").enterText("price");
+		window.textBox("textField_revenueOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").enterText("500.203");
+		window.textBox("textField_revenueOrder").requireText("500.20");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_revenueOrder").enterText("2 50 0. 2 0");
+		window.textBox("textField_revenueOrder").requireText("2500.20");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_revenueOrder").enterText("500.50");
+		window.textBox("textField_revenueOrder").requireText("500.50");
+		window.textBox("textField_revenueOrder").enterText("500.5.0");
+		window.textBox("textField_revenueOrder").requireText("500.50");
+	}
+
+	@Test
+	@GUITest
+	public void testWhenTextFieldsAreNotEmptyAndClientIsSelectedThenAddOrderButtonShouldbeEnabled() {
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+		});
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireEnabled();
+
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+		window.comboBox("comboboxClients").clearSelection();
+
+		window.comboBox("comboboxClients").selectItem(0);
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireEnabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testWhenATextFieldIsEmptyOrClientIsNotSelectedThenAddOrderButtonShouldbeDisabled() throws Exception {
+
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+		});
+		window.textBox("textField_dayOfDateOrder").enterText("");
+		window.textBox("textField_monthOfDateOrder").enterText("");
+		window.textBox("textField_yearOfDateOrder").enterText(" ");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").setText("");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+
+		window.comboBox("comboboxClients").selectItem(0);
+		window.textBox("textField_dayOfDateOrder").setText("1");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+
+		window.comboBox("comboboxClients").selectItem(0);
+		window.textBox("textField_dayOfDateOrder").setText("1");
+		window.textBox("textField_monthOfDateOrder").setText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").setText(" ");
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+
+		window.comboBox("comboboxClients").clearSelection();
+		window.textBox("textField_dayOfDateOrder").setText("1");
+		window.textBox("textField_monthOfDateOrder").setText("1");
+		window.textBox("textField_yearOfDateOrder").setText("2025");
+		window.textBox("textField_revenueOrder").setText(" ");
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
 
 	}
 

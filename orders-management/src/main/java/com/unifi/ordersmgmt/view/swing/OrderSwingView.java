@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +34,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -66,6 +69,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JTable tableOrders;
 	private OrderTableModel orderTableModel;
 	private JTextPane panelOrderError;
+	private JTextField textFieldDayNewOrder;
+	private JTextField textFieldMonthNewOrder;
+	private JTextField textFieldYearNewOrder;
+	private JTextField textFieldRevenueNewOrder;
+	private JButton btnNewOrder;
 
 	public OrderSwingView() {
 		// TODO Auto-generated constructor stub
@@ -257,13 +265,107 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		panel_orderView.add(scrollPanelOrdersList);
 
+		JLabel lblNewOrder = new JLabel("INFO ORDINE");
+		lblNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblNewOrder.setBounds(6, 6, 350, 22);
+		panel_orderViewAndAdd.add(lblNewOrder);
+
+		JLabel lblClientNewOrder = new JLabel("Cliente");
+		lblClientNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblClientNewOrder.setBounds(33, 47, 84, 16);
+		panel_orderViewAndAdd.add(lblClientNewOrder);
 		// combobox selezione clienti
 		comboboxClientsModel = new DefaultComboBoxModel<>();
 		comboboxClients = new JComboBox<>(comboboxClientsModel);
 		comboboxClients.setName("comboboxClients");
 		comboboxClients.setBounds(99, 43, 193, 27);
-		panel_orderManagement.add(comboboxClients);
+		panel_orderViewAndAdd.add(comboboxClients);
 
+		JLabel lblDateNewOrder = new JLabel("Data");
+		lblDateNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblDateNewOrder.setBounds(33, 91, 84, 16);
+		panel_orderViewAndAdd.add(lblDateNewOrder);
+
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setForeground(Color.BLACK);
+		separator_1.setBounds(124, 103, 33, 12);
+		panel_orderViewAndAdd.add(separator_1);
+
+		JLabel lblSlashDate1NewOrder = new JLabel("/");
+		lblSlashDate1NewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 16));
+		lblSlashDate1NewOrder.setBounds(161, 87, 8, 16);
+		panel_orderViewAndAdd.add(lblSlashDate1NewOrder);
+
+		JSeparator separator_1_1 = new JSeparator();
+		separator_1_1.setForeground(Color.BLACK);
+		separator_1_1.setBounds(167, 103, 33, 12);
+		panel_orderViewAndAdd.add(separator_1_1);
+
+		JLabel lblSlashDate2NewOrder = new JLabel("/");
+		lblSlashDate2NewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 16));
+		lblSlashDate2NewOrder.setBounds(203, 87, 8, 16);
+		panel_orderViewAndAdd.add(lblSlashDate2NewOrder);
+
+		JSeparator separator_1_1_1 = new JSeparator();
+		separator_1_1_1.setForeground(Color.BLACK);
+		separator_1_1_1.setBounds(211, 103, 57, 12);
+		panel_orderViewAndAdd.add(separator_1_1_1);
+
+		textFieldDayNewOrder = new JTextField();
+		textFieldDayNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
+		textFieldDayNewOrder.setBorder(null);
+		textFieldDayNewOrder.setName("textField_dayOfDateOrder");
+		textFieldDayNewOrder.setBounds(125, 82, 31, 22);
+		textFieldDayNewOrder.setBackground(new Color(245, 245, 245));
+		panel_orderViewAndAdd.add(textFieldDayNewOrder);
+		textFieldDayNewOrder.setColumns(10);
+
+		textFieldMonthNewOrder = new JTextField();
+		textFieldMonthNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
+		textFieldMonthNewOrder.setBorder(null);
+		textFieldMonthNewOrder.setName("textField_monthOfDateOrder");
+		textFieldMonthNewOrder.setBounds(169, 82, 31, 22);
+		textFieldMonthNewOrder.setBackground(new Color(245, 245, 245));
+		panel_orderViewAndAdd.add(textFieldMonthNewOrder);
+		textFieldMonthNewOrder.setColumns(10);
+
+		textFieldYearNewOrder = new JTextField();
+		textFieldYearNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
+		textFieldYearNewOrder.setName("textField_yearOfDateOrder");
+		textFieldYearNewOrder.setColumns(10);
+		textFieldYearNewOrder.setBorder(null);
+		textFieldYearNewOrder.setBounds(212, 82, 56, 22);
+		textFieldYearNewOrder.setBackground(new Color(245, 245, 245));
+		panel_orderViewAndAdd.add(textFieldYearNewOrder);
+
+		JLabel lblRevenueNewOrder = new JLabel("Importo");
+		lblRevenueNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblRevenueNewOrder.setBounds(33, 129, 84, 16);
+		panel_orderViewAndAdd.add(lblRevenueNewOrder);
+
+		JSeparator separator_1_1_1_1 = new JSeparator();
+		separator_1_1_1_1.setForeground(new Color(0, 0, 0));
+		separator_1_1_1_1.setBounds(118, 140, 150, 12);
+		panel_orderViewAndAdd.add(separator_1_1_1_1);
+
+		textFieldRevenueNewOrder = new JTextField();
+		textFieldRevenueNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
+		textFieldRevenueNewOrder.setName("textField_revenueOrder");
+		textFieldRevenueNewOrder.setColumns(10);
+		textFieldRevenueNewOrder.setBorder(null);
+		textFieldRevenueNewOrder.setBounds(118, 118, 150, 22);
+		textFieldRevenueNewOrder.setBackground(new Color(245, 245, 245));
+		panel_orderViewAndAdd.add(textFieldRevenueNewOrder);
+		
+		btnNewOrder = new JButton("Aggiungi ordine");
+		btnNewOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnNewOrder.setEnabled(false);
+		btnNewOrder.setBorder(new LineBorder(new Color(23, 35, 51), 1, true));
+		btnNewOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+		btnNewOrder.setBounds(50, 200, 250, 50);
+		panel_orderViewAndAdd.add(btnNewOrder);
+		
 		panelOrderError = new JTextPane();
 		panelOrderError.setText("");
 		panelOrderError.setEditable(false);
@@ -292,7 +394,34 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 			}
 		});
+		
+		KeyAdapter btnNewOrderEnabler = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				super.keyReleased(e);
+				checkCompleteNewOrderInfo();
+			}
+		};
 
+		comboboxClients.addActionListener(e -> {
+			checkCompleteNewOrderInfo();
+		});
+		textFieldDayNewOrder.addKeyListener(btnNewOrderEnabler);
+		textFieldMonthNewOrder.addKeyListener(btnNewOrderEnabler);
+		textFieldYearNewOrder.addKeyListener(btnNewOrderEnabler);
+		textFieldRevenueNewOrder.addKeyListener(btnNewOrderEnabler);
+
+		((AbstractDocument) textFieldDayNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {checkCompleteNewOrderInfo();
+
+		}, " "));
+		((AbstractDocument) textFieldMonthNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {checkCompleteNewOrderInfo();
+		}, " "));
+		((AbstractDocument) textFieldYearNewOrder.getDocument()).setDocumentFilter(createTextFilter(4, "\\d*", () -> {checkCompleteNewOrderInfo();
+		}, " "));
+		((AbstractDocument) textFieldRevenueNewOrder.getDocument())
+				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", () -> {checkCompleteNewOrderInfo();
+				}, " "));
 		((AbstractDocument) textFieldNewClient.getDocument())
 				.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
 					if (!textFieldNewClient.getText().trim().isEmpty()) {
@@ -327,6 +456,18 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private DocumentFilter createTextFilter(int maxLength, String regex, Runnable onChange, String spaces) {
 		// TODO Auto-generated method stub
 		return new TextDocumentFilter(maxLength, regex, onChange, spaces);
+	}
+	
+	private void checkCompleteNewOrderInfo() {
+		if ((!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
+				&& (!textFieldYearNewOrder.getText().trim().isEmpty())
+				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty())
+				&& (comboboxClients.getSelectedIndex() != -1)) {
+
+			btnNewOrder.setEnabled(true);
+		} else {
+			btnNewOrder.setEnabled(false);
+		}
 	}
 
 	@Override
@@ -485,7 +626,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 			}
 
 		}
-		//reset error label
+		// reset error label
 		panelOrderError.setText("");
 
 	}
