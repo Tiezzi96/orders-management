@@ -86,7 +86,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JButton btnNewOrder;
 
 	public OrderSwingView() {
-		// TODO Auto-generated constructor stub
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(1000, 850));
 		setBounds(100, 100, 1000, 850);
@@ -575,13 +574,56 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void showAllOrders(List<Order> orders) {
-		// TODO Auto-generated method stub
+		boolean currentYearIsNotSelected = false;
+		boolean aYearIsSelected = false;
+		logger.info("comboboxYears.getSelectedIndex(): {}", comboboxYears.getSelectedIndex());
+		// --- stato selezione anno ---
+		if (comboboxYears.getSelectedIndex() != -1) {
+			Integer yearSelected = getYearSelected();
+
+			aYearIsSelected = true;
+			if (yearSelected != 2025) {
+				currentYearIsNotSelected = true;
+			}
+
+		}
+		if (orders.isEmpty()) {
+			logger.info("orders is Empty");
+			logger.debug("listClients.getSelectedIndex() != -1 : {}", (listClients.getSelectedIndex() != -1));
+			if (currentYearIsNotSelected && listClients.getSelectedIndex() == -1) {
+				orderController.yearsOfTheOrders();
+				return;
+			}
+			// anno selezionato (qualsiasi) ma non ci sono ordini
+			if (!currentYearIsNotSelected && aYearIsSelected) {
+				getOrderTableModel().removedAllOrders();
+				panelOrderError.setText("Non sono presenti ordini per il " + getYearSelected());
+			}
+
+			// cliente selezionato e anno selezionato, ma nessun ordine
+			if (listClients.getSelectedIndex() != -1 && aYearIsSelected) {
+				getOrderTableModel().removedAllOrders();
+				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
+						+ " per il cliente " + getClientSelected().getIdentifier());
+				lblrevenue.setText("");
+			}
+			return;
+
+		}
 		getOrderTableModel().removedAllOrders();
 		for (Order order : orders) {
 			orderTableModel.addOrder(order);
 		}
 		resetRevenueLabel(orders);
 
+	}
+
+	private Client getClientSelected() {
+		return (Client) listClients.getSelectedValue();
+	}
+
+	private Integer getYearSelected() {
+		return Integer.valueOf(getComboboxYearsModel().getSelectedItem().toString());
 	}
 
 	private void resetRevenueLabel(List<Order> orders) {
@@ -697,7 +739,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				items.add(yearOfOrder);
 				logger.info("years: {}", items);
 				items.remove(Pattern.compile(NO_YEAR_ITEM));
-				List<Integer> years = items.stream().map(obj -> (Integer) obj) // Cast sicuro
+				List<Integer> years = items.stream().map(obj -> (Integer) obj) 
 						.collect(Collectors.toList());
 				Collections.sort(years);
 				Collections.reverse(years);
@@ -741,6 +783,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void removeOrdersByClient(Client client) {
 		// TODO Auto-generated method stub
+		getOrderTableModel().removeOrdersOfClient(client);
 
 	}
 
@@ -753,6 +796,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void orderRemoved(Order orderRemoved) {
 		// TODO Auto-generated method stub
+		getOrderTableModel().removeOrder(orderRemoved);
+		List<Order> orderCopy = new ArrayList<Order>(orderTableModel.getOrders());
+		showAllOrders(orderCopy);
 
 	}
 

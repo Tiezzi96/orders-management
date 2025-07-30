@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
 
+import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 
 public class OrderTableModel extends AbstractTableModel {
@@ -87,6 +89,20 @@ public class OrderTableModel extends AbstractTableModel {
 	public int getOrderIndex(Order orderSelected) {
 		// TODO Auto-generated method stub
 		return orders.indexOf(orderSelected);
+	}
+
+	public void removeOrdersOfClient(Client client) {
+		// TODO Auto-generated method stub
+		List<Order> ordersOfClient = orders.stream()
+				.filter(o -> o.getClient().getIdentifier().equals(client.getIdentifier())).collect(Collectors.toList());
+		orders.removeAll(ordersOfClient);
+		fireTableDataChanged();
+		
+	}
+
+	public void removeOrder(Order orderRemoved) {
+		// TODO Auto-generated method stub
+		orders.remove(orderRemoved);
 	}
 
 }
