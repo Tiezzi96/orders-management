@@ -10,12 +10,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -32,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -53,17 +57,17 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JPanel contentPane;
 	private String FONT_TEXT = "Segoe UI";
 	private DefaultListModel<Client> clientListModel;
-	private JList listClients;
+	private JList<Client> listClients;
 	private JButton btnRemoveClient;
 	private JTextPane paneClientError;
 	private JLabel lblNewClient;
 	private JTextField textFieldNewClient;
 	private JLabel lblClientName;
 	private JButton btnNewClient;
-	private OrderController orderController;
+	private transient OrderController orderController;
 	private JLabel lblrevenue;
-	private DefaultComboBoxModel comboboxClientsModel;
-	private JComboBox comboboxClients;
+	private DefaultComboBoxModel<Client> comboboxClientsModel;
+	private JComboBox <Client> comboboxClients;
 	private DefaultComboBoxModel comboboxYearsModel;
 	private JComboBox comboboxYears;
 	private JTable tableOrders;
@@ -77,7 +81,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	public OrderSwingView() {
 		// TODO Auto-generated constructor stub
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setPreferredSize(new Dimension(1000, 850));
 		setBounds(100, 100, 1000, 850);
 		setTitle("Order Management View");
@@ -230,7 +234,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderManagement.add(panel_orderView);
 		panel_orderView.setLayout(null);
 
-		comboboxYearsModel = new DefaultComboBoxModel<>();
+		comboboxYearsModel = new DefaultComboBoxModel<Object>();
 		comboboxYears = new JComboBox<>(comboboxYearsModel);
 		comboboxYears.setBackground(Color.WHITE);
 		comboboxYears.setBounds(523, 20, 101, 27);
@@ -357,7 +361,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldRevenueNewOrder.setBounds(118, 118, 150, 22);
 		textFieldRevenueNewOrder.setBackground(new Color(245, 245, 245));
 		panel_orderViewAndAdd.add(textFieldRevenueNewOrder);
-		
+
 		btnNewOrder = new JButton("Aggiungi ordine");
 		btnNewOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnNewOrder.setEnabled(false);
@@ -365,7 +369,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		btnNewOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 		btnNewOrder.setBounds(50, 200, 250, 50);
 		panel_orderViewAndAdd.add(btnNewOrder);
-		
+
 		panelOrderError = new JTextPane();
 		panelOrderError.setText("");
 		panelOrderError.setEditable(false);
@@ -394,11 +398,10 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 			}
 		});
-		
+
 		KeyAdapter btnNewOrderEnabler = new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
 				super.keyReleased(e);
 				checkCompleteNewOrderInfo();
 			}
@@ -411,16 +414,24 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldMonthNewOrder.addKeyListener(btnNewOrderEnabler);
 		textFieldYearNewOrder.addKeyListener(btnNewOrderEnabler);
 		textFieldRevenueNewOrder.addKeyListener(btnNewOrderEnabler);
+		btnNewOrder.addActionListener(e -> {
+			System.out.println("new Order");
+			newOrder();
+		});
 
-		((AbstractDocument) textFieldDayNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {checkCompleteNewOrderInfo();
+		((AbstractDocument) textFieldDayNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {
+			checkCompleteNewOrderInfo();
 
 		}, " "));
-		((AbstractDocument) textFieldMonthNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {checkCompleteNewOrderInfo();
+		((AbstractDocument) textFieldMonthNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {
+			checkCompleteNewOrderInfo();
 		}, " "));
-		((AbstractDocument) textFieldYearNewOrder.getDocument()).setDocumentFilter(createTextFilter(4, "\\d*", () -> {checkCompleteNewOrderInfo();
+		((AbstractDocument) textFieldYearNewOrder.getDocument()).setDocumentFilter(createTextFilter(4, "\\d*", () -> {
+			checkCompleteNewOrderInfo();
 		}, " "));
 		((AbstractDocument) textFieldRevenueNewOrder.getDocument())
-				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", () -> {checkCompleteNewOrderInfo();
+				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", () -> {
+					checkCompleteNewOrderInfo();
 				}, " "));
 		((AbstractDocument) textFieldNewClient.getDocument())
 				.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
@@ -453,11 +464,60 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	}
 
+	private void newOrder() {
+		int day = Integer.parseInt(textFieldDayNewOrder.getText());
+
+		int month = Integer.parseInt(textFieldMonthNewOrder.getText());
+
+		int year = Integer.parseInt(textFieldYearNewOrder.getText());
+
+		Client client = (Client) getComboboxClientsModel().getSelectedItem();
+
+		double price = Double.parseDouble(textFieldRevenueNewOrder.getText().replace(",", "."));
+
+		if (isValidDate(day, month, year)) {
+			LocalDateTime localDate = LocalDateTime.of(year, month, day, 0, 0);
+			orderController.addOrder(
+					new Order("", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), price));
+			panelOrderError.setText("");
+		} else {
+			System.out.println("data non valida: " + day + "/" + month + "/" + year);
+			panelOrderError.setText("La data " + day + "/" + month + "/" + year + " non è corretta");
+		}
+		textFieldDayNewOrder.setText("");
+		textFieldMonthNewOrder.setText("");
+		textFieldYearNewOrder.setText("");
+		textFieldRevenueNewOrder.setText("");
+		comboboxClients.setSelectedIndex(-1);
+
+	}
+
+	private boolean isValidDate(int day, int month, int year) {
+		// anno bisestile se divisibile per 4 non per 100 ma divisibile per 400
+		boolean isLeap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+		int maxDay;
+
+		switch (month) {
+		case 2:
+			maxDay = isLeap ? 29 : 28;
+			break;
+		case 4:
+		case 6:
+		case 9:
+		case 11:
+			maxDay = 30;
+			break;
+		default:
+			maxDay = 31;
+		}
+		return year >= (2025 - 100) && year <= 2025 && month >= 1 && month <= 12 && (day >= 1 && day <= maxDay);
+
+	}
+
 	private DocumentFilter createTextFilter(int maxLength, String regex, Runnable onChange, String spaces) {
-		// TODO Auto-generated method stub
 		return new TextDocumentFilter(maxLength, regex, onChange, spaces);
 	}
-	
+
 	private void checkCompleteNewOrderInfo() {
 		if ((!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
 				&& (!textFieldYearNewOrder.getText().trim().isEmpty())
@@ -597,10 +657,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 			System.out.println("orderselected: " + orderSelected);
 			System.out.println("yearsoFOrder: " + yearOfOrder);
 			if (getComboboxYearsModel().getIndexOf(yearOfOrder) == -1) {
-				List<Integer> years = getAllElements(getComboboxYearsModel());
-				years.add(yearOfOrder);
-				System.out.println("years:" + years);
-				years.remove(Pattern.compile(NO_YEAR_ITEM));
+				List<Object> items = getAllElements(getComboboxYearsModel());
+				items.add(yearOfOrder);
+				System.out.println("years:" + items);
+				items.remove(Pattern.compile(NO_YEAR_ITEM));
+				List<Integer> years = items.stream().map(obj -> (Integer) obj) // Cast sicuro
+						.collect(Collectors.toList());
 				Collections.sort(years);
 				Collections.reverse(years);
 				System.out.println(years);
@@ -608,6 +670,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				for (Integer integer : years) {
 					getComboboxYearsModel().addElement(integer);
 				}
+				getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 				getComboboxYearsModel().setSelectedItem(yearSelected);
 			}
 
@@ -665,7 +728,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	public void setOrderController(OrderController controller) {
-		// TODO Auto-generated method stub
 		this.orderController = controller;
 	}
 
@@ -677,18 +739,15 @@ public class OrderSwingView extends JFrame implements OrderView {
 		return comboboxClientsModel;
 	}
 
-	public DefaultComboBoxModel<Integer> getComboboxYearsModel() {
-		// TODO Auto-generated method stub
+	public DefaultComboBoxModel getComboboxYearsModel() {
 		return comboboxYearsModel;
 	}
 
 	public OrderTableModel getOrderTableModel() {
-		// TODO Auto-generated method stub
 		return orderTableModel;
 	}
 
 	public JTable getOrderTable() {
-		// TODO Auto-generated method stub
 		return tableOrders;
 	}
 

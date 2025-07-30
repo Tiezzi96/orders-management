@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.atIndex;
 import static org.assertj.swing.data.TableCell.row;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -527,7 +528,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
 			orderSwingView.orderAdded(orderToAdd);
 		});
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", "2022");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", "2022", "-- Nessun anno --");
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents)
 				.doesNotContain(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
@@ -667,6 +668,228 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_revenueOrder").setText(" ");
 		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
 
+	}
+	
+	@Test
+	@GUITest
+	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenDateIsCorrectAndResetErrorLabel() {
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+		});
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		LocalDateTime localDateTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+		verify(orderController).addOrder(
+				new Order("", newClient, Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 20.1));
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		window.textBox("panelOrderErrorMessage").requireText("");
+		window.comboBox("comboboxClients").requireNoSelection();
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenYearIsNotCorrect() {
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+		});
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2026");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/1/2026 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("1924");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/1/1924 non è corretta");
+
+	}
+
+	@Test
+	@GUITest
+	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenMonthIsNotCorrect() {
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+		});
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("13");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/13/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("0");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/0/2025 non è corretta");
+	}
+
+	@Test
+	@GUITest
+	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenDayIsNotCorrect() {
+
+		Client newClient = new Client("1", "new Client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+		});
+		window.textBox("textField_dayOfDateOrder").enterText("0");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 0/1/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("32");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 32/1/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("29");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 29/2/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2000");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 30/2/2000 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("29");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2023");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 29/2/2023 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 30/2/2024 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("29");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2100");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 29/2/2100 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("31");
+		window.textBox("textField_monthOfDateOrder").enterText("4");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.1");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 31/4/2025 non è corretta");
 	}
 
 }

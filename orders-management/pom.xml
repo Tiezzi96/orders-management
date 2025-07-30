@@ -15,6 +15,22 @@
 			${project.build.directory}/surefire-reports,
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
+
+		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
+		<!-- ignore sonar rule "Tests should include assertions" for UI tests
+		with assertj swing-->
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>
+			java:S2699
+		</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>
+			**/swing/**/*.java
+		</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>
+			java:S117
+		</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>
+			**/OrderSwingView.java
+		</sonar.issue.ignore.multicriteria.e2.resourceKey>
 	</properties>
 
 	<dependencies>
@@ -156,7 +172,8 @@
 						</excludedClasses>
 
 						<excludedTestClasses>
-							<param>com.unifi.ordersmgmt.view.swing.OrderSwingViewTest</param>
+							<param>
+								com.unifi.ordersmgmt.view.swing.OrderSwingViewTest</param>
 						</excludedTestClasses>
 						<targetTests>
 							<param>com.unifi.ordersmgmt.*</param>
