@@ -16,6 +16,9 @@
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
 
+		<sonar.coverage.exclusions> **/model/*.*
+		</sonar.coverage.exclusions>
+
 		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
 		<!-- ignore sonar rule "Tests should include assertions" for UI tests
 		with assertj swing-->
@@ -109,6 +112,11 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.12</version>
+					<configuration>
+						<excludes>
+							<exclude>**/model/*.*</exclude>
+						</excludes>
+					</configuration>
 					<executions>
 						<execution>
 							<id>prepare-agent</id>
