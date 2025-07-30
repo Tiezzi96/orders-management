@@ -458,10 +458,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 		listClients.addListSelectionListener(e -> {
 			if (listClients.getSelectedIndex() != -1) {
 				btnRemoveClient.setEnabled(true);
+				panelOrderError.setText("");
 			} else {
 				btnRemoveClient.setEnabled(false);
 
 			}
+
 		});
 
 		btnNewClient.addActionListener(e -> {
@@ -638,6 +640,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 									.mapToDouble(Order::getPrice).sum())).replace(".", ",")
 							+ "€");
 		}
+		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() == -1) {
+			Client clientSelected = (Client) listClients.getSelectedValue();
+			lblrevenue.setText("Il costo totale degli ordini del cliente " + clientSelected.getIdentifier() + " è di "
+					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
+					+ "€");
+		}
 		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() != -1) {
 			lblrevenue.setText("Il costo totale degli ordini nel " + comboboxYears.getSelectedItem() + " è di "
 					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
@@ -739,8 +747,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				items.add(yearOfOrder);
 				logger.info("years: {}", items);
 				items.remove(Pattern.compile(NO_YEAR_ITEM));
-				List<Integer> years = items.stream().map(obj -> (Integer) obj) 
-						.collect(Collectors.toList());
+				List<Integer> years = items.stream().map(obj -> (Integer) obj).collect(Collectors.toList());
 				Collections.sort(years);
 				Collections.reverse(years);
 				getComboboxYearsModel().removeAllElements();
@@ -788,8 +795,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	@Override
-	public void showOrderError(String message, Order order) {
-		// TODO Auto-generated method stub
+	public void showOrderError(String errorMessage, Order order) {
+		panelOrderError.setText(errorMessage + ": " + order);
 
 	}
 
@@ -804,7 +811,42 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void orderUpdated(Order orderModified) {
-		// TODO Auto-generated method stub
+		boolean isOrderIDPresent = false;
+		Integer yearSelected = null;
+		logger.info("order Updated: {}", orderModified);
+		if (comboboxYears.getSelectedIndex() != -1) {
+			yearSelected = Integer
+					.parseInt(getComboboxYearsModel().getElementAt(comboboxYears.getSelectedIndex()).toString());
+		}
+
+		if (orderModified.getIdentifier() != null) {
+
+			if (yearSelected != null
+					&& orderModified.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear() == yearSelected) {
+
+				List<Order> ordersUpdated = new ArrayList<Order>();
+				for (Order order : getOrderTableModel().getOrders()) {
+					logger.info("ORDERID is present in DB: {}",
+							(!order.getIdentifier().equals(orderModified.getIdentifier())));
+					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
+						ordersUpdated.add(order);
+					} else {
+						isOrderIDPresent = true;
+						ordersUpdated.add(orderModified);
+
+					}
+				}
+				if (isOrderIDPresent) {
+					logger.info("ordersUpdated: {}", ordersUpdated);
+					showAllOrders(ordersUpdated);
+				} else {
+					getOrderTableModel().addOrder(orderModified);
+				}
+			}
+		}
+		if (!getOrderTableModel().getOrders().isEmpty()) {
+			panelOrderError.setText("");
+		}
 
 	}
 

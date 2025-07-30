@@ -1232,5 +1232,155 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		verify(orderController).yearsOfTheOrders();
 
 	}
+	
+	@Test
+	@GUITest
+	public void testShowOrderErrorShouldShowErrorInTheOrderErrorLabel() {
+		Order order = new Order("1", new Client(),
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.showOrderError("error message", order);
+		});
 
+		window.textBox("panelOrderErrorMessage").requireText("error message: " + order.toString());
+
+	}
+
+	@Test
+	@GUITest
+	public void testShowAllOrdersWhenOrdersOfClientSelectedAreShowedUpdateTotalPriceAndResetOrderError() {
+		Client firstClient = new Client("1", "test id 1");
+		Client secondClient = new Client("2", "test id 2");
+		Order orderOfClient1CurrentYear = new Order("1", firstClient,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order orderOfClient1YearFixture = new Order("2", firstClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		System.out.println(orderOfClient1CurrentYear);
+
+		window.textBox("panelOrderErrorMessage").setText(" ");
+
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(firstClient);
+
+			orderSwingView.getClientListModel().addElement(secondClient);
+		});
+		window.list("clientsList").selectItem(0);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.showAllOrders(asList(orderOfClient1YearFixture, orderOfClient1CurrentYear));
+		});
+
+		window.label("revenueLabel").requireText("Il costo totale degli ordini del cliente "
+				+ firstClient.getIdentifier() + " è di "
+				+ String.format("%.2f", orderOfClient1CurrentYear.getPrice() + orderOfClient1YearFixture.getPrice())
+				+ "€");
+		window.textBox("panelOrderErrorMessage").requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderModifiedWhenItsYearIsSelectedAndResetErrorLabel() {
+		Client client = new Client("1", "first client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
+		});
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).setText(" ");
+		LocalDateTime newLocalDate = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
+		Order orderModified = new Order("1", client, Date.from(newLocalDate.atZone(ZoneId.systemDefault()).toInstant()),
+				20);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderUpdated(orderModified);
+		});
+		window.table("OrdersTable").requireRowCount(1);
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(orderModified.getIdentifier().toString(),
+				orderModified.getClient().getName(), orderModified.getDate().toString(),
+				String.valueOf(orderModified.getPrice()));
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderModifiedWhenItsYearIsNotSelected() {
+		Client client = new Client("1", "first client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
+		});
+		LocalDateTime newLocalDate = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderModified = new Order("1", client, Date.from(newLocalDate.atZone(ZoneId.systemDefault()).toInstant()),
+				20);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderUpdated(orderModified);
+		});
+		window.table("OrdersTable").requireRowCount(0);
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderModifiedWhenOrderToModifyIsPresentAndItsYearIsSelected() {
+		Client client = new Client("1", "first client id");
+		LocalDateTime prelocalDate = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
+		LocalDateTime localDate = LocalDateTime.of(2025, 1, 2, 0, 0, 0);
+		LocalDateTime nextlocalDate = LocalDateTime.of(2025, 1, 3, 0, 0, 0);
+		Order preOrder = new Order("1", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		Order orderToModify = new Order("2", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()),
+				20);
+		Order nextOrder = new Order("3", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), 30);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
+			orderSwingView.getOrderTableModel().addOrder(preOrder);
+			orderSwingView.getOrderTableModel().addOrder(orderToModify);
+			orderSwingView.getOrderTableModel().addOrder(nextOrder);
+		});
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).setText(" ");
+		LocalDateTime modifiedLocalDate = LocalDateTime.of(2025, 2, 1, 0, 0, 0);
+		Order orderModified = new Order("2", client,
+				Date.from(modifiedLocalDate.atZone(ZoneId.systemDefault()).toInstant()), 30.5);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderUpdated(orderModified);
+		});
+		window.table("OrdersTable").requireRowCount(3);
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(preOrder.getIdentifier().toString(),
+				preOrder.getClient().getName(), preOrder.getDate().toString(), String.valueOf(preOrder.getPrice()));
+		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(nextOrder.getIdentifier().toString(),
+				nextOrder.getClient().getName(), nextOrder.getDate().toString(), String.valueOf(nextOrder.getPrice()));
+		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderModified.getIdentifier().toString(),
+				orderModified.getClient().getName(), orderModified.getDate().toString(),
+				String.valueOf(orderModified.getPrice()));
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testUpdateTotalPriceWhenAnOrderOftheYearSelectedIsModifiedAndClientIsNotSelected() {
+		Client firstClient = new Client("1", "first client identifier");
+		Client secondClient = new Client("2", "second client identifier");
+		Order firstOrder = new Order("1", firstClient,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.1);
+		Order secondOrder = new Order("2", secondClient,
+				Date.from(LocalDate.of(2025, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.1);
+
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
+			orderSwingView.showAllOrders(asList(firstOrder, secondOrder));
+		});
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", firstOrder.getPrice() + secondOrder.getPrice()) + "€");
+		Order secondOrderModified = new Order("2", secondClient,
+				Date.from(LocalDate.of(2025, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20.1);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderUpdated(secondOrderModified);
+		});
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", firstOrder.getPrice() + secondOrderModified.getPrice()) + "€");
+	}
 }
