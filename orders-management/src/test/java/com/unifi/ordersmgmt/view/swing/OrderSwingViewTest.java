@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.atIndex;
 import static org.assertj.swing.data.TableCell.row;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -114,6 +115,9 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).requireDisabled();
+		window.button(
+				JButtonMatcher.withText(Pattern.compile("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")))
+				.requireNotVisible();
 
 		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.comboBox("comboboxClients");
@@ -2139,6 +2143,135 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getClientListModel().addElement(firstClient);
 		});
 		window.list("clientsList").selectItem(0);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderAdded(orderToAdd);
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023",
+				"-- Nessun anno --");
+		String[][] contents = window.table("OrdersTable").contents();
+		assertThat(contents)
+				.contains(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
+		window.comboBox("yearsCombobox").requireNoSelection();
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+	
+	@RunsInEDT
+	@Test
+	@GUITest
+	public void testAllOrdersButtonShouldBeVisibleOnlyWhenAClientIsSelected() {
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(new Client("1", "new client 1"));
+		});
+		window.list("clientsList").selectItem(0);
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
+				.requireVisible();
+		window.list("clientsList").clearSelection();
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
+				.requireNotVisible();
+
+	}
+
+	@RunsInEDT
+	@Test
+	@GUITest
+	public void testShowAllOrdersShouldDelegateToControllerFindAllOrdersAndRevenue() {
+		Client client = new Client("1", "new client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(client);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+
+		});
+		window.list("clientsList").selectItem(0);
+		window.comboBox("yearsCombobox").selectItem("" + 2024);
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")).click();
+		verify(orderController).allOrdersByYear(2024);
+		window.list("clientsList").requireNoSelection();
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
+				.requireNotVisible();
+
+	}
+	@Test
+	@GUITest
+	public void testOrderAddedWhenItsClientIsNotSelectedAndResetErrorLabel() {
+		Client firstClient = new Client("1", "first client id");
+		Client secondClient = new Client("2", "second client id");
+		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderToAdd = new Order("1", firstClient,
+				Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+		});
+		window.list("clientsList").selectItem(1);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderAdded(orderToAdd);
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023",
+				"-- Nessun anno --");
+		String[][] contents = window.table("OrdersTable").contents();
+		assertThat(contents)
+				.doesNotContain(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
+		window.comboBox("yearsCombobox").requireNoSelection();
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+	
+	@Test
+	@GUITest
+	public void testOrderAddedWhenItsClientIsNotSelectedShouldVerifyOrderControllerYearsofTheOrders() {
+		Client firstClient = new Client("1", "first client id");
+		Client secondClient = new Client("2", "second client id");
+		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
+		LocalDateTime secondLocalDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderToAdd = new Order("1", firstClient,
+				Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		Order secondOrderToAdd = new Order("2", firstClient,
+				Date.from(secondLocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+		});
+		window.list("clientsList").selectItem(1);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderAdded(orderToAdd);
+		});
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderAdded(secondOrderToAdd);
+		});
+		verify(orderController, times(1)).yearsOfTheOrders();
+
+	}
+
+	@Test
+	@GUITest
+	public void testOrderAddedWhenItsNoOneClientIsSelectedAndYearAndResetErrorLabel() {
+		Client firstClient = new Client("1", "first client id");
+		Client secondClient = new Client("2", "second client id");
+		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderToAdd = new Order("1", firstClient,
+				Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+		});
 		GuiActionRunner.execute(() -> {
 			orderSwingView.orderAdded(orderToAdd);
 		});

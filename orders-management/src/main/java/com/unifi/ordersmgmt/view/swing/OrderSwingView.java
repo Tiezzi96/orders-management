@@ -89,6 +89,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JButton btnNewOrder;
 	private JButton btnModifyOrder;
 	private JButton btnRemoveOrder;
+	private JButton btnShowAllClientsOrders;
 
 	public OrderSwingView() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -406,6 +407,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderView.add(btnRemoveOrder);
 		btnRemoveOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 
+		btnShowAllClientsOrders = new JButton("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>");
+		btnShowAllClientsOrders.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnShowAllClientsOrders.setVisible(false);
+		btnShowAllClientsOrders.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnShowAllClientsOrders.setBounds(204, 2, 200, 45);
+		btnShowAllClientsOrders.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+		panel_orderView.add(btnShowAllClientsOrders);
+
 		comboboxYears.addActionListener(new ActionListener() {
 
 			@Override
@@ -483,11 +492,24 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		listClients.addListSelectionListener(e -> {
 			if (listClients.getSelectedIndex() != -1) {
+				btnShowAllClientsOrders.setVisible(true);
 				btnRemoveClient.setEnabled(true);
 				panelOrderError.setText("");
 			} else {
+				btnShowAllClientsOrders.setVisible(false);
 				btnRemoveClient.setEnabled(false);
 
+			}
+			if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() != -1) {
+				// System.out.println("Selezionato cliente");
+				Integer yearSelected = (Integer) comboboxYears.getSelectedItem();
+				Client clientSelected = (Client) listClients.getSelectedValue();
+				System.out.println("yearselected: " + yearSelected);
+				if (clientSelected != null) {
+					orderController.findOrdersByYearAndClient(clientSelected, yearSelected);
+				} else {
+					orderController.allOrdersByYear(yearSelected);
+				}
 			}
 
 		});
@@ -557,6 +579,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 			logger.info("remove order");
 			removeOrder();
 		});
+
+		btnShowAllClientsOrders.addActionListener(e -> {
+			btnShowAllClientsOrders.setVisible(false);
+			listClients.clearSelection();
+		});
 	}
 
 	private void removeOrder() {
@@ -589,7 +616,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 		if (isValidDate(day, month, year)) {
 
 			Date newDate = Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant());
-			updates.put("date", newDate);
 			updates.put("date", newDate);
 			updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
 			updates.put("price", Double.valueOf(textFieldRevenueNewOrder.getText()));
@@ -721,9 +747,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 		boolean aYearIsSelected = false;
 		logger.info("comboboxYears.getSelectedIndex(): {}", comboboxYears.getSelectedIndex());
 		// --- stato selezione anno ---
-		if (comboboxYears.getSelectedIndex() != -1) {
-			Integer yearSelected = getYearSelected();
-
+		Integer yearSelected = getYearSelected();
+		if (yearSelected != null) {
 			aYearIsSelected = true;
 			if (yearSelected != 2025) {
 				currentYearIsNotSelected = true;
@@ -733,6 +758,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		if (orders.isEmpty()) {
 			logger.info("orders is Empty");
 			logger.debug("listClients.getSelectedIndex() != -1 : {}", (listClients.getSelectedIndex() != -1));
+			Client clientSelected = getClientSelected();
 			if (currentYearIsNotSelected && listClients.getSelectedIndex() == -1) {
 				orderController.yearsOfTheOrders();
 				return;
@@ -740,28 +766,28 @@ public class OrderSwingView extends JFrame implements OrderView {
 			// anno selezionato (qualsiasi) ma non ci sono ordini
 			if (!currentYearIsNotSelected && aYearIsSelected) {
 				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non sono presenti ordini per il " + getYearSelected());
+				panelOrderError.setText("Non sono presenti ordini per il " + yearSelected);
 			}
-			if (listClients.getSelectedIndex() != -1 && !aYearIsSelected) {
+			if (clientSelected != null && !aYearIsSelected) {
 				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non ci sono ordini per il cliente " + getClientSelected().getIdentifier());
+				panelOrderError.setText("Non ci sono ordini per il cliente " + clientSelected.getIdentifier());
 				lblrevenue.setText("");
 
 			}
 
-			if (listClients.getSelectedIndex() != -1 && aYearIsSelected) {
+			if (clientSelected != null && aYearIsSelected) {
 				logger.info("cliente selezionato, anno selezionato ma non ci sono ordini");
 				getOrderTableModel().removedAllOrders();
 				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
-						+ " per il cliente " + getClientSelected().getIdentifier());
+						+ " per il cliente " + clientSelected.getIdentifier());
 				lblrevenue.setText("");
 			}
 
 			// cliente selezionato e anno selezionato, ma nessun ordine
-			if (listClients.getSelectedIndex() != -1 && aYearIsSelected) {
+			if (clientSelected != null && aYearIsSelected) {
 				getOrderTableModel().removedAllOrders();
 				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
-						+ " per il cliente " + getClientSelected().getIdentifier());
+						+ " per il cliente " + clientSelected.getIdentifier());
 				lblrevenue.setText("");
 			}
 			return;
@@ -776,11 +802,24 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private Client getClientSelected() {
-		return (Client) listClients.getSelectedValue();
+		int index = listClients.getSelectedIndex();
+		if (index == -1)
+			return null;
+		return getClientListModel().getElementAt(index);
 	}
 
 	private Integer getYearSelected() {
-		return Integer.valueOf(getComboboxYearsModel().getSelectedItem().toString());
+		int index = comboboxYears.getSelectedIndex();
+		if (index == -1)
+			return null;
+		return Integer.parseInt(getComboboxYearsModel().getElementAt(index).toString());
+	}
+
+	private boolean matchesYearAndClientFilter(Order order, Integer year, Client client) {
+		boolean isYearMatching = year == null
+				|| order.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear() == year;
+		boolean isClientMatching = client == null || client.equals(order.getClient());
+		return isYearMatching && isClientMatching;
 	}
 
 	private void resetRevenueLabel(List<Order> orders) {
@@ -945,7 +984,19 @@ public class OrderSwingView extends JFrame implements OrderView {
 				// Qui la view sta mostrando tutti gli ordini del cliente (senza filtro anno)
 				// showAllOrders applicherà la logica coerente (client selezionato, anno non
 				// selezionato)
+			} else {
+				if (comboboxYearsModel
+						.getIndexOf(orderAdded.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear()) == -1) {
+
+					orderController.yearsOfTheOrders(); // nel caso l'anno dell'ordine non sia contenuto nella lista
+														// degli ordini
+				}
 			}
+		} // Se non c’è né anno né cliente selezionati, mostriamo “tutti gli ordini”
+		if (selectedItem == null && listClients.getSelectedIndex() == -1) {
+			getOrderTableModel().addOrder(orderAdded);
+			List<Order> ordersList = new ArrayList<>(getOrderTableModel().getOrders());
+			showAllOrders(ordersList);
 		}
 		// reset error label
 		panelOrderError.setText("");
@@ -985,89 +1036,34 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void orderUpdated(Order orderModified) {
+		if (orderModified.getIdentifier() == null)
+			return;
+
+		Integer yearSelected = getYearSelected();
+		Client clientSelected = getClientSelected();
 		boolean isOrderIDPresent = false;
-		Integer yearSelected = null;
-		logger.info("order Updated: {}", orderModified);
-		if (comboboxYears.getSelectedIndex() != -1) {
-			yearSelected = Integer
-					.parseInt(getComboboxYearsModel().getElementAt(comboboxYears.getSelectedIndex()).toString());
-		}
-		Client clientSelected = null;
-		if (listClients.getSelectedIndex() != -1) {
-			clientSelected = getClientListModel().getElementAt(listClients.getSelectedIndex());
-		}
 
-		if (orderModified.getIdentifier() != null) {
-
-			if (yearSelected == null && clientSelected == null) {
-				List<Order> ordersUpdated = new ArrayList<>();
-				for (Order order : getOrderTableModel().getOrders()) {
-					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
-						ordersUpdated.add(order);
-					} else {
-						isOrderIDPresent = true;
-						ordersUpdated.add(orderModified);
-					}
-				}
-				showAllOrders(ordersUpdated);
-
-			} else if (yearSelected != null
-					&& orderModified.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear() == yearSelected) {
-
-				List<Order> ordersUpdated = new ArrayList<Order>();
-				for (Order order : getOrderTableModel().getOrders()) {
-					logger.info("ORDERID is present in DB: {}",
-							(!order.getIdentifier().equals(orderModified.getIdentifier())));
-					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
-						ordersUpdated.add(order);
-					} else {
-						isOrderIDPresent = true;
-						if (clientSelected != null && clientSelected.equals(orderModified.getClient())) {
-							ordersUpdated.add(orderModified);
-						}
-						if (clientSelected == null) {
-							ordersUpdated.add(orderModified);
-						}
-
-					}
-				}
-				if (isOrderIDPresent) {
-					logger.info("ordersUpdated: {}", ordersUpdated);
-					showAllOrders(ordersUpdated);
-				} else {
-					getOrderTableModel().addOrder(orderModified);
-				}
-			} else if (clientSelected != null && clientSelected.equals(orderModified.getClient())) {
-
-				List<Order> ordersUpdated = new ArrayList<Order>();
-				logger.info("ordini pre modifica, cliente selezionato, anno non selezionato: {}",
-						getOrderTableModel().getOrders());
-				for (Order order : getOrderTableModel().getOrders()) {
-					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
-						ordersUpdated.add(order);
-					} else {
-						if (yearSelected == null) { // se l'anno non filtra, tengo quello modificato
-							ordersUpdated.add(orderModified);
-						}
-					}
-				}
-				showAllOrders(ordersUpdated);
-
+		List<Order> updatedOrders = new ArrayList<>();
+		for (Order order : getOrderTableModel().getOrders()) {
+			if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
+				updatedOrders.add(order);
 			} else {
-
-				List<Order> ordersUpdated = new ArrayList<>();
-				for (Order order : getOrderTableModel().getOrders()) {
-					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
-						ordersUpdated.add(order);
-					}
+				isOrderIDPresent = true;
+				if (matchesYearAndClientFilter(orderModified, yearSelected, clientSelected)) {
+					updatedOrders.add(orderModified);
 				}
-				showAllOrders(ordersUpdated);
 			}
 		}
+
+		if (!isOrderIDPresent && matchesYearAndClientFilter(orderModified, yearSelected, clientSelected)) {
+			getOrderTableModel().addOrder(orderModified);
+		} else {
+			showAllOrders(updatedOrders);
+		}
+
 		if (!getOrderTableModel().getOrders().isEmpty()) {
 			panelOrderError.setText("");
 		}
-
 	}
 
 	public void setOrderController(OrderController controller) {
