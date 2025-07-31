@@ -113,6 +113,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireDisabled();
 		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).requireDisabled();
+
 		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.comboBox("comboboxClients");
 		window.comboBox("yearsCombobox");
@@ -2076,7 +2078,81 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	}
 
-	  
+	@Test
+	@GUITest
+	public void testRemoveOrderButtonShouldBeEnebledOnlyWhenAOrderIsSelected() {
+		Client client = new Client("1", "test id 1");
+		Order order = new Order("1", client,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			OrderTableModel listOrderModel = orderSwingView.getOrderTableModel();
+			listOrderModel.addOrder(order);
+		});
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).requireEnabled();
+		window.table("OrdersTable").unselectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).requireDisabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testRemoveOrderButtonShouldDelegateToOrderControllerDeleteOrder() {
+		Client client = new Client("1", "test id 1");
+		Order order = new Order("1", client,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("2", client,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			OrderTableModel listOrderModel = orderSwingView.getOrderTableModel();
+			listOrderModel.addOrder(order);
+			listOrderModel.addOrder(order2);
+			orderSwingView.getComboboxClientsModel().addElement(client);
+		});
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		verify(orderController).deleteOrder(order);
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		window.textBox("panelOrderErrorMessage").requireText("");
+		window.comboBox("comboboxClients").requireNoSelection();
+	}
+
+	
+
+	@Test
+	@GUITest
+	public void testOrderAddedWhenItsClientIsSelectedAndResetErrorLabel() {
+		Client firstClient = new Client("1", "first client id");
+		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+		Order orderToAdd = new Order("1", firstClient,
+				Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(firstClient);
+		});
+		window.list("clientsList").selectItem(0);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderAdded(orderToAdd);
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023",
+				"-- Nessun anno --");
+		String[][] contents = window.table("OrdersTable").contents();
+		assertThat(contents)
+				.contains(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
+		window.comboBox("yearsCombobox").requireNoSelection();
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
+
+	}
+ 
 	  
 	 
 

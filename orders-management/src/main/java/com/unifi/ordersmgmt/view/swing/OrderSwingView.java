@@ -88,6 +88,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JTextField textFieldRevenueNewOrder;
 	private JButton btnNewOrder;
 	private JButton btnModifyOrder;
+	private JButton btnRemoveOrder;
 
 	public OrderSwingView() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -395,12 +396,25 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderView.add(btnModifyOrder);
 		btnModifyOrder.setEnabled(false);
 		btnModifyOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+
+		btnRemoveOrder = new JButton();
+		btnRemoveOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnRemoveOrder.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnRemoveOrder.setText("<html><center>Rimuovi<br>ordine</center></html>");
+		btnRemoveOrder.setBounds(2, 2, 200, 45);
+		btnRemoveOrder.setEnabled(false);
+		panel_orderView.add(btnRemoveOrder);
+		btnRemoveOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+
 		comboboxYears.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 
+				if (comboboxYears.getSelectedIndex() != -1 && comboboxYears.getSelectedItem().equals(NO_YEAR_ITEM)) {
+					comboboxYears.setSelectedIndex(-1);
+				}
 				if (comboboxYears.getSelectedIndex() != -1) {
 					logger.info("anno selezionato");
 					Integer actionSelected = (Integer) comboboxYears.getSelectedItem();
@@ -519,6 +533,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 				textFieldYearNewOrder.setText(String.valueOf(localDate.getYear()));
 				textFieldRevenueNewOrder.setText(String.valueOf(order.getPrice()));
 				btnModifyOrder.setEnabled(true);
+				btnRemoveOrder.setEnabled(true);
+
 			} else {
 				comboboxClients.setSelectedIndex(-1);
 				textFieldDayNewOrder.setText("");
@@ -526,6 +542,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				textFieldYearNewOrder.setText("");
 				textFieldRevenueNewOrder.setText("");
 				btnModifyOrder.setEnabled(false);
+				btnRemoveOrder.setEnabled(false);
 
 			}
 			checkCompleteModifyOrderInfo();
@@ -535,12 +552,28 @@ public class OrderSwingView extends JFrame implements OrderView {
 			logger.info("Update order");
 			updateOrder();
 		});
+
+		btnRemoveOrder.addActionListener(e -> {
+			logger.info("remove order");
+			removeOrder();
+		});
+	}
+
+	private void removeOrder() {
+		// TODO Auto-generated method stub
+		orderController.deleteOrder(getOrderTableModel().getOrderAt(tableOrders.getSelectedRow()));
+		tableOrders.clearSelection();
+		textFieldDayNewOrder.setText("");
+		textFieldMonthNewOrder.setText("");
+		textFieldYearNewOrder.setText("");
+		textFieldRevenueNewOrder.setText("");
+
 	}
 
 	private void updateOrder() {
 		// TODO Auto-generated method stub
 		Order orderToModify = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
-		Map<String, Object> updates = new HashMap<String, Object>();
+		Map<String, Object> updates = new HashMap<>();
 		updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
 		int day = 0;
 		int month = 0;
@@ -900,6 +933,19 @@ public class OrderSwingView extends JFrame implements OrderView {
 				tableOrders.setRowSelectionInterval(orderSelectedIndex, orderSelectedIndex);
 			}
 
+		}
+		if (selectedItem == null && listClients.getSelectedIndex() != -1) {
+			Client clientSelected = getClientListModel().getElementAt(listClients.getSelectedIndex());
+			// se l'ordine è del cliente che l'utente sta guardando, lo aggiungiamo
+			if (clientSelected.equals(orderAdded.getClient())) {
+				getOrderTableModel().addOrder(orderAdded);
+				// Copia per passare a showAllOrders
+				List<Order> ordersList = new ArrayList<Order>(getOrderTableModel().getOrders());
+				showAllOrders(ordersList);
+				// Qui la view sta mostrando tutti gli ordini del cliente (senza filtro anno)
+				// showAllOrders applicherà la logica coerente (client selezionato, anno non
+				// selezionato)
+			}
 		}
 		// reset error label
 		panelOrderError.setText("");
