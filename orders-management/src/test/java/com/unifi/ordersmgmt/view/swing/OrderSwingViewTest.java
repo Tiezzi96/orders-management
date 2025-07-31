@@ -15,7 +15,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -95,6 +97,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.label(JLabelMatcher.withText("CLIENTI"));
 		window.list("clientsList");
 		window.label(JLabelMatcher.withText("NUOVO CLIENTE"));
+		window.label(JLabelMatcher.withText("INFO ORDINE"));
 		window.label(JLabelMatcher.withText("Identificativo"));
 		window.textBox("panelClientErrorMessage").requireText("");
 		window.textBox("panelClientErrorMessage").requireNotEditable();
@@ -109,6 +112,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireDisabled();
 		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
 		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.comboBox("comboboxClients");
 		window.comboBox("yearsCombobox");
@@ -1581,7 +1585,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPrice() throws Exception {
+	public void testUpdateTotalPrice_ClientSelected_ClientModified_TableIsEmpty() throws Exception {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1662,5 +1666,418 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				"" + firstOrderModified.getPrice());
 
 	}
+	
+	
+	 	@Test
+	@GUITest
+	public void testWhenTableOrdersRowIsSelectedOrderTextFieldsShouldBeReportOrderData() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order newOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.table("OrdersTable").selectRows(0);
+		window.comboBox("comboboxClients").requireSelection(0);
+		window.textBox("textField_dayOfDateOrder").requireText("1");
+		window.textBox("textField_monthOfDateOrder").requireText("1");
+		window.textBox("textField_yearOfDateOrder").requireText("2025");
+		window.textBox("textField_revenueOrder").requireText("10.0");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testWhenTableOrdersRowIsDeselectedOrderTextFieldsShouldBeEmpty() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order firstOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order secondOrder = new Order("2", secondClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(firstOrder);
+			orderSwingView.getOrderTableModel().addOrder(secondOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.table("OrdersTable").selectRows(1); // gli ordini sono ordinati per data e non per identificativo
+		window.comboBox("comboboxClients").requireSelection(0);
+		window.textBox("textField_dayOfDateOrder").requireText("1");
+		window.textBox("textField_monthOfDateOrder").requireText("1");
+		window.textBox("textField_yearOfDateOrder").requireText("2025");
+		window.textBox("textField_revenueOrder").requireText("10.0");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
+
+		window.table("OrdersTable").unselectRows(1); // gli ordini sono ordinati per data e non per identificativo
+		window.comboBox("comboboxClients").requireNoSelection();
+		window.textBox("textField_dayOfDateOrder").requireText("");
+		window.textBox("textField_monthOfDateOrder").requireText("");
+		window.textBox("textField_yearOfDateOrder").requireText("");
+		window.textBox("textField_revenueOrder").requireText("");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.table("OrdersTable").selectRows(0);
+		window.comboBox("comboboxClients").requireSelection(1);
+		window.textBox("textField_dayOfDateOrder").requireText("1");
+		window.textBox("textField_monthOfDateOrder").requireText("1");
+		window.textBox("textField_yearOfDateOrder").requireText("2024");
+		window.textBox("textField_revenueOrder").requireText("20.0");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
+
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderButtonShouldBeEnabledWhenAOrderIsSelectedAndAtLeastOneTextFieldIsCorrect() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order newOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.comboBox("comboboxClients").clearSelection();
+
+		window.table("OrdersTable").selectRows(0);
+
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").enterText(" ");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText(" ");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText(" ");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_revenueOrder").enterText(" ");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("textField_revenueOrder").setText("20.0");
+		window.comboBox("comboboxClients").clearSelection();
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_revenueOrder").enterText("");
+		window.comboBox("comboboxClients").selectItem(0);
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+		// no combobox clients item selected. Buttno modify order disabled
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_revenueOrder").enterText("10.00");
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.comboBox("comboboxClients").clearSelection();
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderButtonShouldDelegateToOrderControllerModifyOrderWhenDateIsCorrectAndResetErrorLabel() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order newOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.textBox("panelOrderErrorMessage").setText(" ");
+		window.table("OrdersTable").selectRows(0);
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.comboBox("comboboxClients").selectItem(1);
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		Date newDate = Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant());
+		String orderID = "1";
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("date", newDate);
+		updates.put("price", 10.0);
+		updates.put("client", secondClient);
+		verify(orderController).modifyOrder(newOrder, updates);
+
+		window.table("OrdersTable").requireNoSelection();
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		window.textBox("panelOrderErrorMessage").requireText("");
+		window.comboBox("comboboxClients").requireNoSelection();
+		window.table("OrdersTable").requireNoSelection();
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("panelOrderErrorMessage").requireText("");
+
+		window.textBox("panelOrderErrorMessage").setText(" ");
+		window.table("OrdersTable").selectRows(0);
+		Order orderModified = GuiActionRunner.execute(() -> orderSwingView.getOrderTableModel().getOrderAt(0));
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		updates = new HashMap<String, Object>();
+		updates.put("date", newDate);
+		updates.put("price", 10.0);
+		updates.put("client", secondClient);
+		verify(orderController).modifyOrder(orderModified, updates);
+
+		window.table("OrdersTable").requireNoSelection();
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		window.textBox("textField_revenueOrder").requireEmpty();
+		window.textBox("panelOrderErrorMessage").requireText("");
+		window.comboBox("comboboxClients").requireNoSelection();
+		window.table("OrdersTable").requireNoSelection();
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
+
+		window.textBox("panelOrderErrorMessage").requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderButtonShouldDelegateToOrderControllerNewOrderWhenDayIsNotCorrect() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order newOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.table("OrdersTable").selectRows(0);
+		// pulisco il date text field dalla data attuale dell'ordine
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("0");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 0/1/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("32");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 32/1/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("29");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 29/2/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2000");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 30/2/2000 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("29");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2023");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 29/2/2023 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 30/2/2024 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("29");
+		window.textBox("textField_monthOfDateOrder").enterText("2");
+		window.textBox("textField_yearOfDateOrder").enterText("2100");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 29/2/2100 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("31");
+		window.textBox("textField_monthOfDateOrder").enterText("4");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 31/4/2025 non è corretta");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderButtonShouldDelegateToOrderControllerModifyOrderWhenMonthIsNotCorrect() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order newOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.table("OrdersTable").selectRows(0);
+		// pulisco il date text field dalla data attuale dell'ordine
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("13");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/13/2025 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("0");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/0/2025 non è corretta");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderButtonShouldDelegateToOrderControllerModifyOrderWhenYearIsNotCorrect() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order newOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.table("OrdersTable").selectRows(0);
+		// pulisco il date text field dalla data attuale dell'ordine
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2026");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/1/2026 non è corretta");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("1924");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+
+		window.textBox("textField_dayOfDateOrder").requireEmpty();
+		window.textBox("textField_monthOfDateOrder").requireEmpty();
+		window.textBox("textField_yearOfDateOrder").requireEmpty();
+		verifyNoInteractions(orderController);
+		window.textBox("panelOrderErrorMessage").requireText("La data 1/1/1924 non è corretta");
+
+	}
+
+	  
+	  
+	 
 
 }

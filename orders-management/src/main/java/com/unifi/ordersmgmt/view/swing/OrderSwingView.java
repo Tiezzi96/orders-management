@@ -11,13 +11,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -84,6 +87,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JTextField textFieldYearNewOrder;
 	private JTextField textFieldRevenueNewOrder;
 	private JButton btnNewOrder;
+	private JButton btnModifyOrder;
 
 	public OrderSwingView() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -383,6 +387,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panelOrderError.setBounds(10, 255, 340, 93);
 		panel_orderViewAndAdd.add(panelOrderError);
 
+		btnModifyOrder = new JButton();
+		btnModifyOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnModifyOrder.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnModifyOrder.setText("<html><center>Modifica<br>ordine</center></html>");
+		btnModifyOrder.setBounds(2, 400, 200, 45);
+		panel_orderView.add(btnModifyOrder);
+		btnModifyOrder.setEnabled(false);
+		btnModifyOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 		comboboxYears.addActionListener(new ActionListener() {
 
 			@Override
@@ -476,6 +488,102 @@ public class OrderSwingView extends JFrame implements OrderView {
 			orderController.deleteClient((Client) listClients.getSelectedValue());
 		});
 
+		KeyAdapter btnModifyOrderEnabler = new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				super.keyReleased(e);
+
+				checkCompleteModifyOrderInfo();
+
+			}
+		};
+
+		comboboxClients.addActionListener(e -> {
+			checkCompleteModifyOrderInfo();
+		});
+		textFieldDayNewOrder.addKeyListener(btnModifyOrderEnabler);
+		textFieldMonthNewOrder.addKeyListener(btnModifyOrderEnabler);
+		textFieldYearNewOrder.addKeyListener(btnModifyOrderEnabler);
+		textFieldRevenueNewOrder.addKeyListener(btnModifyOrderEnabler);
+		tableOrders.addKeyListener(btnModifyOrderEnabler);
+
+		tableOrders.getSelectionModel().addListSelectionListener(e -> {
+			if (tableOrders.getSelectedRow() != -1) {
+				Order order = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
+				logger.info("row of table order selected: {}", tableOrders.getSelectedRow());
+				LocalDate localDate = order.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				comboboxClients.setSelectedItem(order.getClient());
+				textFieldDayNewOrder.setText(String.valueOf(localDate.getDayOfMonth()));
+				textFieldMonthNewOrder.setText(String.valueOf(localDate.getMonthValue()));
+				textFieldYearNewOrder.setText(String.valueOf(localDate.getYear()));
+				textFieldRevenueNewOrder.setText(String.valueOf(order.getPrice()));
+				btnModifyOrder.setEnabled(true);
+			} else {
+				comboboxClients.setSelectedIndex(-1);
+				textFieldDayNewOrder.setText("");
+				textFieldMonthNewOrder.setText("");
+				textFieldYearNewOrder.setText("");
+				textFieldRevenueNewOrder.setText("");
+				btnModifyOrder.setEnabled(false);
+
+			}
+			checkCompleteModifyOrderInfo();
+		});
+
+		btnModifyOrder.addActionListener(e -> {
+			logger.info("Update order");
+			updateOrder();
+		});
+	}
+
+	private void updateOrder() {
+		// TODO Auto-generated method stub
+		Order orderToModify = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
+		Map<String, Object> updates = new HashMap<String, Object>();
+		updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
+		int day = 0;
+		int month = 0;
+		int year = 0;
+
+		day = Integer.valueOf(textFieldDayNewOrder.getText());
+
+		month = Integer.valueOf(textFieldMonthNewOrder.getText());
+
+		year = Integer.valueOf(textFieldYearNewOrder.getText());
+
+		LocalDateTime localDate = LocalDateTime.of(1900, 1, 1, 0, 0);
+		if (isValidDate(day, month, year)) {
+
+			Date newDate = Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant());
+			updates.put("date", newDate);
+			updates.put("date", newDate);
+			updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
+			updates.put("price", Double.valueOf(textFieldRevenueNewOrder.getText()));
+			panelOrderError.setText("");
+			orderController.modifyOrder(orderToModify, updates);
+			tableOrders.clearSelection();
+		} else {
+			panelOrderError.setText("La data " + day + "/" + month + "/" + year + " non è corretta");
+			textFieldDayNewOrder.setText("");
+			textFieldMonthNewOrder.setText("");
+			textFieldYearNewOrder.setText("");
+
+		}
+
+	}
+
+	private void checkCompleteModifyOrderInfo() {
+		if (((!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
+				&& (!textFieldYearNewOrder.getText().trim().isEmpty()))
+				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty()) && (comboboxClients.getSelectedIndex() != -1)
+				&& tableOrders.getSelectedRow() != -1) {
+
+			logger.info("Data for modify order are completed");
+			btnModifyOrder.setEnabled(true);
+		} else {
+			btnModifyOrder.setEnabled(false);
+		}
 	}
 
 	private void newOrder() {
@@ -886,7 +994,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 			} else if (clientSelected != null && clientSelected.equals(orderModified.getClient())) {
 
 				List<Order> ordersUpdated = new ArrayList<Order>();
-				logger.info("ordini pre modifica, cliente selezionato, anno non selezionato: {}", getOrderTableModel().getOrders());
+				logger.info("ordini pre modifica, cliente selezionato, anno non selezionato: {}",
+						getOrderTableModel().getOrders());
 				for (Order order : getOrderTableModel().getOrders()) {
 					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
 						ordersUpdated.add(order);
