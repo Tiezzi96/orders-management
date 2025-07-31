@@ -601,6 +601,20 @@ public class OrderSwingView extends JFrame implements OrderView {
 				getOrderTableModel().removedAllOrders();
 				panelOrderError.setText("Non sono presenti ordini per il " + getYearSelected());
 			}
+			if (listClients.getSelectedIndex() != -1 && !aYearIsSelected) {
+				getOrderTableModel().removedAllOrders();
+				panelOrderError.setText("Non ci sono ordini per il cliente " + getClientSelected().getIdentifier());
+				lblrevenue.setText("");
+
+			}
+
+			if (listClients.getSelectedIndex() != -1 && aYearIsSelected) {
+				logger.info("cliente selezionato, anno selezionato ma non ci sono ordini");
+				getOrderTableModel().removedAllOrders();
+				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
+						+ " per il cliente " + getClientSelected().getIdentifier());
+				lblrevenue.setText("");
+			}
 
 			// cliente selezionato e anno selezionato, ma nessun ordine
 			if (listClients.getSelectedIndex() != -1 && aYearIsSelected) {
@@ -648,6 +662,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() != -1) {
 			lblrevenue.setText("Il costo totale degli ordini nel " + comboboxYears.getSelectedItem() + " è di "
+					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
+					+ "€");
+
+		}
+		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() == -1) {
+			lblrevenue.setText("Il costo totale degli ordini presenti nel DB è di "
 					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
 					+ "€");
 
@@ -818,10 +838,26 @@ public class OrderSwingView extends JFrame implements OrderView {
 			yearSelected = Integer
 					.parseInt(getComboboxYearsModel().getElementAt(comboboxYears.getSelectedIndex()).toString());
 		}
+		Client clientSelected = null;
+		if (listClients.getSelectedIndex() != -1) {
+			clientSelected = getClientListModel().getElementAt(listClients.getSelectedIndex());
+		}
 
 		if (orderModified.getIdentifier() != null) {
 
-			if (yearSelected != null
+			if (yearSelected == null && clientSelected == null) {
+				List<Order> ordersUpdated = new ArrayList<>();
+				for (Order order : getOrderTableModel().getOrders()) {
+					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
+						ordersUpdated.add(order);
+					} else {
+						isOrderIDPresent = true;
+						ordersUpdated.add(orderModified);
+					}
+				}
+				showAllOrders(ordersUpdated);
+
+			} else if (yearSelected != null
 					&& orderModified.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear() == yearSelected) {
 
 				List<Order> ordersUpdated = new ArrayList<Order>();
@@ -832,7 +868,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 						ordersUpdated.add(order);
 					} else {
 						isOrderIDPresent = true;
-						ordersUpdated.add(orderModified);
+						if (clientSelected != null && clientSelected.equals(orderModified.getClient())) {
+							ordersUpdated.add(orderModified);
+						}
+						if (clientSelected == null) {
+							ordersUpdated.add(orderModified);
+						}
 
 					}
 				}
@@ -842,6 +883,30 @@ public class OrderSwingView extends JFrame implements OrderView {
 				} else {
 					getOrderTableModel().addOrder(orderModified);
 				}
+			} else if (clientSelected != null && clientSelected.equals(orderModified.getClient())) {
+
+				List<Order> ordersUpdated = new ArrayList<Order>();
+				logger.info("ordini pre modifica, cliente selezionato, anno non selezionato: {}", getOrderTableModel().getOrders());
+				for (Order order : getOrderTableModel().getOrders()) {
+					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
+						ordersUpdated.add(order);
+					} else {
+						if (yearSelected == null) { // se l'anno non filtra, tengo quello modificato
+							ordersUpdated.add(orderModified);
+						}
+					}
+				}
+				showAllOrders(ordersUpdated);
+
+			} else {
+
+				List<Order> ordersUpdated = new ArrayList<>();
+				for (Order order : getOrderTableModel().getOrders()) {
+					if (!order.getIdentifier().equals(orderModified.getIdentifier())) {
+						ordersUpdated.add(order);
+					}
+				}
+				showAllOrders(ordersUpdated);
 			}
 		}
 		if (!getOrderTableModel().getOrders().isEmpty()) {
