@@ -437,7 +437,10 @@ public class OrderSwingView extends JFrame implements OrderView {
 					if (selectedValue != null) {
 						orderController.allOrdersByClient(selectedValue);
 						logger.info("selected index on combobobox Years: {}" + comboboxYears.getSelectedIndex());
-
+					}else {
+						// bisogna mostrare tutti i clienti
+						logger.info("mostra tutti gli ordini dei client di tutti gli anni");
+						orderController.getAllOrders();
 					}
 				}
 				if (comboboxYears.getSelectedIndex() != -1) {
@@ -932,7 +935,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	public void clientAdded(Client clientAdded) {
 		// TODO Auto-generated method stub
 		clientListModel.addElement(clientAdded);
-		// mantiene la selezione vecchia del comboboxclient dopo l'inserimento
+		// mantiene la selezione vecchia del ComboBoxclient dopo l'inserimento
 		Object selectedItem = comboboxClientsModel.getSelectedItem();
 		comboboxClientsModel.addElement(clientAdded);
 		comboboxClientsModel.setSelectedItem(selectedItem);

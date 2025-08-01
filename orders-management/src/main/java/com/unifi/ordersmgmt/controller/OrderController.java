@@ -137,4 +137,9 @@ public class OrderController {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void getAllOrders() {
+		// TODO Auto-generated method stub
+		
+	}
 }

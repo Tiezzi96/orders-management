@@ -1803,7 +1803,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_revenueOrder").enterText("");
 		window.comboBox("comboboxClients").selectItem(0);
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
-		// no combobox clients item selected. Buttno modify order disabled
+		// no ComboBox clients item selected. Button modify order disabled
 		window.textBox("textField_revenueOrder").setText("");
 		window.textBox("textField_revenueOrder").enterText("10.00");
 		window.textBox("textField_dayOfDateOrder").setText("");
@@ -2469,6 +2469,22 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("clientsList").clearSelection();
 		verify(orderController, times(2)).allOrdersByYear(2024);
 
+	}
+	
+	@Test
+	@GUITest
+	public void testSelectNoClientAndNoYeaItemrShouldDelegateOrderControllerFindAllOrders() {
+		Client client = new Client("1", "client1");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(client);
+			orderSwingView.getComboboxClientsModel().addElement(client);
+		});
+		window.comboBox("yearsCombobox").selectItem(2);
+		window.list("clientsList").clearSelection();
+		verify(orderController).getAllOrders();
 	}
 
 }
