@@ -19,11 +19,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.text.JTextComponent;
@@ -95,15 +97,23 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testInitializeOrderView() {
-		window.label(JLabelMatcher.withText("CLIENTI"));
 		window.list("clientsList");
 		window.label(JLabelMatcher.withText("NUOVO CLIENTE"));
 		window.label(JLabelMatcher.withText("INFO ORDINE"));
 		window.label(JLabelMatcher.withText("Identificativo"));
+		window.label(JLabelMatcher.withName("revenueLabel"));
+		window.label(JLabelMatcher.withText("CLIENTI"));
+		window.label(JLabelMatcher.withText("Cliente"));
+		window.label(JLabelMatcher.withText("Data"));
+		window.label(JLabelMatcher.withText("Importo"));
+		window.label(JLabelMatcher.withText("€"));
+		
+
+		
 		window.textBox("panelClientErrorMessage").requireText("");
 		window.textBox("panelClientErrorMessage").requireNotEditable();
-		window.textBox("textField_clientName").requireEnabled();
-
+		window.textBox("panelOrderErrorMessage").requireText("");
+		window.textBox("panelOrderErrorMessage").requireNotEditable();
 		window.textBox("textField_clientName").requireEnabled();
 		window.textBox("textField_dayOfDateOrder").requireEnabled();
 		window.textBox("textField_monthOfDateOrder").requireEnabled();
@@ -115,15 +125,13 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).requireDisabled();
-		window.button(
-				JButtonMatcher.withText(Pattern.compile("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")))
+		window.button(JButtonMatcher
+				.withText(Pattern.compile("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")))
 				.requireNotVisible();
 
-		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.comboBox("comboboxClients");
 		window.comboBox("yearsCombobox");
-		window.textBox("panelOrderErrorMessage").requireText("");
-		window.textBox("panelOrderErrorMessage").requireNotEditable();
+		
 
 		window.table("OrdersTable").requireColumnCount(4);
 		window.table("OrdersTable").requireColumnNamed("Data");
@@ -1672,9 +1680,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				"" + firstOrderModified.getPrice());
 
 	}
-	
-	
-	 	@Test
+
+	@Test
 	@GUITest
 	public void testWhenTableOrdersRowIsSelectedOrderTextFieldsShouldBeReportOrderData() {
 		Client newClient = new Client("1", "new Client id");
@@ -2125,8 +2132,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.comboBox("comboboxClients").requireNoSelection();
 	}
 
-	
-
 	@Test
 	@GUITest
 	public void testOrderAddedWhenItsClientIsSelectedAndResetErrorLabel() {
@@ -2156,7 +2161,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
 
 	}
-	
+
 	@RunsInEDT
 	@Test
 	@GUITest
@@ -2186,13 +2191,15 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 		window.list("clientsList").selectItem(0);
 		window.comboBox("yearsCombobox").selectItem("" + 2024);
-		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")).click();
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
+				.click();
 		verify(orderController).allOrdersByYear(2024);
 		window.list("clientsList").requireNoSelection();
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
 				.requireNotVisible();
 
 	}
+
 	@Test
 	@GUITest
 	public void testOrderAddedWhenItsClientIsNotSelectedAndResetErrorLabel() {
@@ -2224,7 +2231,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testOrderAddedWhenItsClientIsNotSelectedShouldVerifyOrderControllerYearsofTheOrders() {
@@ -2285,7 +2292,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndNoClientNoYearSelected() {
@@ -2367,8 +2374,101 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("clientsList").selectItem(0);
 		verify(orderController).allOrdersByClient(client);
 	}
- 
-	  
-	 
+
+	@Test
+	@GUITest
+	public void testSetYearsOrdersShouldResetNoSelectionWhenComboBoxYearsIsUpdated() {
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2024));
+		});
+		window.comboBox("yearsCombobox").selectItem(2);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2023, 2024));
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
+				"-- Nessun anno --");
+		window.comboBox("yearsCombobox").requireNoSelection();
+	}
+
+	@Test
+	@GUITest
+	public void testSetYearsOrdersShouldresetSelectionWithoutOtherSelections() {
+		AtomicInteger calls = new AtomicInteger();
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2024));
+		});
+		window.comboBox("yearsCombobox").selectItem(1);
+		JComboBox years = window.comboBox("yearsCombobox").target();
+		GuiActionRunner.execute(() -> {
+			years.addActionListener(e -> calls.incrementAndGet());
+			orderSwingView.setYearsOrders(asList(2025, 2023, 2024));
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
+				"-- Nessun anno --");
+		window.comboBox("yearsCombobox").requireSelection("" + 2024);
+		assertThat(calls.get()).isEqualTo(1);
+
+	}
+
+	@Test
+	@GUITest
+	public void testSetYearsOrderShouldClearSelectionIfPreviouslySelectedItemIsNoLongerAvailable() {
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2024));
+		});
+		window.comboBox("yearsCombobox").selectItem(1);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2023));
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2023,
+				"-- Nessun anno --");
+		window.comboBox("yearsCombobox").requireNoSelection();
+	}
+
+	@Test
+	@GUITest
+	public void testUpdateTotalPriceWhenShowAllOrdersAndNoClientNoYearSelected() {
+		Client firstClient = new Client("1", "first client identifier");
+		Client secondClient = new Client("2", "second client identifier");
+		Order firstOrder = new Order("1", firstClient, new Date(), 10.1);
+		Order secondOrder = new Order("2", firstClient, new Date(), 10.1);
+		Order thirdOrder = new Order("3", secondClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.1);
+		JTextComponent panelOrderError = window.textBox("panelOrderErrorMessage").target();
+		GuiActionRunner.execute(() -> {
+			panelOrderError.setText(" ");
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+		});
+		window.list("clientsList").clearSelection();
+		window.comboBox("yearsCombobox").clearSelection();
+		GuiActionRunner.execute(() -> {
+			orderSwingView.showAllOrders(asList(firstOrder, secondOrder, thirdOrder));
+		});
+		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di "
+				+ String.format("%.2f", firstOrder.getPrice() + secondOrder.getPrice() + thirdOrder.getPrice()) + "€");
+		window.textBox("panelOrderErrorMessage").requireText("");
+
+	}
+	
+	@Test
+	@GUITest
+	public void testShowAllOrdersByYearShouldbeRefreshWhenAnyClientIsSelected() {
+		Client firstClient = new Client("1", "first client id");
+		Client secondClient = new Client("2", "second client id");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getClientListModel().addElement(secondClient);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+		});
+		window.comboBox("yearsCombobox").selectItem(0);
+		window.list("clientsList").selectItem(0);
+		window.list("clientsList").clearSelection();
+		verify(orderController, times(2)).allOrdersByYear(2024);
+
+	}
 
 }

@@ -358,6 +358,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblRevenueNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		lblRevenueNewOrder.setBounds(33, 129, 84, 16);
 		panel_orderViewAndAdd.add(lblRevenueNewOrder);
+		
+		JLabel lblRevenueNewOrder_1 = new JLabel("€");
+		lblRevenueNewOrder_1.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblRevenueNewOrder_1.setBounds(270, 124, 15, 16);
+		panel_orderViewAndAdd.add(lblRevenueNewOrder_1);
 
 		JSeparator separator_1_1_1_1 = new JSeparator();
 		separator_1_1_1_1.setForeground(new Color(0, 0, 0));
@@ -414,6 +419,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 		btnShowAllClientsOrders.setBounds(204, 2, 200, 45);
 		btnShowAllClientsOrders.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 		panel_orderView.add(btnShowAllClientsOrders);
+		
+		JPanel panel_headBar = new JPanel();
+		panel_headBar.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		panel_headBar.setBounds(0, 0, 1000, 53);
+		contentPane.add(panel_headBar);
 
 		comboboxYears.addActionListener(new ActionListener() {
 
@@ -739,6 +749,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void setYearsOrders(List<Integer> yearsOfOrders) {
 		// TODO Auto-generated method stub
+		boolean wasEmpty = comboboxYears.getItemCount() == 0;
+		Integer prevSelection = (Integer) comboboxYears.getSelectedItem();
+
+		ActionListener[] ls = comboboxYears.getActionListeners();
+		for (ActionListener l : ls)
+			comboboxYears.removeActionListener(l);
+
 		comboboxYearsModel.removeAllElements();
 		Collections.sort(yearsOfOrders, Collections.reverseOrder());
 		logger.info("yearsOfTheOrders: {}", yearsOfOrders);
@@ -750,6 +767,21 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 
 		comboboxYearsModel.addElement(NO_YEAR_ITEM);
+
+		for (ActionListener l : ls)
+			comboboxYears.addActionListener(l);
+
+		if (wasEmpty) {
+			comboboxYears.setSelectedItem(2025);
+
+		} else {
+			Integer toSelect = (prevSelection != null && yearsOfOrders.contains(prevSelection)) ? prevSelection : null;
+			if (toSelect != null) {
+				comboboxYears.setSelectedItem(toSelect); // nessun evento perché i listener sono staccati
+			} else {
+				comboboxYears.setSelectedIndex(-1);
+			}
+		}
 
 	}
 
