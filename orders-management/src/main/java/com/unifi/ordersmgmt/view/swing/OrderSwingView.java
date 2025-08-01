@@ -423,6 +423,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 				if (comboboxYears.getSelectedIndex() != -1 && comboboxYears.getSelectedItem().equals(NO_YEAR_ITEM)) {
 					comboboxYears.setSelectedIndex(-1);
+					Client selectedValue = (Client) listClients.getSelectedValue();
+					if (selectedValue != null) {
+						orderController.allOrdersByClient(selectedValue);
+						logger.info("selected index on combobobox Years: {}" + comboboxYears.getSelectedIndex());
+
+					}
 				}
 				if (comboboxYears.getSelectedIndex() != -1) {
 					logger.info("anno selezionato");
@@ -501,14 +507,20 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 			}
 			if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() != -1) {
-				// System.out.println("Selezionato cliente");
 				Integer yearSelected = (Integer) comboboxYears.getSelectedItem();
 				Client clientSelected = (Client) listClients.getSelectedValue();
-				System.out.println("yearselected: " + yearSelected);
+				logger.info("yearselected: {}", yearSelected);
 				if (clientSelected != null) {
 					orderController.findOrdersByYearAndClient(clientSelected, yearSelected);
 				} else {
 					orderController.allOrdersByYear(yearSelected);
+				}
+			}
+			if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() == -1) {
+				Client clientSelected = (Client) listClients.getSelectedValue();
+				if (clientSelected != null) {
+					logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
+					orderController.allOrdersByClient(clientSelected);
 				}
 			}
 
@@ -754,6 +766,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 				currentYearIsNotSelected = true;
 			}
 
+		} else {
+			logger.info("show all orders anno non selezionato");
+			orderController.yearsOfTheOrders(); // se aggiungo un ordine che non appartiene al cliente selezionato devo
+												// chiamare il metodo per controllare che l'anno, se non presente nel
+												// combobox, sia aggiunto
+			comboboxYears.setSelectedIndex(-1);
 		}
 		if (orders.isEmpty()) {
 			logger.info("orders is Empty");
@@ -789,6 +807,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
 						+ " per il cliente " + clientSelected.getIdentifier());
 				lblrevenue.setText("");
+			}
+
+			if (clientSelected == null && !aYearIsSelected) {
+				getOrderTableModel().removedAllOrders();
+				panelOrderError.setText("Non sono presenti ordini");
+				lblrevenue.setText("");
+
 			}
 			return;
 

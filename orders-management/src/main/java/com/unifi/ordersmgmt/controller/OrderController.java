@@ -132,4 +132,9 @@ public class OrderController {
 			}
 		}
 	}
+
+	public void allOrdersByClient(Client client) {
+		// TODO Auto-generated method stub
+		
+	}
 }

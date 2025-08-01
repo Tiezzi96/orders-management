@@ -2285,6 +2285,88 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
 
 	}
+	
+	@Test
+	@GUITest
+	public void testResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndNoClientNoYearSelected() {
+		Client newClient = new Client("1", "test id 1");
+		JLabelFixture revenueLabel = window.label("revenueLabel");
+		GuiActionRunner.execute(() -> {
+
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			revenueLabel.target().setText(" ");
+			orderSwingView.getClientListModel().addElement(newClient);
+		});
+		window.list("clientsList").clearSelection();
+		window.comboBox("yearsCombobox").clearSelection();
+		GuiActionRunner.execute(() -> {
+			orderSwingView.showAllOrders(asList());
+		});
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage"))
+				.requireText("Non sono presenti ordini");
+		window.label("revenueLabel").requireText("");
+		assertThat(window.table("OrdersTable").contents()).isEmpty();
+		verify(orderController, times(1)).yearsOfTheOrders();
+	}
+
+	@Test
+	@GUITest
+	public void testResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndNoYearSelected() {
+		Client newClient = new Client("1", "test id 1");
+		JLabelFixture revenueLabel = window.label("revenueLabel");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getClientListModel().addElement(newClient);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			revenueLabel.target().setText(" ");
+			orderSwingView.getClientListModel().addElement(newClient);
+		});
+		window.list("clientsList").selectItem(0);
+		window.comboBox("yearsCombobox").clearSelection();
+		GuiActionRunner.execute(() -> {
+			orderSwingView.showAllOrders(asList());
+		});
+		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage"))
+				.requireText("Non ci sono ordini per il cliente 1");
+		window.label("revenueLabel").requireText("");
+		assertThat(window.table("OrdersTable").contents()).isEmpty();
+		verify(orderController, times(1)).yearsOfTheOrders();
+	}
+
+	@Test
+	@GUITest
+	public void testSelectNoYearsItemAndClientShouldDelegateOrderControllerFindOrdersByClient() {
+		Client client = new Client("1", "client1");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(client);
+			orderSwingView.getComboboxClientsModel().addElement(client);
+		});
+		window.list("clientsList").selectItem(0);
+		window.comboBox("yearsCombobox").selectItem(2);
+		verify(orderController).allOrdersByClient(client);
+	}
+
+	@Test
+	@GUITest
+	public void testSelectClientAndNoYearShouldDelegateOrderControllerFindOrdersByClient() {
+		Client client = new Client("1", "client1");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(client);
+			orderSwingView.getComboboxClientsModel().addElement(client);
+		});
+		window.comboBox("yearsCombobox").selectItem(2);
+		window.list("clientsList").selectItem(0);
+		verify(orderController).allOrdersByClient(client);
+	}
  
 	  
 	 
