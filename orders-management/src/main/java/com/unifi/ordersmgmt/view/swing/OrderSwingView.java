@@ -541,6 +541,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	public void yearSelection(ActionEvent e) {
+		logger.info("selezione anno avviata");
 		Object selectedItem = comboboxYears.getSelectedItem();
 		Integer selectedIndex = comboboxYears.getSelectedIndex();
 		Client clientselected = listClients.getSelectedValue();
@@ -572,6 +573,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void updateOrder() {
+		logger.info("richiesta aggiornamento ordine");
 		Order orderToModify = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
@@ -618,6 +620,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void newOrder() {
+		logger.info("richiesta aggiunta ordine");
 		int day = Integer.parseInt(textFieldDayNewOrder.getText());
 
 		int month = Integer.parseInt(textFieldMonthNewOrder.getText());
@@ -736,6 +739,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void showAllOrders(List<Order> orders) {
+		logger.info("mostra gli ordini in tabella");
 		boolean currentYearIsNotSelected = false;
 		boolean aYearIsSelected = false;
 		logger.info("comboboxYears.getSelectedIndex(): {}", comboboxYears.getSelectedIndex());
@@ -827,6 +831,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void resetRevenueLabel(List<Order> orders) {
+		logger.info("reimposta totale prezzo");
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() != -1) {
 			Client clientSelected = listClients.getSelectedValue();
 			String totalCostTemplate = "Il costo totale degli ordini del cliente %s nel %s è di %s€";
