@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,6 +45,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.DocumentFilter;
 
@@ -130,8 +132,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_clientManagement.add(scrollPaneClientsList);
 
 		clientListModel = new DefaultListModel<>();
-		// clientListModel.addElement(new Client("CLIENT-00001", "Marta").toString());
-		// clientListModel.addElement(new Client("2", "Martino").toString());
 		listClients = new JList<>(clientListModel);
 		listClients.setFont(new Font(FONT_TEXT, Font.BOLD, 16));
 		listClients.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -264,14 +264,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 		scrollPanelOrdersList.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		orderTableModel = new OrderTableModel();
 
-		// orderTableModel = new DefaultTableModel();
 
 		tableOrders = new TableOrder(orderTableModel);
-		// orderTableModel.addOrder(new Order("ORDER-00001", new Client("CLIENT-00001",
-		// "Marta"), new Date(), 10.0));
-
-		// tableOrders.setBackground(Color.YELLOW);
-
 		tableOrders.setBorder(new EmptyBorder(0, 0, 0, 0));
 		tableOrders.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableOrders.setFont(new Font(FONT_TEXT, Font.PLAIN, 13));
@@ -358,7 +352,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblRevenueNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		lblRevenueNewOrder.setBounds(33, 129, 84, 16);
 		panel_orderViewAndAdd.add(lblRevenueNewOrder);
-		
+
 		JLabel lblRevenueNewOrder_1 = new JLabel("€");
 		lblRevenueNewOrder_1.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		lblRevenueNewOrder_1.setBounds(270, 124, 15, 16);
@@ -419,44 +413,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 		btnShowAllClientsOrders.setBounds(204, 2, 200, 45);
 		btnShowAllClientsOrders.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 		panel_orderView.add(btnShowAllClientsOrders);
-		
+
 		JPanel panel_headBar = new JPanel();
 		panel_headBar.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
 		panel_headBar.setBounds(0, 0, 1000, 53);
 		contentPane.add(panel_headBar);
 
-		comboboxYears.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-
-				if (comboboxYears.getSelectedIndex() != -1 && comboboxYears.getSelectedItem().equals(NO_YEAR_ITEM)) {
-					comboboxYears.setSelectedIndex(-1);
-					Client selectedValue = (Client) listClients.getSelectedValue();
-					if (selectedValue != null) {
-						orderController.allOrdersByClient(selectedValue);
-						logger.info("selected index on combobobox Years: {}" + comboboxYears.getSelectedIndex());
-					}else {
-						// bisogna mostrare tutti i clienti
-						logger.info("mostra tutti gli ordini dei client di tutti gli anni");
-						orderController.getAllOrders();
-					}
-				}
-				if (comboboxYears.getSelectedIndex() != -1) {
-					logger.info("anno selezionato");
-					Integer actionSelected = (Integer) comboboxYears.getSelectedItem();
-					Client selectedValue = (Client) listClients.getSelectedValue();
-					logger.info(selectedValue);
-					if (selectedValue != null) {
-						orderController.findOrdersByYearAndClient(selectedValue, actionSelected.intValue());
-					} else {
-						orderController.allOrdersByYear(actionSelected.intValue());
-					}
-				}
-
-			}
-		});
+		comboboxYears.addActionListener(this::yearSelection);
 
 		KeyAdapter btnNewOrderEnabler = new KeyAdapter() {
 			@Override
@@ -509,35 +472,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 				}, ""));
 
-		listClients.addListSelectionListener(e -> {
-			if (listClients.getSelectedIndex() != -1) {
-				btnShowAllClientsOrders.setVisible(true);
-				btnRemoveClient.setEnabled(true);
-				panelOrderError.setText("");
-			} else {
-				btnShowAllClientsOrders.setVisible(false);
-				btnRemoveClient.setEnabled(false);
-
-			}
-			if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() != -1) {
-				Integer yearSelected = (Integer) comboboxYears.getSelectedItem();
-				Client clientSelected = (Client) listClients.getSelectedValue();
-				logger.info("yearselected: {}", yearSelected);
-				if (clientSelected != null) {
-					orderController.findOrdersByYearAndClient(clientSelected, yearSelected);
-				} else {
-					orderController.allOrdersByYear(yearSelected);
-				}
-			}
-			if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() == -1) {
-				Client clientSelected = (Client) listClients.getSelectedValue();
-				if (clientSelected != null) {
-					logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
-					orderController.allOrdersByClient(clientSelected);
-				}
-			}
-
-		});
+		listClients.addListSelectionListener(this::clientListSelection);
 
 		btnNewClient.addActionListener(e -> {
 			orderController.addClient(new Client(textFieldNewClient.getText()));
@@ -619,6 +554,68 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldMonthNewOrder.setText("");
 		textFieldYearNewOrder.setText("");
 		textFieldRevenueNewOrder.setText("");
+
+	}
+
+	public void clientListSelection(ListSelectionEvent e) {
+
+		if (listClients.getSelectedIndex() != -1) {
+			btnShowAllClientsOrders.setVisible(true);
+			btnRemoveClient.setEnabled(true);
+			panelOrderError.setText("");
+		} else {
+			btnShowAllClientsOrders.setVisible(false);
+			btnRemoveClient.setEnabled(false);
+
+		}
+		if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() != -1) {
+			Integer yearSelected = (Integer) comboboxYears.getSelectedItem();
+			Client clientSelected = (Client) listClients.getSelectedValue();
+			logger.info("yearselected: {}", yearSelected);
+			if (clientSelected != null) {
+				orderController.findOrdersByYearAndClient(clientSelected, yearSelected);
+			} else {
+				orderController.allOrdersByYear(yearSelected);
+			}
+		}
+		if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() == -1) {
+			Client clientSelected = (Client) listClients.getSelectedValue();
+			if (clientSelected != null) {
+				logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
+				orderController.allOrdersByClient(clientSelected);
+			}
+		}
+
+	}
+
+	public void yearSelection(ActionEvent e) {
+		Object selectedItem = comboboxYears.getSelectedItem();
+		Integer selectedIndex = comboboxYears.getSelectedIndex();
+		Client clientselected = listClients.getSelectedValue();
+
+		boolean noYearSelected = selectedIndex != -1 && selectedItem.equals(NO_YEAR_ITEM);
+		boolean validYearSelected = selectedIndex != -1 && selectedItem instanceof Integer;
+
+		if (noYearSelected) {
+			comboboxYears.setSelectedIndex(-1);
+			if (clientselected != null) {
+				orderController.allOrdersByClient(clientselected);
+				logger.info("selected index on combobobox Years: {}" + selectedIndex);
+			} else {
+				// bisogna mostrare tutti i clienti
+				logger.info("mostra tutti gli ordini dei client di tutti gli anni");
+				orderController.getAllOrders();
+			}
+		}
+		if (validYearSelected) {
+			Integer selectedYear = (Integer) selectedItem;
+			if (clientselected != null) {
+				orderController.findOrdersByYearAndClient(clientselected, selectedYear.intValue());
+			} else {
+				orderController.allOrdersByYear(selectedYear.intValue());
+			}
+
+		}
 
 	}
 
@@ -815,40 +812,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 			if (currentYearIsNotSelected && listClients.getSelectedIndex() == -1) {
 				orderController.yearsOfTheOrders();
 				return;
-			}
-			// anno selezionato (qualsiasi) ma non ci sono ordini
-			if (!currentYearIsNotSelected && aYearIsSelected) {
-				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non sono presenti ordini per il " + yearSelected);
-			}
-			if (clientSelected != null && !aYearIsSelected) {
-				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non ci sono ordini per il cliente " + clientSelected.getIdentifier());
-				lblrevenue.setText("");
+			} else {
 
-			}
-
-			if (clientSelected != null && aYearIsSelected) {
-				logger.info("cliente selezionato, anno selezionato ma non ci sono ordini");
-				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
-						+ " per il cliente " + clientSelected.getIdentifier());
-				lblrevenue.setText("");
-			}
-
-			// cliente selezionato e anno selezionato, ma nessun ordine
-			if (clientSelected != null && aYearIsSelected) {
-				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
-						+ " per il cliente " + clientSelected.getIdentifier());
-				lblrevenue.setText("");
-			}
-
-			if (clientSelected == null && !aYearIsSelected) {
-				getOrderTableModel().removedAllOrders();
-				panelOrderError.setText("Non sono presenti ordini");
-				lblrevenue.setText("");
-
+				extracted(currentYearIsNotSelected, aYearIsSelected, yearSelected, clientSelected);
 			}
 			return;
 
@@ -859,6 +825,36 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 		resetRevenueLabel(orders);
 
+	}
+
+	private void extracted(boolean currentYearIsNotSelected, boolean aYearIsSelected, Integer yearSelected,
+			Client clientSelected) {
+		// anno selezionato (qualsiasi) ma non ci sono ordini
+		if (!currentYearIsNotSelected && aYearIsSelected) {
+			getOrderTableModel().removedAllOrders();
+			panelOrderError.setText("Non sono presenti ordini per il " + yearSelected);
+		}
+		if (clientSelected != null && !aYearIsSelected) {
+			getOrderTableModel().removedAllOrders();
+			panelOrderError.setText("Non ci sono ordini per il cliente " + clientSelected.getIdentifier());
+			lblrevenue.setText("");
+
+		}
+
+		if (clientSelected != null && aYearIsSelected) {
+			logger.info("cliente selezionato, anno selezionato ma non ci sono ordini");
+			getOrderTableModel().removedAllOrders();
+			panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
+					+ " per il cliente " + clientSelected.getIdentifier());
+			lblrevenue.setText("");
+		}
+
+		if (clientSelected == null && !aYearIsSelected) {
+			getOrderTableModel().removedAllOrders();
+			panelOrderError.setText("Non sono presenti ordini");
+			lblrevenue.setText("");
+
+		}
 	}
 
 	private Client getClientSelected() {
@@ -885,31 +881,35 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private void resetRevenueLabel(List<Order> orders) {
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() != -1) {
 			Client clientSelected = (Client) listClients.getSelectedValue();
-			lblrevenue
-					.setText("Il costo totale degli ordini del cliente " + clientSelected.getIdentifier() + " nel "
-							+ comboboxYears.getSelectedItem() + " è di "
-							+ String.format("%.2f", (orders.stream()
+			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini del cliente %s nel %s è di %s€";
+			String message = String
+					.format(TOTAL_COST_TEMPLATE, clientSelected.getIdentifier(), comboboxYears.getSelectedItem(),
+							String.format("%.2f", (orders.stream()
 									.filter(o -> o.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 											.getYear() == Integer.valueOf(comboboxYears.getSelectedItem().toString()))
-									.mapToDouble(Order::getPrice).sum())).replace(".", ",")
-							+ "€");
+									.mapToDouble(Order::getPrice).sum())).replace(".", ","));
+			lblrevenue.setText(message);
 		}
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() == -1) {
 			Client clientSelected = (Client) listClients.getSelectedValue();
-			lblrevenue.setText("Il costo totale degli ordini del cliente " + clientSelected.getIdentifier() + " è di "
-					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
-					+ "€");
+			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini del cliente %s è di %s€";
+			String message = String.format(TOTAL_COST_TEMPLATE, clientSelected.getIdentifier(),
+					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
+			lblrevenue.setText(message);
+
 		}
 		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() != -1) {
-			lblrevenue.setText("Il costo totale degli ordini nel " + comboboxYears.getSelectedItem() + " è di "
-					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
-					+ "€");
+			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini nel %s è di %s€";
+			String message = String.format(TOTAL_COST_TEMPLATE, comboboxYears.getSelectedItem(),
+					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
+			lblrevenue.setText(message);
 
 		}
 		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() == -1) {
-			lblrevenue.setText("Il costo totale degli ordini presenti nel DB è di "
-					+ String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ",")
-					+ "€");
+			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini presenti nel DB è di %s€";
+			String message = String.format(TOTAL_COST_TEMPLATE,
+					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
+			lblrevenue.setText(message);
 
 		}
 
@@ -996,71 +996,69 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		Object selectedItem = getComboboxYearsModel().getSelectedItem();
 		logger.info(": {}", selectedItem);
-		int yearSelected = -1;
 		if (selectedItem != null) {
-			yearSelected = (Integer) selectedItem;
-			logger.info("orderselected: {}", orderSelected);
-			logger.info("yearsoFOrder: {}", yearOfOrder);
-
-			if (getComboboxYearsModel().getIndexOf(yearOfOrder) == -1) {
-				List<Object> items = getAllElements(getComboboxYearsModel());
-				items.add(yearOfOrder);
-				logger.info("years: {}", items);
-				items.remove(Pattern.compile(NO_YEAR_ITEM));
-				List<Integer> years = items.stream().map(obj -> (Integer) obj).collect(Collectors.toList());
-				Collections.sort(years);
-				Collections.reverse(years);
-				getComboboxYearsModel().removeAllElements();
-				for (Integer integer : years) {
-					getComboboxYearsModel().addElement(integer);
-				}
-				getComboboxYearsModel().addElement(NO_YEAR_ITEM);
-				getComboboxYearsModel().setSelectedItem(yearSelected);
-			}
-
-			if (yearSelected == yearOfOrder) {
-				getOrderTableModel().addOrder(orderAdded);
-				logger.info("orderAdded function: orders: {}", getOrderTableModel().getOrders());
-				// usa la deepCopy, si puo anche fare altro
-				List<Order> ordersList = new ArrayList<Order>(getOrderTableModel().getOrders());
-				showAllOrders(ordersList);
-
-			}
-			if (orderSelected != null) {
-				logger.info("order select index");
-				int orderSelectedIndex = getOrderTableModel().getOrderIndex(orderSelected);
-				tableOrders.setRowSelectionInterval(orderSelectedIndex, orderSelectedIndex);
-			}
+			handleYearSelectedCase(orderAdded, orderSelected, yearOfOrder, selectedItem);
 
 		}
 		if (selectedItem == null && listClients.getSelectedIndex() != -1) {
-			Client clientSelected = getClientListModel().getElementAt(listClients.getSelectedIndex());
-			// se l'ordine è del cliente che l'utente sta guardando, lo aggiungiamo
-			if (clientSelected.equals(orderAdded.getClient())) {
-				getOrderTableModel().addOrder(orderAdded);
-				// Copia per passare a showAllOrders
-				List<Order> ordersList = new ArrayList<Order>(getOrderTableModel().getOrders());
-				showAllOrders(ordersList);
-				// Qui la view sta mostrando tutti gli ordini del cliente (senza filtro anno)
-				// showAllOrders applicherà la logica coerente (client selezionato, anno non
-				// selezionato)
-			} else {
-				if (comboboxYearsModel
-						.getIndexOf(orderAdded.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear()) == -1) {
-
-					orderController.yearsOfTheOrders(); // nel caso l'anno dell'ordine non sia contenuto nella lista
-														// degli ordini
-				}
-			}
+			handleOnlyClientSelectedCase(orderAdded);
 		} // Se non c’è né anno né cliente selezionati, mostriamo “tutti gli ordini”
 		if (selectedItem == null && listClients.getSelectedIndex() == -1) {
-			getOrderTableModel().addOrder(orderAdded);
-			List<Order> ordersList = new ArrayList<>(getOrderTableModel().getOrders());
-			showAllOrders(ordersList);
+			addOrderAndRefreshtable(orderAdded);
 		}
 		// reset error label
 		panelOrderError.setText("");
 
+	}
+
+	private void handleOnlyClientSelectedCase(Order orderAdded) {
+		Client clientSelected = getClientListModel().getElementAt(listClients.getSelectedIndex());
+		// se l'ordine è del cliente che l'utente sta guardando, lo aggiungiamo
+		if (clientSelected.equals(orderAdded.getClient())) {
+			addOrderAndRefreshtable(orderAdded);
+			// Qui la view sta mostrando tutti gli ordini del cliente (senza filtro anno)
+			// showAllOrders applicherà la logica coerente (client selezionato, anno non
+			// selezionato)
+		} else {
+			if (comboboxYearsModel
+					.getIndexOf(orderAdded.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear()) == -1) {
+
+				orderController.yearsOfTheOrders(); // nel caso l'anno dell'ordine non sia contenuto nella lista
+													// degli ordini
+			}
+		}
+	}
+
+	private void handleYearSelectedCase(Order orderAdded, Order orderSelected, int yearOfOrder, Object selectedItem) {
+		int yearSelected;
+		yearSelected = (Integer) selectedItem;
+		logger.info("orderselected: {}", orderSelected);
+		logger.info("yearsoFOrder: {}", yearOfOrder);
+
+		if (getComboboxYearsModel().getIndexOf(yearOfOrder) == -1) {
+			List<Object> yearsCombobox = getAllElements(getComboboxYearsModel());
+			List<Integer> years = yearsCombobox.stream().filter(obj -> obj instanceof Integer).map(obj -> (Integer) obj)
+					.collect(Collectors.toList());
+			years.add(yearOfOrder);
+			setYearsOrders(years);
+		}
+
+		if (yearSelected == yearOfOrder) {
+			logger.info("orderAdded function: orders: {}", getOrderTableModel().getOrders());
+			addOrderAndRefreshtable(orderAdded);
+
+		}
+		if (orderSelected != null) {
+			logger.info("order select index");
+			int orderSelectedIndex = getOrderTableModel().getOrderIndex(orderSelected);
+			tableOrders.setRowSelectionInterval(orderSelectedIndex, orderSelectedIndex);
+		}
+	}
+
+	private void addOrderAndRefreshtable(Order orderAdded) {
+		getOrderTableModel().addOrder(orderAdded);
+		List<Order> ordersList = new ArrayList<>(getOrderTableModel().getOrders());
+		showAllOrders(ordersList);
 	}
 
 	private static <T> List<T> getAllElements(DefaultComboBoxModel<T> comboboxModel) {
