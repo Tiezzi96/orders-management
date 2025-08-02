@@ -311,7 +311,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.showAllOrders(asList(firstOrder));
 		});
 		window.table("OrdersTable").requireRowCount(1);
-		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(firstOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(firstOrder.getIdentifier(),
 				firstOrder.getClient().getName(), firstOrder.getDate().toString(),
 				String.valueOf(firstOrder.getPrice()));
 	}
@@ -330,10 +330,10 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.showAllOrders(asList(firstOrder, secondOrder));
 		});
 		window.table("OrdersTable").requireRowCount(2);
-		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(firstOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(firstOrder.getIdentifier(),
 				firstOrder.getClient().getName(), firstOrder.getDate().toString(),
 				String.valueOf(firstOrder.getPrice()));
-		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(secondOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(secondOrder.getIdentifier(),
 				secondOrder.getClient().getName(), secondOrder.getDate().toString(),
 				String.valueOf(secondOrder.getPrice()));
 	}
@@ -356,10 +356,10 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.showAllOrders(asList(secondOrder, firstOrder));
 		});
 		window.table("OrdersTable").requireRowCount(2);
-		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(firstOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(firstOrder.getIdentifier(),
 				firstOrder.getClient().getName(), firstOrder.getDate().toString(),
 				String.valueOf(firstOrder.getPrice()));
-		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(secondOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(secondOrder.getIdentifier(),
 				secondOrder.getClient().getName(), secondOrder.getDate().toString(),
 				String.valueOf(secondOrder.getPrice()));
 	}
@@ -408,7 +408,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 		});
-		logger.info("secondClient: {}", secondClient.toString());
+		logger.info("secondClient: {}", secondClient);
 		window.comboBox("yearsCombobox").clearSelection();
 		window.list("clientsList").selectItem(Pattern.compile("" + secondClient.toString()));
 		window.comboBox("yearsCombobox").selectItem(Pattern.compile("" + 2024));
@@ -488,7 +488,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderAdded(orderToAdd);
 		});
 		window.table("OrdersTable").requireRowCount(1);
-		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(orderToAdd.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(orderToAdd.getIdentifier(),
 				orderToAdd.getClient().getName(), orderToAdd.getDate().toString(),
 				String.valueOf(orderToAdd.getPrice()));
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
@@ -521,12 +521,12 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 		window.table("OrdersTable").requireRowCount(3);
 		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(
-				orderToAddPrevious.getIdentifier().toString(), orderToAddPrevious.getClient().getName(),
+				orderToAddPrevious.getIdentifier(), orderToAddPrevious.getClient().getName(),
 				orderToAddPrevious.getDate().toString(), String.valueOf(orderToAddPrevious.getPrice()));
 		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(
-				orderToAddCurrent.getIdentifier().toString(), orderToAddCurrent.getClient().getName(),
+				orderToAddCurrent.getIdentifier(), orderToAddCurrent.getClient().getName(),
 				orderToAddCurrent.getDate().toString(), String.valueOf(orderToAddCurrent.getPrice()));
-		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderToAddNext.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderToAddNext.getIdentifier(),
 				orderToAddNext.getClient().getName(), orderToAddNext.getDate().toString(),
 				String.valueOf(orderToAddNext.getPrice()));
 		// check if order preselected is always selected
@@ -553,7 +553,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				"-- Nessun anno --");
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents)
-				.doesNotContain(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+				.doesNotContain(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
 		window.comboBox("yearsCombobox").requireSelection("2025");
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
@@ -562,7 +562,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testControlThatOnlyCorrectValueIsInsertedInDateAndPriceTextFields() throws Exception {
+	public void testControlThatOnlyCorrectValueIsInsertedInDateAndPriceTextFields() {
 		window.textBox("textField_dayOfDateOrder").enterText("day");
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_dayOfDateOrder").enterText("203");
@@ -648,7 +648,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenATextFieldIsEmptyOrClientIsNotSelectedThenAddOrderButtonShouldbeDisabled() throws Exception {
+	public void testWhenATextFieldIsEmptyOrClientIsNotSelectedThenAddOrderButtonShouldbeDisabled() {
 
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
@@ -1218,10 +1218,10 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		});
 		String[][] orders = window.table("OrdersTable").contents();
-		List<List<String>> orderList = Arrays.stream(orders).map((String[] row) -> Arrays.asList(row))
+		List<List<String>> orderList = Arrays.stream(orders).map(Arrays::asList)
 				.collect(Collectors.toList());
-		assertThat(orderList).containsOnly(Arrays.asList(order.getIdentifier().toString(),
-				order.getClient().getName().toString(), order.getDate().toString(), String.valueOf(order.getPrice())));
+		assertThat(orderList).containsOnly(Arrays.asList(order.getIdentifier(),
+				order.getClient().getName(), order.getDate().toString(), String.valueOf(order.getPrice())));
 		window.label(JLabelMatcher.withName("revenueLabel")).requireText(
 				"Il costo totale degli ordini nel 2025" + " è di " + String.format("%.2f", order.getPrice()) + "€");
 	}
@@ -1244,7 +1244,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 
 		String[][] orders = window.table("OrdersTable").contents();
-		List<List<String>> orderList = Arrays.stream(orders).map((String[] row) -> Arrays.asList(row))
+		List<List<String>> orderList = Arrays.stream(orders).map(Arrays::asList)
 				.collect(Collectors.toList());
 		assertThat(orderList).isEmpty();
 		verify(orderController).yearsOfTheOrders();
@@ -1311,7 +1311,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderUpdated(orderModified);
 		});
 		window.table("OrdersTable").requireRowCount(1);
-		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(orderModified.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(orderModified.getIdentifier(),
 				orderModified.getClient().getName(), orderModified.getDate().toString(),
 				String.valueOf(orderModified.getPrice()));
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
@@ -1340,9 +1340,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testOrderModifiedWhenOrderToModifyIsPresentAndItsYearIsSelected() {
 		Client client = new Client("1", "first client id");
-		LocalDateTime prelocalDate = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
 		LocalDateTime localDate = LocalDateTime.of(2025, 1, 2, 0, 0, 0);
-		LocalDateTime nextlocalDate = LocalDateTime.of(2025, 1, 3, 0, 0, 0);
 		Order preOrder = new Order("1", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), 10);
 		Order orderToModify = new Order("2", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()),
 				20);
@@ -1362,11 +1360,11 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderUpdated(orderModified);
 		});
 		window.table("OrdersTable").requireRowCount(3);
-		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(preOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[0]).containsExactly(preOrder.getIdentifier(),
 				preOrder.getClient().getName(), preOrder.getDate().toString(), String.valueOf(preOrder.getPrice()));
-		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(nextOrder.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[1]).containsExactly(nextOrder.getIdentifier(),
 				nextOrder.getClient().getName(), nextOrder.getDate().toString(), String.valueOf(nextOrder.getPrice()));
-		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderModified.getIdentifier().toString(),
+		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderModified.getIdentifier(),
 				orderModified.getClient().getName(), orderModified.getDate().toString(),
 				String.valueOf(orderModified.getPrice()));
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
@@ -1470,7 +1468,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenAnOrderOfAClientSelectedIsModifiedWithTheSameClient() throws Exception {
+	public void testUpdateTotalPriceWhenAnOrderOfAClientSelectedIsModifiedWithTheSameClient() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1503,7 +1501,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenAnOrderOfAClientSelectedIsModifiedWithADifferentClient() throws Exception {
+	public void testUpdateTotalPriceWhenAnOrderOfAClientSelectedIsModifiedWithADifferentClient() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1535,7 +1533,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenAnOrderOfAClientNotSelectedAndYearNotSelectedIsModified() throws Exception {
+	public void testUpdateTotalPriceWhenAnOrderOfAClientNotSelectedAndYearNotSelectedIsModified() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1568,7 +1566,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenModifyOnlyPriceOfOrder() throws Exception {
+	public void testUpdateTotalPriceWhenModifyOnlyPriceOfOrder() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		JLabelFixture revenueLabel = window.label("revenueLabel");
@@ -1599,7 +1597,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPrice_ClientSelected_ClientModified_TableIsEmpty() throws Exception {
+	public void testUpdateTotalPrice_ClientSelected_ClientModified_TableIsEmpty() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1627,7 +1625,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenOrderHasIdNull() throws Exception {
+	public void testUpdateTotalPriceWhenOrderHasIdNull() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		GuiActionRunner.execute(() -> {
@@ -1779,7 +1777,11 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").enterText(" ");
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
-
+		
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
+		window.textBox("textField_monthOfDateOrder").setText("");
+		
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_dayOfDateOrder").enterText(" ");
 		window.textBox("textField_monthOfDateOrder").enterText("1");
@@ -1843,7 +1845,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
 
 		Date newDate = Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant());
-		String orderID = "1";
 		Map<String, Object> updates = new HashMap<String, Object>();
 		updates.put("date", newDate);
 		updates.put("price", 10.0);
@@ -2155,7 +2156,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				"-- Nessun anno --");
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents)
-				.contains(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+				.contains(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
 		window.comboBox("yearsCombobox").requireNoSelection();
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
@@ -2225,7 +2226,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				"-- Nessun anno --");
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents)
-				.doesNotContain(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+				.doesNotContain(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
 		window.comboBox("yearsCombobox").requireNoSelection();
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
@@ -2286,7 +2287,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				"-- Nessun anno --");
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents)
-				.contains(new String[] { orderToAdd.getIdentifier().toString(), orderToAdd.getClient().getName(),
+				.contains(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 						orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
 		window.comboBox("yearsCombobox").requireNoSelection();
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");

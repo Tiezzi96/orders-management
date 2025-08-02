@@ -2,7 +2,6 @@ package com.unifi.ordersmgmt.view.swing;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -11,7 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,7 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
@@ -448,20 +445,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 			newOrder();
 		});
 
-		((AbstractDocument) textFieldDayNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {
-			checkCompleteNewOrderInfo();
-
-		}, " "));
-		((AbstractDocument) textFieldMonthNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", () -> {
-			checkCompleteNewOrderInfo();
-		}, " "));
-		((AbstractDocument) textFieldYearNewOrder.getDocument()).setDocumentFilter(createTextFilter(4, "\\d*", () -> {
-			checkCompleteNewOrderInfo();
-		}, " "));
+		((AbstractDocument) textFieldDayNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*",  this::checkCompleteNewOrderInfo, " "));
+		((AbstractDocument) textFieldMonthNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", this::checkCompleteNewOrderInfo, " "));
+		((AbstractDocument) textFieldYearNewOrder.getDocument()).setDocumentFilter(createTextFilter(4, "\\d*", this::checkCompleteNewOrderInfo, " "));
 		((AbstractDocument) textFieldRevenueNewOrder.getDocument())
-				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", () -> {
-					checkCompleteNewOrderInfo();
-				}, " "));
+				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", this::checkCompleteNewOrderInfo, " "));
 		((AbstractDocument) textFieldNewClient.getDocument())
 				.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
 					if (!textFieldNewClient.getText().trim().isEmpty()) {
@@ -600,7 +588,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 			comboboxYears.setSelectedIndex(-1);
 			if (clientselected != null) {
 				orderController.allOrdersByClient(clientselected);
-				logger.info("selected index on combobobox Years: {}" + selectedIndex);
+				logger.info("selected index on combobobox Years: {}", selectedIndex);
 			} else {
 				// bisogna mostrare tutti i clienti
 				logger.info("mostra tutti gli ordini dei client di tutti gli anni");
@@ -634,7 +622,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		year = Integer.valueOf(textFieldYearNewOrder.getText());
 
-		LocalDateTime localDate = LocalDateTime.of(1900, 1, 1, 0, 0);
 		if (isValidDate(day, month, year)) {
 
 			Date newDate = Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -814,7 +801,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				return;
 			} else {
 
-				extracted(currentYearIsNotSelected, aYearIsSelected, yearSelected, clientSelected);
+				handleTableEmptyCase(currentYearIsNotSelected, aYearIsSelected, yearSelected, clientSelected);
 			}
 			return;
 
@@ -827,7 +814,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	}
 
-	private void extracted(boolean currentYearIsNotSelected, boolean aYearIsSelected, Integer yearSelected,
+	private void handleTableEmptyCase(boolean currentYearIsNotSelected, boolean aYearIsSelected, Integer yearSelected,
 			Client clientSelected) {
 		// anno selezionato (qualsiasi) ma non ci sono ordini
 		if (!currentYearIsNotSelected && aYearIsSelected) {
@@ -1087,7 +1074,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	public void orderRemoved(Order orderRemoved) {
 		// TODO Auto-generated method stub
 		getOrderTableModel().removeOrder(orderRemoved);
-		List<Order> orderCopy = new ArrayList<Order>(orderTableModel.getOrders());
+		List<Order> orderCopy = new ArrayList<>(orderTableModel.getOrders());
 		showAllOrders(orderCopy);
 
 	}

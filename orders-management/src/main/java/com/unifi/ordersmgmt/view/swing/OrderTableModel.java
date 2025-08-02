@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 
@@ -19,35 +22,31 @@ public class OrderTableModel extends AbstractTableModel {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LogManager.getLogger(OrderTableModel.class);
 	private transient List<Order> orders;
 	private static final String[] columns = { "Id", "Cliente", "Data", "Importo ($)" };
 
 	public OrderTableModel() {
-		// TODO Auto-generated constructor stub
-		this.orders = new ArrayList<Order>();
+		this.orders = new ArrayList<>();
 	}
 
 	@Override
 	public int getColumnCount() {
-		// TODO Auto-generated method stub
 		return columns.length;
 	}
 	
 	@Override
 	public String getColumnName(int column) {
-		// TODO Auto-generated method stub
 		return columns[column];
 	}
 
 	@Override
 	public int getRowCount() {
-		// TODO Auto-generated method stub
 		return orders.size();
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		// TODO Auto-generated method stub
 		Order order = orders.get(rowIndex);
 		if (columnIndex % 4 == 0) {
 			return order.getIdentifier();
@@ -64,7 +63,7 @@ public class OrderTableModel extends AbstractTableModel {
 
 	public void addOrder(Order order) {
 		orders.add(order);
-		System.out.println("ORDER: " + order);
+		logger.info("ORDER: {}", order);
 		Collections.sort(orders, Comparator.comparing(Order::getDate));
 		fireTableDataChanged();
 	}
@@ -75,24 +74,20 @@ public class OrderTableModel extends AbstractTableModel {
 	}
 
 	public Order getOrderAt(int selectedRow) {
-		// TODO Auto-generated method stub
 		if (selectedRow == -1)
 			return null;
 		return orders.get(selectedRow);
 	}
 
 	public List<Order> getOrders() {
-		// TODO Auto-generated method stub
 		return orders;
 	}
 
 	public int getOrderIndex(Order orderSelected) {
-		// TODO Auto-generated method stub
 		return orders.indexOf(orderSelected);
 	}
 
 	public void removeOrdersOfClient(Client client) {
-		// TODO Auto-generated method stub
 		List<Order> ordersOfClient = orders.stream()
 				.filter(o -> o.getClient().getIdentifier().equals(client.getIdentifier())).collect(Collectors.toList());
 		orders.removeAll(ordersOfClient);
@@ -101,7 +96,6 @@ public class OrderTableModel extends AbstractTableModel {
 	}
 
 	public void removeOrder(Order orderRemoved) {
-		// TODO Auto-generated method stub
 		orders.remove(orderRemoved);
 	}
 
