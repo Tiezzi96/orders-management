@@ -3,11 +3,11 @@ package com.unifi.ordersmgmt.model;
 public abstract class BaseElement {
 	protected String identifier;
 	
-	public BaseElement() {
+	protected BaseElement() {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public BaseElement(String id) {
+	protected BaseElement(String id) {
 		identifier = id;
 	}
 	

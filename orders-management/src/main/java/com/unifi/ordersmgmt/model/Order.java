@@ -67,8 +67,8 @@ public class Order extends BaseElement {
 		} else if (!this.client.equals(otherOrder.getClient())) {
 			System.out.println("different client ");
 			return false;
-		} else if (!this.date.toInstant().truncatedTo(ChronoUnit.SECONDS)
-				.equals(otherOrder.getDate().toInstant().truncatedTo(ChronoUnit.SECONDS))) {
+		} else if (!this.date.toInstant().truncatedTo(ChronoUnit.DAYS)
+				.equals(otherOrder.getDate().toInstant().truncatedTo(ChronoUnit.DAYS))) {
 			System.out.println("different date " + date + "   " + otherOrder.getDate());
 
 			return false;
