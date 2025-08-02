@@ -8,8 +8,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -63,7 +61,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private static final String NO_YEAR_ITEM = "-- Nessun anno --";
 	private static final Logger logger = LogManager.getLogger(OrderSwingView.class);
 	private JPanel contentPane;
-	private String FONT_TEXT = "Segoe UI";
+	private static final String FONT_TEXT = "Segoe UI";
 	private DefaultListModel<Client> clientListModel;
 	private JList<Client> listClients;
 	private JButton btnRemoveClient;
@@ -76,8 +74,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JLabel lblrevenue;
 	private DefaultComboBoxModel<Client> comboboxClientsModel;
 	private JComboBox<Client> comboboxClients;
-	private DefaultComboBoxModel comboboxYearsModel;
-	private JComboBox comboboxYears;
+	private DefaultComboBoxModel<Object> comboboxYearsModel;
+	private JComboBox<Object> comboboxYears;
 	private JTable tableOrders;
 	private OrderTableModel orderTableModel;
 	private JTextPane panelOrderError;
@@ -242,7 +240,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderManagement.add(panel_orderView);
 		panel_orderView.setLayout(null);
 
-		comboboxYearsModel = new DefaultComboBoxModel<Object>();
+		comboboxYearsModel = new DefaultComboBoxModel<>();
 		comboboxYears = new JComboBox<>(comboboxYearsModel);
 		comboboxYears.setBackground(Color.WHITE);
 		comboboxYears.setBounds(523, 20, 101, 27);
@@ -260,7 +258,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 		scrollPanelOrdersList.setBounds(3, 48, 620, 350);
 		scrollPanelOrdersList.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		orderTableModel = new OrderTableModel();
-
 
 		tableOrders = new TableOrder(orderTableModel);
 		tableOrders.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -418,17 +415,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		comboboxYears.addActionListener(this::yearSelection);
 
-		KeyAdapter btnNewOrderEnabler = new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				super.keyReleased(e);
-				checkCompleteNewOrderInfo();
-			}
-		};
-
-		comboboxClients.addActionListener(e -> {
-			checkCompleteNewOrderInfo();
-		});
+		comboboxClients.addActionListener(e -> checkCompleteNewOrderInfo());
 
 		comboboxYears.addItemListener(e -> {
 			if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -436,29 +423,22 @@ public class OrderSwingView extends JFrame implements OrderView {
 				paneClientError.setText("");
 			}
 		});
-		textFieldDayNewOrder.addKeyListener(btnNewOrderEnabler);
-		textFieldMonthNewOrder.addKeyListener(btnNewOrderEnabler);
-		textFieldYearNewOrder.addKeyListener(btnNewOrderEnabler);
-		textFieldRevenueNewOrder.addKeyListener(btnNewOrderEnabler);
+
 		btnNewOrder.addActionListener(e -> {
 			logger.info("new Order");
 			newOrder();
 		});
 
-		((AbstractDocument) textFieldDayNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*",  this::checkCompleteNewOrderInfo, " "));
-		((AbstractDocument) textFieldMonthNewOrder.getDocument()).setDocumentFilter(createTextFilter(2, "\\d*", this::checkCompleteNewOrderInfo, " "));
-		((AbstractDocument) textFieldYearNewOrder.getDocument()).setDocumentFilter(createTextFilter(4, "\\d*", this::checkCompleteNewOrderInfo, " "));
+		((AbstractDocument) textFieldDayNewOrder.getDocument())
+				.setDocumentFilter(createTextFilter(2, "\\d*", this::checkCompleteInfo, " "));
+		((AbstractDocument) textFieldMonthNewOrder.getDocument())
+				.setDocumentFilter(createTextFilter(2, "\\d*", this::checkCompleteInfo, " "));
+		((AbstractDocument) textFieldYearNewOrder.getDocument())
+				.setDocumentFilter(createTextFilter(4, "\\d*", this::checkCompleteInfo, " "));
 		((AbstractDocument) textFieldRevenueNewOrder.getDocument())
-				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", this::checkCompleteNewOrderInfo, " "));
-		((AbstractDocument) textFieldNewClient.getDocument())
-				.setDocumentFilter(createTextFilter(20, "[\\s\\S]*", () -> {
-					if (!textFieldNewClient.getText().trim().isEmpty()) {
-						btnNewClient.setEnabled(true);
-					} else {
-						btnNewClient.setEnabled(false);
-					}
-
-				}, ""));
+				.setDocumentFilter(createTextFilter(10, "^\\d*(\\.\\d{0,2})?$", this::checkCompleteInfo, " "));
+		((AbstractDocument) textFieldNewClient.getDocument()).setDocumentFilter(createTextFilter(20, "[\\s\\S]*",
+				() -> btnNewClient.setEnabled(!textFieldNewClient.getText().trim().isEmpty()), ""));
 
 		listClients.addListSelectionListener(this::clientListSelection);
 
@@ -468,29 +448,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 			paneClientError.setText("");
 		});
 
-		btnRemoveClient.addActionListener(e -> {
-			orderController.deleteClient((Client) listClients.getSelectedValue());
-		});
+		btnRemoveClient.addActionListener(e -> orderController.deleteClient(listClients.getSelectedValue()));
 
-		KeyAdapter btnModifyOrderEnabler = new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				super.keyReleased(e);
-
-				checkCompleteModifyOrderInfo();
-
-			}
-		};
-
-		comboboxClients.addActionListener(e -> {
-			checkCompleteModifyOrderInfo();
-		});
-		textFieldDayNewOrder.addKeyListener(btnModifyOrderEnabler);
-		textFieldMonthNewOrder.addKeyListener(btnModifyOrderEnabler);
-		textFieldYearNewOrder.addKeyListener(btnModifyOrderEnabler);
-		textFieldRevenueNewOrder.addKeyListener(btnModifyOrderEnabler);
-		tableOrders.addKeyListener(btnModifyOrderEnabler);
+		comboboxClients.addActionListener(e -> checkCompleteModifyOrderInfo());
 
 		tableOrders.getSelectionModel().addListSelectionListener(e -> {
 			if (tableOrders.getSelectedRow() != -1) {
@@ -534,8 +494,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 		});
 	}
 
+	private void checkCompleteInfo() {
+		checkCompleteNewOrderInfo();
+		checkCompleteModifyOrderInfo();
+	}
+
 	private void removeOrder() {
-		// TODO Auto-generated method stub
 		orderController.deleteOrder(getOrderTableModel().getOrderAt(tableOrders.getSelectedRow()));
 		tableOrders.clearSelection();
 		textFieldDayNewOrder.setText("");
@@ -558,7 +522,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 		if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() != -1) {
 			Integer yearSelected = (Integer) comboboxYears.getSelectedItem();
-			Client clientSelected = (Client) listClients.getSelectedValue();
+			Client clientSelected = listClients.getSelectedValue();
 			logger.info("yearselected: {}", yearSelected);
 			if (clientSelected != null) {
 				orderController.findOrdersByYearAndClient(clientSelected, yearSelected);
@@ -567,7 +531,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 			}
 		}
 		if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() == -1) {
-			Client clientSelected = (Client) listClients.getSelectedValue();
+			Client clientSelected = listClients.getSelectedValue();
 			if (clientSelected != null) {
 				logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
 				orderController.allOrdersByClient(clientSelected);
@@ -577,6 +541,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	public void yearSelection(ActionEvent e) {
+		logger.info("selezione anno avviata");
 		Object selectedItem = comboboxYears.getSelectedItem();
 		Integer selectedIndex = comboboxYears.getSelectedIndex();
 		Client clientselected = listClients.getSelectedValue();
@@ -608,7 +573,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void updateOrder() {
-		// TODO Auto-generated method stub
+		logger.info("richiesta aggiornamento ordine");
 		Order orderToModify = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
@@ -655,6 +620,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void newOrder() {
+		logger.info("richiesta aggiunta ordine");
 		int day = Integer.parseInt(textFieldDayNewOrder.getText());
 
 		int month = Integer.parseInt(textFieldMonthNewOrder.getText());
@@ -735,7 +701,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void setYearsOrders(List<Integer> yearsOfOrders) {
-		// TODO Auto-generated method stub
 		boolean wasEmpty = comboboxYears.getItemCount() == 0;
 		Integer prevSelection = (Integer) comboboxYears.getSelectedItem();
 
@@ -774,6 +739,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void showAllOrders(List<Order> orders) {
+		logger.info("mostra gli ordini in tabella");
 		boolean currentYearIsNotSelected = false;
 		boolean aYearIsSelected = false;
 		logger.info("comboboxYears.getSelectedIndex(): {}", comboboxYears.getSelectedIndex());
@@ -798,7 +764,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 			Client clientSelected = getClientSelected();
 			if (currentYearIsNotSelected && listClients.getSelectedIndex() == -1) {
 				orderController.yearsOfTheOrders();
-				return;
 			} else {
 
 				handleTableEmptyCase(currentYearIsNotSelected, aYearIsSelected, yearSelected, clientSelected);
@@ -866,11 +831,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void resetRevenueLabel(List<Order> orders) {
+		logger.info("reimposta totale prezzo");
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() != -1) {
-			Client clientSelected = (Client) listClients.getSelectedValue();
-			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini del cliente %s nel %s è di %s€";
+			Client clientSelected = listClients.getSelectedValue();
+			String totalCostTemplate = "Il costo totale degli ordini del cliente %s nel %s è di %s€";
 			String message = String
-					.format(TOTAL_COST_TEMPLATE, clientSelected.getIdentifier(), comboboxYears.getSelectedItem(),
+					.format(totalCostTemplate, clientSelected.getIdentifier(), comboboxYears.getSelectedItem(),
 							String.format("%.2f", (orders.stream()
 									.filter(o -> o.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 											.getYear() == Integer.valueOf(comboboxYears.getSelectedItem().toString()))
@@ -878,23 +844,23 @@ public class OrderSwingView extends JFrame implements OrderView {
 			lblrevenue.setText(message);
 		}
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() == -1) {
-			Client clientSelected = (Client) listClients.getSelectedValue();
-			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini del cliente %s è di %s€";
-			String message = String.format(TOTAL_COST_TEMPLATE, clientSelected.getIdentifier(),
+			Client clientSelected = listClients.getSelectedValue();
+			String totalCostTemplate = "Il costo totale degli ordini del cliente %s è di %s€";
+			String message = String.format(totalCostTemplate, clientSelected.getIdentifier(),
 					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
 			lblrevenue.setText(message);
 
 		}
 		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() != -1) {
-			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini nel %s è di %s€";
-			String message = String.format(TOTAL_COST_TEMPLATE, comboboxYears.getSelectedItem(),
+			String totalCostTemplate = "Il costo totale degli ordini nel %s è di %s€";
+			String message = String.format(totalCostTemplate, comboboxYears.getSelectedItem(),
 					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
 			lblrevenue.setText(message);
 
 		}
 		if (listClients.getSelectedIndex() == -1 && comboboxYears.getSelectedIndex() == -1) {
-			String TOTAL_COST_TEMPLATE = "Il costo totale degli ordini presenti nel DB è di %s€";
-			String message = String.format(TOTAL_COST_TEMPLATE,
+			String totalCostTemplate = "Il costo totale degli ordini presenti nel DB è di %s€";
+			String message = String.format(totalCostTemplate,
 					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
 			lblrevenue.setText(message);
 
@@ -920,7 +886,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void clientAdded(Client clientAdded) {
-		// TODO Auto-generated method stub
 		clientListModel.addElement(clientAdded);
 		// mantiene la selezione vecchia del ComboBoxclient dopo l'inserimento
 		Object selectedItem = comboboxClientsModel.getSelectedItem();
@@ -935,7 +900,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void sortClientsById() {
-		// TODO Auto-generated method stub
 		Client selectedValue = null;
 		Client selectedItemValue = null;
 
@@ -943,7 +907,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		logger.info("comboboxClients.getSelectedItem(): {}", comboboxClients.getSelectedItem());
 
 		if (listClients.getSelectedValue() != null) {
-			selectedValue = (Client) listClients.getSelectedValue();
+			selectedValue = listClients.getSelectedValue();
 		}
 		if (comboboxClients.getSelectedItem() != null) {
 			selectedItemValue = (Client) comboboxClients.getSelectedItem();
@@ -1024,7 +988,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		if (getComboboxYearsModel().getIndexOf(yearOfOrder) == -1) {
 			List<Object> yearsCombobox = getAllElements(getComboboxYearsModel());
-			List<Integer> years = yearsCombobox.stream().filter(obj -> obj instanceof Integer).map(obj -> (Integer) obj)
+			List<Integer> years = yearsCombobox.stream().filter(Integer.class::isInstance).map(Integer.class::cast)
 					.collect(Collectors.toList());
 			years.add(yearOfOrder);
 			setYearsOrders(years);
@@ -1049,7 +1013,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private static <T> List<T> getAllElements(DefaultComboBoxModel<T> comboboxModel) {
-		// TODO Auto-generated method stub
 		List<T> items = new ArrayList<>();
 		for (int iter = 0; iter < comboboxModel.getSize(); iter++) {
 			items.add(comboboxModel.getElementAt(iter));
@@ -1059,7 +1022,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void removeOrdersByClient(Client client) {
-		// TODO Auto-generated method stub
 		getOrderTableModel().removeOrdersOfClient(client);
 
 	}
@@ -1072,7 +1034,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void orderRemoved(Order orderRemoved) {
-		// TODO Auto-generated method stub
 		getOrderTableModel().removeOrder(orderRemoved);
 		List<Order> orderCopy = new ArrayList<>(orderTableModel.getOrders());
 		showAllOrders(orderCopy);
@@ -1123,7 +1084,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		return comboboxClientsModel;
 	}
 
-	public DefaultComboBoxModel getComboboxYearsModel() {
+	public DefaultComboBoxModel<Object> getComboboxYearsModel() {
 		return comboboxYearsModel;
 	}
 

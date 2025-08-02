@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.atIndex;
 import static org.assertj.swing.data.TableCell.row;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -323,7 +322,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		Order firstOrder = new Order("1", newClient, new Date(), 10);
 		Order secondOrder = new Order("2", newClient, new Date(), 10);
 		GuiActionRunner.execute(() -> {
-			DefaultComboBoxModel<Integer> comboboxYearsModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearsModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearsModel.addElement(2025);
 			comboboxYearsModel.setSelectedItem(2025);
 			orderSwingView.getOrderTableModel().addOrder(secondOrder);
@@ -349,7 +348,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		Order secondOrder = new Order("2", newClient,
 				Date.from(nextLocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
 		GuiActionRunner.execute(() -> {
-			DefaultComboBoxModel<Integer> comboboxYearsModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearsModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearsModel.addElement(2025);
 			comboboxYearsModel.setSelectedItem(2025);
 			orderSwingView.getOrderTableModel().addOrder(secondOrder);
@@ -1093,7 +1092,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testResetShowOrderOfCurrentYearWhenShowOrderIsCalledWithEmptyArgumentAndAnyClientIsSelected() {
 		GuiActionRunner.execute(() -> {
-			DefaultComboBoxModel<Integer> comboboxYearModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearModel.addElement(2025);
 			comboboxYearModel.addElement(2024);
 			comboboxYearModel.setSelectedItem(2024);
@@ -1108,7 +1107,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		Client newClient = new Client("1", "test id 1");
 		JLabelFixture revenueLabel = window.label("revenueLabel");
 		GuiActionRunner.execute(() -> {
-			DefaultComboBoxModel<Integer> comboboxYearModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearModel.addElement(2025);
 			comboboxYearModel.addElement(2024);
 			comboboxYearModel.setSelectedItem(2024);
@@ -1130,7 +1129,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	public void testNotResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndCurrentYearIsSelected() {
 		JLabel revenueLabel = window.label("revenueLabel").target();
 		GuiActionRunner.execute(() -> {
-			DefaultComboBoxModel<Integer> comboboxYearModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearModel.addElement(2025);
 			comboboxYearModel.addElement(2024);
 			comboboxYearModel.setSelectedItem(2025);
@@ -1155,7 +1154,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			DefaultListModel<Client> listClientModel = orderSwingView.getClientListModel();
 			listClientModel.addElement(firstClient);
-			DefaultComboBoxModel<Integer> comboboxYearModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearModel.addElement(2024);
 			comboboxYearModel.addElement(2025);
 			comboboxYearModel.setSelectedItem(2024);
@@ -1184,7 +1183,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			DefaultListModel<Client> listClientModel = orderSwingView.getClientListModel();
 			listClientModel.addElement(firstClient);
 			listClientModel.addElement(secondClient);
-			DefaultComboBoxModel<Integer> comboboxYearModel = orderSwingView.getComboboxYearsModel();
+			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearModel.addElement(2024);
 			comboboxYearModel.addElement(2025);
 			comboboxYearModel.setSelectedItem(2024);

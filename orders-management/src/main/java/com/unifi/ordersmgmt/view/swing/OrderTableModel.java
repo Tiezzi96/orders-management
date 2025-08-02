@@ -1,7 +1,6 @@
 package com.unifi.ordersmgmt.view.swing;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -34,7 +33,7 @@ public class OrderTableModel extends AbstractTableModel {
 	public int getColumnCount() {
 		return columns.length;
 	}
-	
+
 	@Override
 	public String getColumnName(int column) {
 		return columns[column];
@@ -92,7 +91,7 @@ public class OrderTableModel extends AbstractTableModel {
 				.filter(o -> o.getClient().getIdentifier().equals(client.getIdentifier())).collect(Collectors.toList());
 		orders.removeAll(ordersOfClient);
 		fireTableDataChanged();
-		
+
 	}
 
 	public void removeOrder(Order orderRemoved) {
