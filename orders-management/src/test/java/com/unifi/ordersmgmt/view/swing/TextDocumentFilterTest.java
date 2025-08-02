@@ -19,8 +19,8 @@ public class TextDocumentFilterTest {
 
 	@Parameterized.Parameters(name = "{index}: input={0} expectedOutput={1} onChange={2}")
 	public static List<Object> data() {
-		return Arrays.asList(new Object[][] {{ "1234", "1234", true }, { "12345678910", "", true }, { "15a", "", true },
-				{ "12.34", "12.34", true }, { "12,34", "", true }, { "1.345", "", true } });
+		return Arrays.asList(new Object[][] { { "1234", "1234", true }, { "12345678910", "", true },
+				{ "15a", "", true }, { "12.34", "12.34", true }, { "12,34", "", true }, { "1.345", "", true } });
 	}
 
 	private final String input;
@@ -44,59 +44,7 @@ public class TextDocumentFilterTest {
 				new TextDocumentFilter(10, "^\\d*(\\.\\d{0,2})?$", () -> onChangeCalled.set(true), " "));
 
 	}
-/*
-	@Test
-	public void shouldAcceptUpToFourDigits() throws Exception {
-		onChangeCalled.set(false);
-		doc.insertString(0, "1234", null);
-		assertEquals("1234", doc.getText(0, doc.getLength()));
-		assertTrue("onChange should have been called", onChangeCalled.get());
 
-	}
-	@Test
-	public void shouldNotAcceptUpToFiveDigits() throws Exception {
-		onChangeCalled.set(false);
-		doc.insertString(0, "12345678910", null);
-		assertEquals("", doc.getText(0, doc.getLength()));
-		assertTrue("onChange should have been called", onChangeCalled.get());
-
-	}
-
-	@Test
-	public void shouldNotAcceptUpToAlphaDigits() throws Exception {
-		onChangeCalled.set(false);
-		doc.insertString(0, "15a", null);
-		assertEquals("", doc.getText(0, doc.getLength()));
-		assertTrue("onChange should have been called", onChangeCalled.get());
-
-	}
-
-	@Test
-	public void shouldAcceptValidDecimalTwoPlaces() throws Exception {
-		onChangeCalled.set(false);
-		doc.insertString(0, "12.34", null);
-		assertEquals("12.34", doc.getText(0, doc.getLength()));
-		assertTrue("onChange should have been called", onChangeCalled.get());
-
-	}
-
-	@Test
-	public void shouldNotAcceptInvalidDecimalTwoPlaces() throws Exception {
-		onChangeCalled.set(false);
-		doc.insertString(0, "12,34", null);
-		assertEquals("", doc.getText(0, doc.getLength()));
-		assertTrue("onChange should have been called", onChangeCalled.get());
-
-	}
-
-	@Test
-	public void shouldRejectDecimalWithThreePlaces() throws Exception {
-		onChangeCalled.set(false);
-		doc.insertString(0, "1.345", null);
-		assertEquals("", doc.getText(0, doc.getLength()));
-		assertTrue("onChange should have been called", onChangeCalled.get());
-
-	}*/
 	@Test
 	public void shouldRejectDecimalWithThreePlaces() throws Exception {
 		onChangeCalled.set(false);
