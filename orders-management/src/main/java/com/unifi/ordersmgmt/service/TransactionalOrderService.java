@@ -109,7 +109,7 @@ public class TransactionalOrderService implements OrderService {
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(client.getIdentifier()) == null) {
 				throw new NotFoundClientException(
-						String.format("Il cliente con id %s non è presente nel database", client.getIdentifier()));
+						String.format(CLIENT_MESSAGE_EXCEPTION, client.getIdentifier()));
 			}
 			return orderRepo.findOrdersByClient(client);
 		});

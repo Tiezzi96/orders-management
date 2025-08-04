@@ -195,15 +195,15 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public List<Order> findOrdersByClient(Client client) {
 		for (Document doc : orderCollection.find()) {
-			logger.info("client ID: {}", ((DBRef) doc.get("client")).getId());
+			logger.info("client ID: {}", ((DBRef) doc.get(CLIENT)).getId());
 		}
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> {
-					return ((DBRef) d.get("client")).getId().toString().equals(client.getIdentifier());
+					return ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
 				})
 				.map(d -> new Order(d.get("id").toString(),
-						clientMongoRepository.findById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"),
-						d.getDouble("price")))
+						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+						d.getDouble(PRICE)))
 				.collect(Collectors.toList());
 		return orders;
 	}
