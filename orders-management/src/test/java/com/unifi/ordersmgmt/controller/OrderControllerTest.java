@@ -264,5 +264,23 @@ public class OrderControllerTest {
 		inOrder.verify(orderView).clientRemoved(clientForUpdate);
 		inOrder.verify(orderView).removeOrdersByClient(clientForUpdate);
 	}
+	
+	@Test
+	public void testOrdersByClientWhenClientIsNotInDB() {
+		Client newClient = new Client("1", "client1");
+		when(orderService.allOrdersByClient(newClient))
+				.thenThrow(new NotFoundClientException("Client not found"));
+		controller.allOrdersByClient(newClient);
+		verify(orderView).showErrorClient("Cliente non presente nel DB", newClient);
+		verify(orderView).clientRemoved(newClient);
+	}
+
+	@Test
+	public void testOrdersByClient() {
+		List<Order> ordersByClient = asList(new Order());
+		when(orderService.allOrdersByClient(new Client())).thenReturn(ordersByClient);
+		controller.allOrdersByClient(new Client());
+		verify(orderView).showAllOrders(ordersByClient);
+	}
 
 }
