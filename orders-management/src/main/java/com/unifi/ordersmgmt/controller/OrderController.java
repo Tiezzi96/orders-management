@@ -144,6 +144,7 @@ public class OrderController {
 	}
 
 	public void getAllOrders() {
-		// TODO Auto-generated method stub
+		orderView.showAllOrders(orderService.findAllOrders());
+
 	}
 }

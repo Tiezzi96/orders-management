@@ -27,8 +27,6 @@ import com.unifi.ordersmgmt.service.ClientService;
 import com.unifi.ordersmgmt.service.OrderService;
 import com.unifi.ordersmgmt.view.OrderView;
 
-
-
 public class OrderControllerTest {
 
 	@Mock
@@ -50,7 +48,7 @@ public class OrderControllerTest {
 	public void setUp() {
 		closeable = MockitoAnnotations.openMocks(this);
 	}
-	
+
 	@Test
 	public void testInitializeView() {
 		List<Client> clients = asList(new Client());
@@ -61,7 +59,7 @@ public class OrderControllerTest {
 		verify(orderView).showAllClients(clients);
 		verify(orderView).setYearsOrders(years);
 	}
-	
+
 	@Test
 	public void testShowAllClients() {
 		List<Client> clients = asList(new Client());
@@ -77,7 +75,7 @@ public class OrderControllerTest {
 		controller.allOrdersByYear(2024);
 		verify(orderView).showAllOrders(orders);
 	}
-	
+
 	@Test
 	public void testYearsOfOrders() {
 		List<Integer> years = asList(2024);
@@ -103,8 +101,7 @@ public class OrderControllerTest {
 		controller.findOrdersByYearAndClient(new Client(), 2024);
 		verify(orderView).showAllOrders(ordersByClientAndYear);
 	}
-	
-	
+
 	@Test
 	public void testDeleteClientWhenItIsPresentInDB() {
 		Client newClient = new Client();
@@ -161,7 +158,7 @@ public class OrderControllerTest {
 		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
 
 	}
-	
+
 	@Test
 	public void testDeleteOrderWhenClientIsInDB() {
 		Order newOrder = new Order();
@@ -198,7 +195,7 @@ public class OrderControllerTest {
 		inOrder.verify(orderView).orderRemoved(newOrder);
 
 	}
-	
+
 	@Test
 	public void testModifyOrderWhenOrderIsInDBAndClientIsInDB() {
 		Order newOrder = new Order();
@@ -245,7 +242,7 @@ public class OrderControllerTest {
 		inOrder.verify(orderView).clientRemoved(clientRemoved);
 		inOrder.verify(orderView).removeOrdersByClient(clientRemoved);
 	}
-	
+
 	@Test
 	public void testModifyOrderWhenClientForUpdateIsNotInDB() {
 		Client clientOriginal = new Client();
@@ -256,7 +253,8 @@ public class OrderControllerTest {
 		updates.put("price", 10.5);
 		updates.put("date", new Date());
 		doThrow(new NotFoundClientException(String.format("Il cliente con id %s non è presente nel database",
-				((Client)updates.get("client")).getIdentifier()))).when(orderService).updateOrder(orderToModify, updates);
+				((Client) updates.get("client")).getIdentifier()))).when(orderService)
+				.updateOrder(orderToModify, updates);
 		controller.modifyOrder(orderToModify, updates);
 		InOrder inOrder = Mockito.inOrder(orderService, orderView);
 		inOrder.verify(orderService).updateOrder(orderToModify, updates);
@@ -264,12 +262,11 @@ public class OrderControllerTest {
 		inOrder.verify(orderView).clientRemoved(clientForUpdate);
 		inOrder.verify(orderView).removeOrdersByClient(clientForUpdate);
 	}
-	
+
 	@Test
 	public void testOrdersByClientWhenClientIsNotInDB() {
 		Client newClient = new Client("1", "client1");
-		when(orderService.allOrdersByClient(newClient))
-				.thenThrow(new NotFoundClientException("Client not found"));
+		when(orderService.allOrdersByClient(newClient)).thenThrow(new NotFoundClientException("Client not found"));
 		controller.allOrdersByClient(newClient);
 		verify(orderView).showErrorClient("Cliente non presente nel DB", newClient);
 		verify(orderView).clientRemoved(newClient);
@@ -281,6 +278,14 @@ public class OrderControllerTest {
 		when(orderService.allOrdersByClient(new Client())).thenReturn(ordersByClient);
 		controller.allOrdersByClient(new Client());
 		verify(orderView).showAllOrders(ordersByClient);
+	}
+
+	@Test
+	public void testGetAllOrders() {
+		List<Order> orders = asList(new Order());
+		when(orderService.findAllOrders()).thenReturn(orders);
+		controller.getAllOrders();
+		verify(orderView).showAllOrders(orders);
 	}
 
 }
