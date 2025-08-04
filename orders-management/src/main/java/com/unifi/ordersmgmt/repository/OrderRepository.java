@@ -16,4 +16,7 @@ public interface OrderRepository extends Repository<Order> {
 	public Order updateOrder(String orderID, Map<String, Object> updates);
 
 	public List<Order> findOrdersByClientAndYear(Client client, int year);
+
+	public List<Order> findOrdersByClient(Client client);
+
 }

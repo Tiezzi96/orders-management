@@ -133,12 +133,18 @@ public class OrderController {
 	}
 
 	public void allOrdersByClient(Client client) {
-		// TODO Auto-generated method stub
-		
+		try {
+			orderView.showAllOrders(orderService.allOrdersByClient(client));
+		} catch (NotFoundClientException e) {
+			logger.error("findOrdersByYearAndClient: exception thrown");
+			logger.error("Client not found");
+			orderView.showErrorClient("Cliente non presente nel DB", client);
+			orderView.clientRemoved(client);
+		}
 	}
 
 	public void getAllOrders() {
-		// TODO Auto-generated method stub
-		
+		orderView.showAllOrders(orderService.findAllOrders());
+
 	}
 }

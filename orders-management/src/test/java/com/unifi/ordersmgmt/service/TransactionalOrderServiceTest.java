@@ -63,7 +63,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testallOrdersByYear() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -77,7 +76,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testGetyearsofOrders() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -97,7 +95,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testfindallOrdersByClientByYearSuccess() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
@@ -134,17 +131,14 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testAddOrderShouldSaveOrderWhenClientExists() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
 
 		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
 		when(orderRepo.save(order)).thenReturn(order);
 
-		// Act
 		Order orderSaved = orderService.addOrder(order);
 
-		// Assert
 		assertThat(order).isEqualTo(orderSaved);
 		assertThat(orderSaved).isNotNull();
 		verify(clientRepo, times(2)).findById(client.getIdentifier());
@@ -153,14 +147,12 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testAddOrderShouldNotSaveOrderWhenClientNoExists() {
-		// Arrange
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 		Order order = new Order("ORDER-00001", clientNotExist, new Date(), 100.0);
 
 		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);
 		when(orderRepo.save(order)).thenReturn(order);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundClientException.class).isThrownBy(() -> orderService.addOrder(order));
 		verify(clientRepo, times(2)).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).save(any());
@@ -168,7 +160,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testRemoveOrderShouldRemoveOrderWhenClientAndOrderExist() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -176,24 +167,20 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
 		when(orderRepo.delete(order.getIdentifier())).thenReturn(order);
 
-		// Act
 		orderService.removeOrder(order);
 
-		// Assert
 		verify(clientRepo).findById(client.getIdentifier());
 		verify(orderRepo).delete(order.getIdentifier());
 	}
 
 	@Test
 	public void testDeleteOrderShouldNotDeleteOrderWhenClientNoExists() {
-		// Arrange
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 		Order order = new Order("ORDER-00001", clientNotExist, new Date(), 100.0);
 
 		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);
 		when(orderRepo.delete(order.getIdentifier())).thenReturn(order);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundClientException.class).isThrownBy(() -> orderService.removeOrder(order));
 		verify(clientRepo).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).delete(any());
@@ -201,7 +188,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testDeleteOrderShouldNotDeleteOrderWhenOrderNoExists() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client Not Exist");
 		Order orderNotExist = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -209,7 +195,6 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(orderNotExist.getIdentifier())).thenReturn(null);
 		when(orderRepo.delete(orderNotExist.getIdentifier())).thenReturn(null);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundOrderException.class)
 				.isThrownBy(() -> orderService.removeOrder(orderNotExist));
 		verify(clientRepo).findById(client.getIdentifier());
@@ -219,7 +204,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testUpdateOrderShouldUpdateOrderWhenClientAndOrderExist() {
-		// Arrange
 		Client client1 = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client1, new Date(), 100.0);
 		Map<String, Object> updates = new HashMap<String, Object>();
@@ -231,10 +215,8 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
 		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(orderModified);
 
-		// Act
 		Order orderUpdated = orderService.updateOrder(order, updates);
 
-		// Assert
 		verify(clientRepo, times(2)).findById(client1.getIdentifier());
 		verify(orderRepo).updateOrder(order.getIdentifier(), updates);
 		assertThat(orderUpdated).isEqualTo(orderModified);
@@ -242,7 +224,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testUpdateOrderShouldNotUpdateOrderWhenClientNoExists() {
-		// Arrange
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 		Client clientOriginal = new Client("CLIENT-00002", "client ");
 		Order order = new Order("ORDER-00001", clientOriginal, new Date(), 100.0);
@@ -255,16 +236,28 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
 		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(null);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundClientException.class)
 				.isThrownBy(() -> orderService.updateOrder(order, updates));
 		verify(clientRepo).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).updateOrder(any(), any());
 	}
+	
+	@Test
+	public void testFindAllOrders() {
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
+		Order order2 = new Order("ORDER-00002", client, Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 200.0);
+
+		when(orderRepo.findAll()).thenReturn(asList(order, order2));
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+		List<Order> orders = orderService.findAllOrders();
+		assertThat(orders).containsExactly(order, order2);
+		verify(orderRepo).findAll();
+
+	}
 
 	@Test
 	public void testUpdateOrderShouldNotUpdateOrderWhenOriginalClientNoExists() {
-		// Arrange
 		Client clientForUpdate = new Client("CLIENT-00001", "client");
 		Client clientOriginal = new Client("CLIENT-00002", "Client Not Exist");
 		Order order = new Order("ORDER-00001", clientOriginal, new Date(), 100.0);
@@ -279,7 +272,6 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(order.getIdentifier())).thenReturn(orderWithoutClient);
 		when(orderRepo.updateOrder(order.getIdentifier(), updates)).thenReturn(null);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundClientException.class)
 				.isThrownBy(() -> orderService.updateOrder(order, updates));
 		verify(clientRepo).findById(clientOriginal.getIdentifier());
@@ -288,7 +280,6 @@ public class TransactionalOrderServiceTest {
 
 	@Test
 	public void testupdateOrderShouldNotDeleteOrderWhenOrderNoExists() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Client client2 = new Client("CLIENT-00002", "Client 2");
 		Order orderNotExist = new Order("ORDER-00001", client, new Date(), 100.0);
@@ -299,12 +290,43 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(orderNotExist.getIdentifier())).thenReturn(null);
 		when(orderRepo.updateOrder(orderNotExist.getIdentifier(), updates)).thenReturn(null);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundOrderException.class)
 				.isThrownBy(() -> orderService.updateOrder(orderNotExist, updates));
 
 		verify(orderRepo).findById(orderNotExist.getIdentifier());
 		verify(orderRepo, never()).updateOrder(any(), any());
+	}
+
+	@Test
+	public void testallOrdersByClientSuccess() {
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Client client2 = new Client("CLIENT-00002", "Client 2");
+		Order order = new Order("ORDER-00001", client,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2024, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 50.0);
+
+		when(orderRepo.findOrdersByClient(client)).thenReturn(asList(order));
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+
+		List<Order> years = orderService.allOrdersByClient(client);
+
+		verify(orderRepo).findOrdersByClient(client);
+		assertThat(years).containsExactly(order).doesNotContain(order2);
+
+	}
+
+	@Test
+	public void testallOrdersByClientWhenClientNoExists() {
+		Client client = new Client("CLIENT-00001", "Client 1");
+
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(null);
+
+		assertThatExceptionOfType(NotFoundClientException.class)
+				.isThrownBy(() -> orderService.allOrdersByClient(client));
+
+		verify(orderRepo, never()).findOrdersByClient(client);
+
 	}
 
 }

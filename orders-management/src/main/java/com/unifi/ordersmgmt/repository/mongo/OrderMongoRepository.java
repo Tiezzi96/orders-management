@@ -52,7 +52,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Order> findAll() {
-		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.map(d -> new Order(d.get("id").toString(),
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
@@ -62,7 +61,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public Order findById(String id) {
-		// TODO Auto-generated method stub
 		Document docFound = orderCollection.find(clientSession, Filters.eq("id", id)).first();
 		if (docFound == null) {
 			return null;
@@ -74,7 +72,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public Order save(Order obj) {
-		// TODO Auto-generated method stub
 		if (obj.getIdentifier().trim().isEmpty()) {
 			obj.setIdentifier(seqGen.generateCodiceCliente(clientSession));
 			logger.info("Generated new order id {}", obj.getIdentifier());
@@ -83,8 +80,7 @@ public class OrderMongoRepository implements OrderRepository {
 				.append(CLIENT, new DBRef(CLIENT, obj.getClient().getIdentifier())).append("date", obj.getDate())
 				.append(PRICE, obj.getPrice());
 		orderCollection.insertOne(clientSession, docToInsert);
-		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier()))
-				.first();
+		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier())).first();
 		logger.info("Inserted order document: {}", docToInsert);
 		Order orderInserted = new Order(docInserted.get("id").toString(),
 				clientMongoRepository.findById(((DBRef) docInserted.get(CLIENT)).getId().toString()),
@@ -94,7 +90,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public Order delete(String id) {
-		// TODO Auto-generated method stub
 		Order orderToDelete = findById(id);
 		if (orderToDelete != null) {
 			orderCollection.deleteOne(clientSession, Filters.eq("id", orderToDelete.getIdentifier()));
@@ -105,7 +100,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Order> findOrderByYear(int year) {
-		// TODO Auto-generated method stub
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> {
 					Date dataOrdine = d.getDate("date");
@@ -123,7 +117,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Integer> getYearsOfOrders() {
-		// TODO Auto-generated method stub
 		Set<Integer> setOfYears = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.map(d -> {
 					Date date = d.getDate("date");
@@ -137,7 +130,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Order> removeOrdersByClient(String clientId) {
-		// TODO Auto-generated method stub
 		List<Order> ordersToRemove = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> ((DBRef) d.get(CLIENT)).getId().toString().equals(clientId))
 				.map(d -> new Order(d.getString("id"),
@@ -153,13 +145,12 @@ public class OrderMongoRepository implements OrderRepository {
 			}
 			return ordersToRemove;
 		}
-		List<Order> emptyList = new ArrayList<Order>();
+		List<Order> emptyList = new ArrayList<>();
 		return emptyList;
 	}
 
 	@Override
 	public List<Order> findOrdersByClientAndYear(Client client, int year) {
-		// TODO Auto-generated method stub
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> {
 					Calendar calendar = Calendar.getInstance();
@@ -177,7 +168,6 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public Order updateOrder(String orderID, Map<String, Object> updates) {
-		// TODO Auto-generated method stub
 		Order orderToModify = findById(orderID);
 		if (orderToModify != null) {
 			Document docOfUpdates = new Document();
@@ -201,4 +191,21 @@ public class OrderMongoRepository implements OrderRepository {
 		}
 		return null;
 	}
+
+	@Override
+	public List<Order> findOrdersByClient(Client client) {
+		for (Document doc : orderCollection.find()) {
+			logger.info("client ID: {}", ((DBRef) doc.get(CLIENT)).getId());
+		}
+		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
+				.filter(d -> {
+					return ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
+				})
+				.map(d -> new Order(d.get("id").toString(),
+						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+						d.getDouble(PRICE)))
+				.collect(Collectors.toList());
+		return orders;
+	}
+
 }
