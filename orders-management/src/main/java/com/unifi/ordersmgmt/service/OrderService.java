@@ -20,4 +20,6 @@ public interface OrderService {
 	public List<Integer> findYearsOfOrders();
 
 	public Order updateOrder(Order order, Map<String, Object> updates);
+
+	List<Order> findAllOrders();
 }

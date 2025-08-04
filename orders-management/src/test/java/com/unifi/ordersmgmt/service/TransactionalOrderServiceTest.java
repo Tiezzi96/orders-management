@@ -241,6 +241,20 @@ public class TransactionalOrderServiceTest {
 		verify(clientRepo).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).updateOrder(any(), any());
 	}
+	
+	@Test
+	public void testFindAllOrders() {
+		Client client = new Client("CLIENT-00001", "Client 1");
+		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
+		Order order2 = new Order("ORDER-00002", client, Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 200.0);
+
+		when(orderRepo.findAll()).thenReturn(asList(order, order2));
+		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
+		List<Order> orders = orderService.findAllOrders();
+		assertThat(orders).containsExactly(order, order2);
+		verify(orderRepo).findAll();
+
+	}
 
 	@Test
 	public void testUpdateOrderShouldNotUpdateOrderWhenOriginalClientNoExists() {

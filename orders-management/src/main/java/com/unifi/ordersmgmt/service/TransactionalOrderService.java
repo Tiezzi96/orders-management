@@ -114,5 +114,10 @@ public class TransactionalOrderService implements OrderService {
 			return orderRepo.findOrdersByClient(client);
 		});
 	}
+	
+	@Override
+	public List<Order> findAllOrders() {
+		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> orderRepo.findAll());
+	}
 
 }
