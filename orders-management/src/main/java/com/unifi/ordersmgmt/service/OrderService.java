@@ -6,11 +6,12 @@ import java.util.Map;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 
-
 public interface OrderService {
 	public List<Order> allOrdersByYear(int year);
 
 	public List<Order> findallOrdersByClientByYear(Client client, int year);
+
+	public List<Order> allOrdersByClient(Client client);
 
 	public Order addOrder(Order order);
 
