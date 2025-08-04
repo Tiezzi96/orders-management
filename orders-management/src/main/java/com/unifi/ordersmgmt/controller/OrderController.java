@@ -2,7 +2,6 @@ package com.unifi.ordersmgmt.controller;
 
 import java.util.Map;
 import org.apache.logging.log4j.*;
-
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
 import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
@@ -134,12 +133,18 @@ public class OrderController {
 	}
 
 	public void allOrdersByClient(Client client) {
-		// TODO Auto-generated method stub
-		
+		try {
+			orderView.showAllOrders(orderService.allOrdersByClient(client));
+		} catch (NotFoundClientException e) {
+			logger.error("findOrdersByYearAndClient: exception thrown");
+			logger.error("Client not found");
+			orderView.showErrorClient("Cliente non presente nel DB", client);
+			orderView.clientRemoved(client);
+		}
 	}
 
 	public void getAllOrders() {
-		// TODO Auto-generated method stub
-		
+		orderView.showAllOrders(orderService.findAllOrders());
+
 	}
 }

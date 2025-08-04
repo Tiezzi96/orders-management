@@ -486,7 +486,6 @@ public class OrderMongoRepositoryTest {
 	}
 
 	private List<Order> getAllOrdersFromDB() {
-		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find().spliterator(), false)
 				.map(d -> new Order(d.getString("id"),
 						new Client(((DBRef) d.get("client")).getId().toString(), "firstClient"), (Date) d.get("date"),
@@ -495,7 +494,6 @@ public class OrderMongoRepositoryTest {
 	}
 
 	private String insertNewOrderInDB(Client client, Date date, double price, int index) {
-		// TODO Auto-generated method stub
 		String orderID = String.format("ORDER-0000%d", index);
 		Document orderToInsert = new Document().append("id", orderID)
 				.append("client", new DBRef("client", client.getIdentifier())).append("date", date)
@@ -503,6 +501,31 @@ public class OrderMongoRepositoryTest {
 		logger.debug("Doc to insert: {}", orderToInsert);
 		orderCollection.insertOne(orderToInsert);
 		return orderID;
+	}
+	
+	@Test
+	public void testFindOrdersByClientWhenDBIsEmpty() {
+		List<Order> ordersOfClientSelected = orderRepository
+				.findOrdersByClient(new Client("CLIENT-00001", "firstClient"));
+		assertThat(ordersOfClientSelected).isEmpty();
+	}
+
+	@Test
+	public void testFindOrdersByClientWhenDBContainsOrdersOfTheClientSelected() {
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
+		Date currentDate = new Date(); // Data corrente
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(currentDate);
+		calendar.add(Calendar.DAY_OF_MONTH, -1); // Rimuovi 1 giorno
+		Date previousDate = calendar.getTime();
+		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 2);
+		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
+		List<Order> ordersOfClientSelected = orderRepository
+				.findOrdersByClient(new Client("CLIENT-00001", "firstClient"));
+		System.out.println(ordersOfClientSelected);
+		assertThat(ordersOfClientSelected).containsExactly(
+				new Order("ORDER-00001", new Client("CLIENT-00001", "firstClient"), currentDate, 10.0),
+				new Order("ORDER-00002", new Client("CLIENT-00001", "firstClient"), previousDate, 20.0));
 	}
 
 }
