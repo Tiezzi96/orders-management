@@ -101,6 +101,100 @@
 	</dependencies>
 
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-it</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<skipTests>${skipItest}</skipTests>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/it/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.34.1</version>
+				<configuration>
+					<!-- Rimuove automaticamente i volumi al termine -->
+					<removeVolumes>true</removeVolumes>
+					<images>
+						<image>
+							<name>mongo:4.4.3</name>
+							<run>
+								<volumes>
+									<bind>
+										<volume>
+											${project.basedir}/src/it/resources/docker:/script</volume>
+									</bind>
+								</volumes>
+								<cmd>--replSet rs0</cmd>
+								<ports>
+									<port>27017:27017</port>
+								</ports>
+								<wait>
+									<log>Waiting for connections</log>
+									<!-- Timeout di attesa in ms prima di fallire -->
+									<time>45000</time>
+									<!-- Se fermiamo il container, aspettiamo 5s per arrestare il container -->
+									<shutdown>5000</shutdown>
+									<!-- Dopo 1s di attesa senza risposta, forziamo la chiusura -->
+									<kill>1000</kill>
+									<exec>
+										<!-- Post‐start: eseguiamo lo script init_replicaSet.sh -->
+										<postStart>sh /script/init_replicaSet.sh</postStart>
+									</exec>
+								</wait>
+							</run>
+						</image>
+					</images>
+				</configuration>
+				<executions>
+					<!-- In pre‐integration‐test, avvia il container Mongo -->
+					<execution>
+						<id>docker:start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<!-- In post‐integration‐test, stoppa e rimuovi il container -->
+					<execution>
+						<id>docker:stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 		<pluginManagement>
 			<plugins>
 				<plugin>
