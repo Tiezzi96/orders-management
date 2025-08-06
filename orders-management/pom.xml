@@ -160,14 +160,18 @@
 								</ports>
 								<wait>
 									<log>Waiting for connections</log>
-									<!-- Timeout di attesa in ms prima di fallire -->
+									<!-- Timeout di attesa in ms prima di
+									fallire -->
 									<time>45000</time>
-									<!-- Se fermiamo il container, aspettiamo 5s per arrestare il container -->
+									<!-- Se fermiamo il container, aspettiamo 5s
+									per arrestare il container -->
 									<shutdown>5000</shutdown>
-									<!-- Dopo 1s di attesa senza risposta, forziamo la chiusura -->
+									<!-- Dopo 1s di attesa senza risposta,
+									forziamo la chiusura -->
 									<kill>1000</kill>
 									<exec>
-										<!-- Post‐start: eseguiamo lo script init_replicaSet.sh -->
+										<!-- Post‐start: eseguiamo lo script
+										init_replicaSet.sh -->
 										<postStart>sh /script/init_replicaSet.sh</postStart>
 									</exec>
 								</wait>
@@ -276,6 +280,7 @@
 						<excludedTestClasses>
 							<param>
 								com.unifi.ordersmgmt.view.swing.OrderSwingViewTest</param>
+							<param>**.*IT</param>
 						</excludedTestClasses>
 						<targetTests>
 							<param>com.unifi.ordersmgmt.*</param>
