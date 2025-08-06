@@ -1,7 +1,8 @@
 package com.unifi.ordersmgmt.service;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +19,6 @@ import com.unifi.ordersmgmt.repository.mongo.OrderMongoRepository;
 import com.unifi.ordersmgmt.repository.mongo.OrderSequenceGenerator;
 import com.unifi.ordersmgmt.transaction.*;
 import com.unifi.ordersmgmt.transaction.mongo.MongoTransactionManager;
-
 
 public class ClientServiceMongoRepositoryIT {
 	private MongoClient mongoclient;
@@ -49,12 +49,23 @@ public class ClientServiceMongoRepositoryIT {
 	public void tearDown() {
 		mongoclient.close();
 	}
-	
+
 	@Test
 	public void testAddClient() {
 		Client newClient = new Client("1", "test id");
 		clientService.saveClient(newClient);
 		assertThat(clientRepository.findAll()).containsExactly(newClient);
+	}
+
+	@Test
+	public void testFindAllClients() {
+		Client newClient = new Client("CLIENT-00001", "client id");
+
+		Client secondClient = new Client("CLIENT-00002", "second client id");
+		clientService.saveClient(newClient);
+		clientService.saveClient(secondClient);
+		List<Client> clients = clientService.findAllClients();
+		assertThat(clients).contains(newClient, secondClient);
 	}
 
 }
