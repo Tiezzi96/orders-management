@@ -253,5 +253,60 @@ public class OrderServiceMongoRepositoryIT {
 		assertThat(orderFound).isEqualTo(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 		System.out.println(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 	}
+	
+	@Test
+	public void testFindOrdersOfAClient() {
+		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20));
+		orderRepository.save(new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+		List<Order> orderOfYearCurrentClient1Found = orderService
+				.allOrdersByClient(new Client("CLIENT-00001", "first client"));
+		assertThat(orderOfYearCurrentClient1Found).containsExactly(
+				new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+						Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10),
+				new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+						Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+	}
+
+	@Test
+	public void testFindOrdersOfAClientWhenClientNoExistingInDB() {
+		Client client1 = new Client("CLIENT-00001", "first client");
+		orderRepository.save(new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20));
+		orderRepository.save(new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+		clientRepository.delete("CLIENT-00001");
+		try {
+			orderService.allOrdersByClient(client1);
+			fail("Expected Not Client FoundException to be thrown");
+
+		} catch (NotFoundClientException e) {
+			assertThat("Il cliente con id " + client1.getIdentifier() + " non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testFindAllOrders() {
+		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20));
+		orderRepository.save(new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+		List<Order> orders = orderService.findAllOrders();
+		assertThat(orders).containsExactly(
+				new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+						Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10),
+				new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+						Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20),
+				new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+						Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+	}
 
 }
