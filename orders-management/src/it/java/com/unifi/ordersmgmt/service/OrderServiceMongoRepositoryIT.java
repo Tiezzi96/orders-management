@@ -16,6 +16,7 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.unifi.ordersmgmt.exception.NotFoundClientException;
+import com.unifi.ordersmgmt.exception.NotFoundOrderException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.repository.mongo.ClientMongoRepository;
@@ -80,7 +81,45 @@ public class OrderServiceMongoRepositoryIT {
 		} catch (NotFoundClientException e) {
 			assertThat("Il cliente con id " + clientOfOrderToAdd.getIdentifier() + " non è presente nel database")
 					.isEqualTo(e.getMessage());
+			return;
 		}
+	}
+	
+	@Test
+	public void testRemoveOrderWhenOrderNoExistingInDB() {
+		Client clientOfOrderToRemove = new Client("CLIENT-00001", "first client");
+		Order orderToRemove = new Order("ORDER-00001", clientOfOrderToRemove, new Date(), 10);
+		try {
+			orderService.removeOrder(orderToRemove);
+			fail("Expected a NotFoundOrderException to be thrown");
+		} catch (NotFoundOrderException e) {
+			assertThat("L'ordine con id " + orderToRemove.getIdentifier() + " non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testRemoveOrderWhenClientNoExistingInDB() {
+		Client clientOfOrderToRemove = new Client("CLIENT-00001", "first client");
+		clientRepository.delete(clientOfOrderToRemove.getIdentifier());
+		Order order = new Order("ORDER-00001", clientOfOrderToRemove, new Date(), 10);
+		try {
+			orderService.removeOrder(order);
+			fail("Expected a NotFoundClientException to be thrown");
+		} catch (NotFoundClientException e) {
+			assertThat("Il cliente con id " + clientOfOrderToRemove.getIdentifier() + " non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testRemoveOrderWhenClientAndOrderExistingInDB() {
+		Order orderToRemove = orderRepository
+				.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"), new Date(), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "first client"), new Date(), 10));
+		orderService.removeOrder(orderToRemove);
+		Order orderFound = orderRepository.findById(orderToRemove.getIdentifier());
+		assertThat(orderFound).isNull();
 	}
 
 }
