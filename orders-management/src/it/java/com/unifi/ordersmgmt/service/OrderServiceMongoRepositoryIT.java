@@ -5,8 +5,11 @@ import static org.junit.Assert.fail;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -181,6 +184,74 @@ public class OrderServiceMongoRepositoryIT {
 			assertThat("Il cliente con id " + client1.getIdentifier() + " non è presente nel database")
 					.isEqualTo(e.getMessage());
 		}
+	}
+	
+	@Test
+	public void testUpdateOrderWhenOrderNoExistingInDB() {
+		Client clientOfOrderToUpdate = new Client("CLIENT-00001", "first client");
+		Order orderToUpdate = new Order("ORDER-00001", clientOfOrderToUpdate, new Date(), 10);
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		updates.put("date", date2);
+		updates.put("price", 20.5);
+		updates.put("client", new Client("CLIENT-00002", "second client"));
+		try {
+			orderService.updateOrder(orderToUpdate, updates);
+			fail("Expected a NotFoundOrderException to be thrown");
+		} catch (NotFoundOrderException e) {
+			assertThat("L'ordine con id " + orderToUpdate.getIdentifier() + " non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testUpdateOrderWhenClientNoExistingInDB() {
+		Client clientOfOrderToUpdate = new Client("CLIENT-00001", "first client");
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		updates.put("date", date2);
+		updates.put("price", 20.5);
+		Client clientOfOrderUpdated = new Client("CLIENT-00002", "second client");
+		updates.put("client", clientOfOrderUpdated);
+		clientRepository.delete("CLIENT-00002");
+		Order order = new Order("ORDER-00001", clientOfOrderToUpdate, new Date(), 10);
+		orderRepository.save(order);
+		try {
+			orderService.updateOrder(order, updates);
+			fail("Expected a NotFoundClientException to be thrown");
+		} catch (NotFoundClientException e) {
+			assertThat("Il cliente con id " + clientOfOrderUpdated.getIdentifier() + " non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testUpdateOrderWhenClientAndOrderExistingInDB() {
+		Order orderToUpdate = orderRepository
+				.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"), new Date(), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "first client"), new Date(), 10));
+		Map<String, Object> updates = new HashMap<String, Object>();
+		Date date2 = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date2);
+		calendar.add(Calendar.YEAR, -1);
+		date2 = calendar.getTime();
+		updates.put("date", date2);
+		updates.put("price", 20.5);
+		Client clientOfOrderUpdated = new Client("CLIENT-00002", "second client");
+		updates.put("client", clientOfOrderUpdated);
+		orderService.updateOrder(orderToUpdate, updates);
+		Order orderFound = orderRepository.findById(orderToUpdate.getIdentifier());
+		assertThat(orderFound).isEqualTo(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
+		System.out.println(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 	}
 
 }
