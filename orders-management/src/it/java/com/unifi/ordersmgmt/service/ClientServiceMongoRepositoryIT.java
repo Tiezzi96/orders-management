@@ -1,6 +1,7 @@
 package com.unifi.ordersmgmt.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.junit.Test;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.unifi.ordersmgmt.exception.NotFoundClientException;
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.repository.mongo.ClientMongoRepository;
@@ -66,6 +68,28 @@ public class ClientServiceMongoRepositoryIT {
 		clientService.saveClient(secondClient);
 		List<Client> clients = clientService.findAllClients();
 		assertThat(clients).contains(newClient, secondClient);
+	}
+	
+	@Test
+	public void testRemoveClientWhenClientExistingInDatabase() {
+		Client clientToRemove=clientRepository.save(new Client("CLIENT-00001", "CLIENT 1"));
+		clientRepository.save(new Client("CLIENT-00002", "CLIENT 2"));
+		clientService.removeClient(clientToRemove);
+		Client clientFound=clientRepository.findById(clientToRemove.getIdentifier());
+		assertThat(clientFound).isNull();
+	}
+	
+	@Test
+	public void testRemoveClientWhenClienNotExistingInDatabase() {
+		Client clientNotExistInDB = new Client("CLIENT-00001", "client not exist in db");
+		try {
+			clientService.removeClient(clientNotExistInDB);
+			fail("Excpected a ClientNotFoundException to be thrown");
+		}
+		catch(NotFoundClientException e) {
+			assertThat("Il cliente con id "+clientNotExistInDB.getIdentifier()+" non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}	
 	}
 
 }
