@@ -121,5 +121,66 @@ public class OrderServiceMongoRepositoryIT {
 		Order orderFound = orderRepository.findById(orderToRemove.getIdentifier());
 		assertThat(orderFound).isNull();
 	}
+	
+	@Test
+	public void testallOrdersByYear() {
+		Order order1 = new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		orderRepository.save(order1);
+		Order order2 = new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		orderRepository.save(order2);
+		Order order3 = new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30);
+		orderRepository.save(order3);
+		List<Order> ordersOfYearFixtureFound = orderService.allOrdersByYear(2025);
+		assertThat(ordersOfYearFixtureFound).containsExactly(order1, order2);
+	}
+
+	@Test
+	public void testFindYearsOfTheOrders() {
+		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20));
+		orderRepository.save(new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+		List<Integer> yearsOfTheOrdersFound = orderService.findYearsOfOrders();
+		assertThat(yearsOfTheOrdersFound).containsExactly(2024, 2025);
+	}
+
+	@Test
+	public void testFindOrdersOfAClientAndYear() {
+		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20));
+		orderRepository.save(new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+		List<Order> orderOfYearCurrentClient1Found = orderService
+				.findallOrdersByClientByYear(new Client("CLIENT-00001", "first client"), 2025);
+		assertThat(orderOfYearCurrentClient1Found)
+				.containsExactly(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
+						Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+	}
+
+	@Test
+	public void testFindOrdersOfAClientAndYearWhenClientNoExistingInDB() {
+		Client client1 = new Client("CLIENT-00001", "first client");
+		orderRepository.save(new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
+				Date.from(LocalDate.of(2025, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20));
+		orderRepository.save(new Order("ORDER-00003", new Client("CLIENT-00001", "first client"),
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30));
+		clientRepository.delete("CLIENT-00001");
+		try {
+			orderService.findallOrdersByClientByYear(client1, 2025);
+			fail("Expected a NotFoundClientException to be thrown");
+		} catch (NotFoundClientException e) {
+			assertThat("Il cliente con id " + client1.getIdentifier() + " non è presente nel database")
+					.isEqualTo(e.getMessage());
+		}
+	}
 
 }
