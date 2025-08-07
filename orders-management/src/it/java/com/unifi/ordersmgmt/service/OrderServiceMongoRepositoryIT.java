@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,7 @@ public class OrderServiceMongoRepositoryIT {
 	private TransactionalOrderService orderService;
 	private ClientMongoRepository clientRepository;
 	private OrderMongoRepository orderRepository;
+	private static final Logger logger = LogManager.getLogger(OrderServiceMongoRepositoryIT.class);
 
 	@Before
 	public void setUp() {
@@ -66,7 +69,7 @@ public class OrderServiceMongoRepositoryIT {
 	
 	@Test
 	public void testAddOrderWhenClientExistingInDB() {
-		System.out.println(clientRepository.findById("CLIENT-00001"));
+		logger.info(clientRepository.findById("CLIENT-00001"));
 		Order order = new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.0);
 		orderService.addOrder(order);
@@ -251,7 +254,7 @@ public class OrderServiceMongoRepositoryIT {
 		orderService.updateOrder(orderToUpdate, updates);
 		Order orderFound = orderRepository.findById(orderToUpdate.getIdentifier());
 		assertThat(orderFound).isEqualTo(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
-		System.out.println(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
+		logger.info("order Updated: {}", new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 	}
 	
 	@Test
