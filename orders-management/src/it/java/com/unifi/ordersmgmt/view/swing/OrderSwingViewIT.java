@@ -196,5 +196,123 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini del cliente " + client1.getIdentifier()
 				+ " nel " + "2025" + " è di " + String.format("%.2f", order1.getPrice()) + "€");
 	}
+	
+	
+	@Test
+	@GUITest
+	public void testViewOrdersAndAnnualRevenueByClientAndYearWhenClientIsNotPresentInDatabase() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("ORDER-00003", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		orderRepository.removeOrdersByClient(client1.getIdentifier());
+		clientRepository.delete(client1.getIdentifier());
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.list("clientsList").selectItem(client1.toString());
+		window.textBox("panelClientErrorMessage").requireText("Cliente non presente nel DB: " + client1);
+		assertThat(window.list("clientsList").contents()).doesNotContain(client1.toString());
+		window.table("OrdersTable").requireRowCount(1);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly(order2.getIdentifier(), order2.getClient().getName(),
+				order2.getDate().toString(), String.valueOf(order2.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", order2.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testViewAllOrdersAndAnnualRevenueAfterSelectingAClient() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("ORDER-00003", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.list("clientsList").selectItem(client1.toString());
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")).click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly(order1.getIdentifier(), order1.getClient().getName(),
+				order1.getDate().toString(), String.valueOf(order1.getPrice()));
+		assertThat(tableContents[1]).containsExactly(order2.getIdentifier(), order2.getClient().getName(),
+				order2.getDate().toString(), String.valueOf(order2.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", order1.getPrice() + order2.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testRemoveClientButtonWithSuccess() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("ORDER-00003", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.list("clientsList").selectItem(client1.toString());
+		window.button(JButtonMatcher.withText("Rimuovi cliente")).click();
+		logger.info("client1: {}", client1);
+		logger.info("client1 id: {}", client1.getIdentifier());
+		assertThat(window.list("clientsList").contents())
+				.noneSatisfy(item -> assertThat(item).contains(client1.getIdentifier()));
+
+		assertThat(window.comboBox("comboboxClients").contents())
+				.noneSatisfy(item -> assertThat(item).contains(client1.getIdentifier()));
+		String[][] tableContents = window.table("OrdersTable").contents();
+		window.table("OrdersTable").requireRowCount(1);
+		assertThat(tableContents[0]).containsOnly(order2.getIdentifier(), order2.getClient().getName(),
+				order2.getDate().toString(), String.valueOf(order2.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", order2.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testRemoveClientButtonThrowError() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order orderOfClient2 = new Order("ORDER-00001", client2,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		orderRepository.save(orderOfClient2);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.list("clientsList").selectItem(client1.toString());
+		clientRepository.delete(client1.getIdentifier());
+		window.button(JButtonMatcher.withText("Rimuovi cliente")).click();
+		assertThat(window.list("clientsList").contents())
+				.noneSatisfy(item -> assertThat(item).contains(client1.getIdentifier()));
+
+		assertThat(window.comboBox("comboboxClients").contents())
+				.noneSatisfy(item -> assertThat(item).contains(client1.getIdentifier()));
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0])
+				.containsOnly(new String[] { orderOfClient2.getIdentifier(), orderOfClient2.getClient().getName(),
+						orderOfClient2.getDate().toString(), String.valueOf(orderOfClient2.getPrice()) });
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", orderOfClient2.getPrice()) + "€");
+		window.textBox("panelClientErrorMessage")
+				.requireText("" + "Cliente non più presente nel DB: " + client1.toString());
+	}
 
 }
