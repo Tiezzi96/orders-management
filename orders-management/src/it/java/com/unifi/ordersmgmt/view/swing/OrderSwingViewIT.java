@@ -2,6 +2,12 @@ package com.unifi.ordersmgmt.view.swing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -38,6 +44,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	private OrderSwingView orderSwingView;
 	private OrderController orderController;
 	private FrameFixture window;
+	private static final Logger logger = LogManager.getLogger(OrderSwingViewIT.class);
 
 	@Override
 	protected void onSetUp() throws Exception {
@@ -103,6 +110,91 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				.containsOnly(new Client("CLIENT-00001", "test identifier").toString());
 		assertThat(window.comboBox("comboboxClients").contents())
 				.containsExactly(new Client("CLIENT-00001", "test identifier").toString());
+	}
+	
+	@Test
+	@GUITest
+	public void testAllOrdersByYear() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		logger.info("client1: {}", client1);
+		logger.info("client2: {}", client2);
+		Order order1 = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("ORDER-00003", client2,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> {
+			orderController.yearsOfTheOrders();
+			orderController.allOrdersByYear(2025);
+		});
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly(order1.getIdentifier(), order1.getClient().getName(),
+				order1.getDate().toString(), String.valueOf(order1.getPrice()));
+		assertThat(tableContents[1]).containsExactly(order2.getIdentifier(), order2.getClient().getName(),
+				order2.getDate().toString(), String.valueOf(order2.getPrice()));
+	}
+
+	@Test
+	@GUITest
+	public void testViewOrdersAndAnnualTotalPriceByYear() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("ORDER-00003", client2,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		Order order4 = new Order("ORDER-00004", client2,
+				Date.from(LocalDate.of(2026, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		orderRepository.save(order4);
+		GuiActionRunner.execute(() -> orderController.yearsOfTheOrders());
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly(order1.getIdentifier(), order1.getClient().getName(),
+				order1.getDate().toString(), String.valueOf(order1.getPrice()));
+		assertThat(tableContents[1]).containsExactly(order2.getIdentifier(), order2.getClient().getName(),
+				order2.getDate().toString(), String.valueOf(order2.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", order1.getPrice() + order2.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testViewOrdersAndAnnualPriceByClientAndYear() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("ORDER-00002", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("ORDER-00003", client2,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		Order order4 = new Order("ORDER-00004", client2,
+				Date.from(LocalDate.of(2026, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		orderRepository.save(order4);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.list("clientsList").selectItem(client1.toString());
+		window.table("OrdersTable").requireRowCount(1);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly(order1.getIdentifier(), order1.getClient().getName(),
+				order1.getDate().toString(), String.valueOf(order1.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini del cliente " + client1.getIdentifier()
+				+ " nel " + "2025" + " è di " + String.format("%.2f", order1.getPrice()) + "€");
 	}
 
 }
