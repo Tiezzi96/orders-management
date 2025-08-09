@@ -565,4 +565,171 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
 				+ String.format("%.2f", order1.getPrice()) + "€");
 	}
+	
+	@Test
+	@GUITest
+	public void testModifyOrderOfYearSelectedMaintainingSameYearButtonSuccess() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").selectRows(roworderToModify);
+		window.comboBox("comboboxClients").selectItem(client1.toString());
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("6");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("20.20");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		Order orderModified = new Order("ORDER-00002", client1,
+				Date.from(LocalDate.of(2025, 6, 30).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20.20);
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", order1.getClient().getName(),
+				order1.getDate().toString(), String.valueOf(order1.getPrice()));
+		assertThat(tableContents[1]).containsExactly("ORDER-00002", orderModified.getClient().getName(),
+				orderModified.getDate().toString(), String.valueOf(orderModified.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", order1.getPrice() + orderModified.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderOfYearSelectedChangeYearButtonSuccess() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").selectRows(roworderToModify);
+		window.comboBox("comboboxClients").selectItem(client1.toString());
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("31");
+		window.textBox("textField_monthOfDateOrder").enterText("7");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.textBox("textField_revenueOrder").enterText("20.20");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(1);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", order1.getClient().getName(),
+				order1.getDate().toString(), String.valueOf(order1.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di "
+				+ String.format("%.2f", order1.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderOfClientSelectedChangeClientButtonSuccess() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> {
+			orderController.InitializeView();
+		});
+		window.list("clientsList").selectItem(client1.toString());
+		window.comboBox("yearsCombobox").clearSelection();
+		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
+		window.table("OrdersTable").selectRows(roworderToModify);
+		window.comboBox("comboboxClients").selectItem(client2.toString());
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("31");
+		window.textBox("textField_monthOfDateOrder").enterText("12");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.textBox("textField_revenueOrder").enterText("40.50");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(1);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00003", order3.getClient().getName(),
+				order3.getDate().toString(), String.valueOf(order3.getPrice()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini del cliente " + client1.getIdentifier()
+				+ " è di " + String.format("%.2f", order3.getPrice()).replace(".", ",") + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderOfClientAndYearSelectedMaintainingClientButtonSuccess() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> {
+			orderController.InitializeView();
+		});
+		window.list("clientsList").selectItem(client1.toString());
+		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
+		window.table("OrdersTable").selectRows(roworderToModify);
+		window.comboBox("comboboxClients").selectItem(client1.toString());
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("1");
+		window.textBox("textField_yearOfDateOrder").enterText("2025");
+		window.textBox("textField_revenueOrder").enterText("70.50");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		Order orderModified = new Order("ORDER-00001", client1,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 70.50);
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", orderModified.getClient().getName(),
+				orderModified.getDate().toString(), String.valueOf(orderModified.getPrice()));
+		assertThat(tableContents[1]).containsExactly("ORDER-00003", order3.getClient().getName(),
+				order3.getDate().toString(), String.valueOf(order3.getPrice()));
+		window.label("revenueLabel")
+				.requireText("Il costo totale degli ordini del cliente " + client1.getIdentifier() + " nel " + "2025"
+						+ " è di "
+						+ String.format("%.2f", order3.getPrice() + orderModified.getPrice()).replace(".", ",") + "€");
+	}
 }
