@@ -85,7 +85,17 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 		robot().settings().delayBetweenEvents(200);
 		window = new FrameFixture(robot(), orderSwingView);
+		GuiActionRunner.execute(() -> {
+		    orderSwingView.setAlwaysOnTop(true);
+		    orderSwingView.toFront();
+		    orderSwingView.requestFocusInWindow();
+		});
+
+		// meglio di una sleep fissa
+		robot().waitForIdle();
 		window.show();
+		GuiActionRunner.execute(() -> orderSwingView.setAlwaysOnTop(false));
+
 	}
 
 	@Override
