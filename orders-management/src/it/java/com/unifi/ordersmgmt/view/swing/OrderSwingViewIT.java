@@ -441,4 +441,128 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> orderController.yearsOfTheOrders());
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "-- Nessun anno --");
 	}
+	
+	@Test
+	@GUITest
+	public void testAddOrderButtonErrorNoExistingClient() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client1,
+				Date.from(LocalDate.of(2023, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 40);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.comboBox("comboboxClients").selectItem(client1.toString());
+		window.textBox("textField_dayOfDateOrder").enterText("1");
+		window.textBox("textField_monthOfDateOrder").enterText("5");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.textBox("textField_revenueOrder").enterText("10.20");
+		clientRepository.delete(client1.getIdentifier());
+		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.textBox("panelClientErrorMessage")
+				.requireText("" + "Cliente non più presente nel DB: " + client1.toString());
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		String[] expectedRow = { "ORDER-00002", order2.getClient().getName(), order2.getDate().toString(),
+				String.valueOf(order2.getPrice()) };
+
+		assertThat(rows).containsOnly(expectedRow);
+
+		assertThat(window.list("clientsList").contents()).noneMatch(e -> e.contains(client1.toString()));
+		assertThat(window.comboBox("comboboxClients").contents()).noneMatch(e -> e.contains(client1.toString()));
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
+				+ String.format("%.2f", order2.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testRemoveOrderButtonSuccess() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2024");
+		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order1);
+		window.table("OrdersTable").selectRows(rowOrderToDeleted);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		String[] expectedRow = { "ORDER-00001", order1.getClient().getName(), order1.getDate().toString(),
+				String.valueOf(order1.getPrice()) };
+
+		assertThat(rows).isNotEmpty().doesNotContain(expectedRow);
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
+				+ String.format("%.2f", order2.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testRemoveOrderButtonErrorClientNotExistInDB() {
+		Client clientRemainInList = clientRepository.save(new Client("client 1 name"));
+		Client clientToDelete = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", clientRemainInList,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", clientToDelete,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2024");
+		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToDeleted);
+		clientRepository.delete(clientToDelete.getIdentifier());
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.textBox("panelClientErrorMessage")
+				.requireText("Cliente non più presente nel DB: " + clientToDelete.toString());
+		assertThat(window.list("clientsList").contents()).noneMatch(e -> e.contains(clientToDelete.toString()));
+		assertThat(window.comboBox("comboboxClients").contents()).noneMatch(e -> e.contains(clientToDelete.toString()));
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		String[] expectedRow = { "ORDER-00002", order2.getClient().getName(), order2.getDate().toString(),
+				String.valueOf(order2.getPrice()) };
+
+		assertThat(rows).isNotEmpty().doesNotContain(expectedRow);
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
+				+ String.format("%.2f", order1.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testRemoveOrderButtonErrorOrderNotExistInDB() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		GuiActionRunner.execute(() -> orderController.InitializeView());
+		window.comboBox("yearsCombobox").selectItem("2024");
+		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToDelete);
+		orderRepository.delete(order2.getIdentifier());
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.textBox("panelOrderErrorMessage").requireText("Ordine non più presente nel DB: " + order2.toString());
+
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		String[] expectedRow = { "ORDER-00002", order2.getClient().getName(), order2.getDate().toString(),
+				String.valueOf(order2.getPrice()) };
+
+		assertThat(rows).isNotEmpty().doesNotContain(expectedRow);
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
+				+ String.format("%.2f", order1.getPrice()) + "€");
+	}
 }

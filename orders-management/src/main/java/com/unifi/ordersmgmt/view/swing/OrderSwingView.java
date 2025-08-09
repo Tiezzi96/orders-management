@@ -1023,6 +1023,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 	@Override
 	public void removeOrdersByClient(Client client) {
 		getOrderTableModel().removeOrdersOfClient(client);
+		if (listClients.getSelectedIndex() == -1) {
+			resetRevenueLabel(getOrderTableModel().getOrders());
+		}
 
 	}
 

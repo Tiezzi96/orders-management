@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.text.JTextComponent;
@@ -39,6 +38,7 @@ import org.assertj.swing.core.matcher.JLabelMatcher;
 import org.assertj.swing.core.matcher.JTextComponentMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JComboBoxFixture;
 import org.assertj.swing.fixture.JLabelFixture;
 import org.assertj.swing.junit.runner.GUITestRunner;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
@@ -1167,6 +1167,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents).isEmpty();
 		verify(orderController, never()).yearsOfTheOrders();
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel 2024 è di 0,00€");
 	}
 
 	@Test
@@ -2398,9 +2399,9 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.setYearsOrders(asList(2025, 2024));
 		});
 		window.comboBox("yearsCombobox").selectItem(1);
-		JComboBox years = window.comboBox("yearsCombobox").target();
+		JComboBoxFixture years = window.comboBox("yearsCombobox");
 		GuiActionRunner.execute(() -> {
-			years.addActionListener(e -> calls.incrementAndGet());
+			years.target().addActionListener(e -> calls.incrementAndGet());
 			orderSwingView.setYearsOrders(asList(2025, 2023, 2024));
 		});
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
