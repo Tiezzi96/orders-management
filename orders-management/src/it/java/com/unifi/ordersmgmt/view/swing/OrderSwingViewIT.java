@@ -83,7 +83,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 			return orderSwingView;
 		});
 
-		robot().settings().delayBetweenEvents(200);
 		window = new FrameFixture(robot(), orderSwingView);
 		GuiActionRunner.execute(() -> {
 		    orderSwingView.setAlwaysOnTop(true);
@@ -91,7 +90,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		    orderSwingView.requestFocusInWindow();
 		});
 
-		// meglio di una sleep fissa
 		robot().waitForIdle();
 		window.show();
 		GuiActionRunner.execute(() -> orderSwingView.setAlwaysOnTop(false));
