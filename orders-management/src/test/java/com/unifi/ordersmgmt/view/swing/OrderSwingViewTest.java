@@ -2474,7 +2474,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	
 	@Test
 	@GUITest
-	public void testSelectNoClientAndNoYeaItemrShouldDelegateOrderControllerFindAllOrders() {
+	public void testSelectNoClientAndNoYeaItemShouldDelegateOrderControllerFindAllOrders() {
 		Client client = new Client("1", "client1");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
@@ -2485,6 +2485,23 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 		window.comboBox("yearsCombobox").selectItem(2);
 		window.list("clientsList").clearSelection();
+		verify(orderController).getAllOrders();
+	}
+	
+	@Test
+	@GUITest
+	public void testShowAllOrderButtonWhenNoYeaItemShouldDelegateOrderControllerFindAllOrders() {
+		Client client = new Client("1", "client1");
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(2023);
+			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getClientListModel().addElement(client);
+			orderSwingView.getComboboxClientsModel().addElement(client);
+		});
+		window.list("clientsList").selectItem(0);
+		window.comboBox("yearsCombobox").selectItem(2);
+		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")).click();
 		verify(orderController).getAllOrders();
 	}
 
