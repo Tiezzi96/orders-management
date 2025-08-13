@@ -139,6 +139,7 @@
 						<configuration>
 							<sources>
 								<source>src/it/java</source>
+								<source>src/e2e/java</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -270,6 +271,22 @@
 								<goal>verify</goal>
 							</goals>
 						</execution>
+						<execution>
+						<id>e2e-tests</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+							</excludes>
+							<includes>
+								<include>**/*E2ETest.java</include>
+							</includes>
+						</configuration>
+					</execution>
 					</executions>
 				</plugin>
 				<plugin>
@@ -290,6 +307,7 @@
 							<param>
 								com.unifi.ordersmgmt.view.swing.OrderSwingViewTest</param>
 							<param>**.*IT</param>
+							<param>**.*E2ETest</param>
 						</excludedTestClasses>
 						<targetTests>
 							<param>com.unifi.ordersmgmt.*</param>
