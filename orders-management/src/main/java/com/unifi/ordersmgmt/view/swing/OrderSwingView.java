@@ -535,6 +535,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 			if (clientSelected != null) {
 				logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
 				orderController.allOrdersByClient(clientSelected);
+			}else {
+				orderController.getAllOrders();
 			}
 		}
 
