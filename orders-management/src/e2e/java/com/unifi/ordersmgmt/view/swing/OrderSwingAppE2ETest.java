@@ -103,5 +103,43 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				.anySatisfy(e -> assertThat(e).isEqualTo("CLIENT-00001, client 1"))
 				.anySatisfy(e -> assertThat(e).isEqualTo("CLIENT-00002, client 2"));
 	}
+	
+	
+	@Test
+	@GUITest
+	public void testOnStartShowAllOrdersOfCurrentYearInDBAreShown() {
+		window.comboBox("yearsCombobox").requireSelection("2025");
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0");
+	}
+
+	@Test
+	@GUITest
+	public void testOnStartInitialRevenueLabelOfYearsSelectedIsShown() {
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents).isNotEmpty();
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "30,00€");
+	}
+
+	@Test
+	@GUITest
+	public void testShowAllOrdersOfAYearSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00003", "client 1",
+				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00004", "client 2",
+				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"40.0");
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "70,00€");
+	}
 
 }
