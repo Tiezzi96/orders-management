@@ -373,7 +373,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"10.0" });
 		List<String[]> rows = Arrays.asList(tableContents);
-		assertThat(rows).doesNotContain(new String[] { "ORDER-00002", "client 2",
+		assertThat(rows).isNotEmpty().doesNotContain(new String[] { "ORDER-00002", "client 2",
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"20.0" });
 
@@ -394,8 +394,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		List<String[]> rows = Arrays.asList(tableContents);
 		assertThat(rows).doesNotContain(new String[] { "ORDER-00003", "client 1",
 				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
-				"30.0" });
-		assertThat(rows).containsExactly(new String[] { "ORDER-00004", "client 2",
+				"30.0" }).containsExactly(new String[] { "ORDER-00004", "client 2",
 				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"40.0" });
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "40,00€");
@@ -415,8 +414,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		List<String[]> rows = Arrays.asList(tableContents);
 		assertThat(rows).doesNotContain(new String[] { "ORDER-00002", "client 2",
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
-				"20.0" });
-		assertThat(rows).containsExactly(new String[] { "ORDER-00001", "client 1",
+				"20.0" }).containsExactly(new String[] { "ORDER-00001", "client 1",
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"10.0" });
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "10,00€");
@@ -449,6 +447,111 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				"80.75" });
 
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "90,75€");
+
+	}
+	
+	@Test
+	@GUITest
+	public void testModifyOrderWhenYearChangedIsDifferentThanYearSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(1);
+		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("22");
+		window.textBox("textField_monthOfDateOrder").enterText("8");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2025);
+		window.textBox("textField_revenueOrder").enterText("80.75");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Modifica<br>ordine</center></html>")))
+				.click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		window.table("OrdersTable").requireRowCount(1);
+		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00003", "client 1",
+				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0" });
+
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "30,00€");
+
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderWhenClientChangedIsDifferentThanClientSelected() {
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.list("clientsList").selectItem("CLIENT-00001, client 1");
+		window.table("OrdersTable").selectRows(0);
+		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("22");
+		window.textBox("textField_monthOfDateOrder").enterText("8");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2025);
+		window.textBox("textField_revenueOrder").enterText("80.75");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Modifica<br>ordine</center></html>")))
+				.click();
+		assertThat(window.textBox("panelOrderErrorMessage").text()).contains("CLIENT-00001");
+		window.table("OrdersTable").requireRowCount(0);
+		window.label("revenueLabel").requireText("");
+
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderWhenClientNoExists() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(0);
+		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("15");
+		window.textBox("textField_monthOfDateOrder").enterText("5");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2024);
+		window.textBox("textField_revenueOrder").enterText("80.75");
+		removeClientFromDatabase("CLIENT-00002");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Modifica<br>ordine</center></html>")))
+				.click();
+		assertThat(window.textBox("panelClientErrorMessage").text()).contains("CLIENT-00002");
+		String[][] tableContents = window.table("OrdersTable").contents();
+		window.table("OrdersTable").requireRowCount(1);
+		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00003", "client 1",
+				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0" });
+
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "30,00€");
+
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrderWhenOrderNoExist() {
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").selectRows(1);
+		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("15");
+		window.textBox("textField_monthOfDateOrder").enterText("9");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2025);
+		window.textBox("textField_revenueOrder").enterText("60.75");
+		removeOrderFromDatabase("ORDER-00002");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Modifica<br>ordine</center></html>")))
+				.click();
+		assertThat(window.textBox("panelOrderErrorMessage").text()).contains("ORDER-00002");
+		String[][] tableContents = window.table("OrdersTable").contents();
+		window.table("OrdersTable").requireRowCount(1);
+		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0" });
+
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "10,00€");
 
 	}
 
