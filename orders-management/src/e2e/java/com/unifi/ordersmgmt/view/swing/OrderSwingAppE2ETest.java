@@ -5,7 +5,9 @@ import static org.assertj.swing.launcher.ApplicationLauncher.application;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
@@ -80,7 +82,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	private void addTestClientToDB(String id, String name) {
 		Document doc = new Document().append("id", id).append("name", name);
-		mongoClient.getDatabase(DB_NAME).getCollection(COLLECTION_NAME).insertOne(doc); 
+		mongoClient.getDatabase(DB_NAME).getCollection(COLLECTION_NAME).insertOne(doc);
 	}
 
 	private void updateClientSequence(int lastIdUsed) {
@@ -98,11 +100,15 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				.append("date", date).append("price", price);
 		mongoClient.getDatabase(DB_NAME).getCollection(ORDER_COLLECTION_NAME).insertOne(doc);
 	}
-	
+
 	private void removeClientFromDatabase(String clientID) {
 		mongoClient.getDatabase(DB_NAME).getCollection(ORDER_COLLECTION_NAME)
 				.deleteMany(Filters.eq("client.$id", clientID));
 		mongoClient.getDatabase(DB_NAME).getCollection(COLLECTION_NAME).deleteOne(Filters.eq("id", clientID));
+	}
+
+	private void removeOrderFromDatabase(String orderID) {
+		mongoClient.getDatabase(DB_NAME).getCollection(ORDER_COLLECTION_NAME).deleteOne(Filters.eq("id", orderID));
 	}
 
 	@Test
@@ -112,8 +118,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				.anySatisfy(e -> assertThat(e).isEqualTo("CLIENT-00001, client 1"))
 				.anySatisfy(e -> assertThat(e).isEqualTo("CLIENT-00002, client 2"));
 	}
-	
-	
+
 	@Test
 	@GUITest
 	public void testOnStartShowAllOrdersOfCurrentYearInDBAreShown() {
@@ -150,7 +155,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				"40.0");
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "70,00€");
 	}
-	
+
 	@Test
 	@GUITest
 	public void testShowAllOrdersOfAYearAndClientSelected() {
@@ -256,14 +261,14 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "40,00€");
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testShowAllOrders() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(0);
-		window.button(
-				JButtonMatcher.withText(Pattern.compile("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")))
+		window.button(JButtonMatcher
+				.withText(Pattern.compile("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>")))
 				.click();
 		window.list("clientsList").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -352,6 +357,98 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				"20.0" });
 
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "20,00€");
+
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteOrder() {
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").selectRows(1);
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Rimuovi<br>ordine</center></html>")))
+				.click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+
+		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0" });
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).doesNotContain(new String[] { "ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0" });
+
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "10,00€");
+
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteOrderWhenOrderNoExists() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(0);
+		removeOrderFromDatabase("ORDER-00003");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Rimuovi<br>ordine</center></html>")))
+				.click();
+		assertThat(window.textBox("panelOrderErrorMessage").text()).contains("ORDER-00003");
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).doesNotContain(new String[] { "ORDER-00003", "client 1",
+				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0" });
+		assertThat(rows).containsExactly(new String[] { "ORDER-00004", "client 2",
+				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"40.0" });
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di " + "40,00€");
+
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteOrderWhenClientNoExists() {
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").selectRows(1);
+		removeClientFromDatabase("CLIENT-00002");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Rimuovi<br>ordine</center></html>")))
+				.click();
+		assertThat(window.textBox("panelClientErrorMessage").text()).contains("CLIENT-00002");
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).doesNotContain(new String[] { "ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0" });
+		assertThat(rows).containsExactly(new String[] { "ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0" });
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "10,00€");
+
+	}
+
+	@Test
+	@GUITest
+	public void testModifyOrder() {
+		window.comboBox("yearsCombobox").selectItem("2025");
+		window.table("OrdersTable").selectRows(1);
+		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+		window.textBox("textField_dayOfDateOrder").enterText("22");
+		window.textBox("textField_monthOfDateOrder").enterText("8");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2025);
+		window.textBox("textField_revenueOrder").enterText("80.75");
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Modifica<br>ordine</center></html>")))
+				.click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		window.table("OrdersTable").requireRowCount(2);
+		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0" });
+		assertThat(tableContents[1]).containsExactly(new String[] { "ORDER-00002", "client 1",
+				Date.from(LocalDate.of(2025, 8, 22).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"80.75" });
+
+		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2025" + " è di " + "90,75€");
 
 	}
 
