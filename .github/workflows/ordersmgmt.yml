@@ -33,7 +33,7 @@ jobs:
 
       - name: Build with maven
         working-directory: orders-management
-        run: xvfb-run mvn clean verify -Pjacoco -Ppitest -DrepoToken=$COVERALLS_REPO_TOKEN coveralls:report
+        run: xvfb-run mvn clean verify -Pjacoco -Ppitest
         env: 
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
 
@@ -43,6 +43,13 @@ jobs:
         with:
           name: compiled-classes-jdk-${{ matrix.java }}
           path: orders-management/target
+      
+      - name: Submit coverage to coveralls
+        if: matrix.java == 8
+        working-directory: orders-management
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+        run: xvfb-run mvn -DrepoToken=$COVERALLS_REPO_TOKEN coveralls:report
 
    
   sonarcloud:

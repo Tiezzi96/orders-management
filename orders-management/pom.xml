@@ -126,6 +126,17 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.2</version>
+				<configuration>
+					<excludes>
+						<exclude>**/*IT.java</exclude>
+						<exclude>**/*E2ETest.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>3.0.0</version>
@@ -139,6 +150,7 @@
 						<configuration>
 							<sources>
 								<source>src/it/java</source>
+								<source>src/e2e/java</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -201,6 +213,30 @@
 						<phase>post-integration-test</phase>
 						<goals>
 							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.7.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>
+								com.unifi.ordersmgmt.app.swing.OrderSwingApp</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -270,6 +306,21 @@
 								<goal>verify</goal>
 							</goals>
 						</execution>
+						<execution>
+						<id>e2e-tests</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+							</excludes>
+							<includes>
+								<include>**/*E2ETest.java</include>
+							</includes>
+						</configuration>
+					</execution>
 					</executions>
 				</plugin>
 				<plugin>
@@ -290,6 +341,7 @@
 							<param>
 								com.unifi.ordersmgmt.view.swing.OrderSwingViewTest</param>
 							<param>**.*IT</param>
+							<param>**.*E2ETest</param>
 						</excludedTestClasses>
 						<targetTests>
 							<param>com.unifi.ordersmgmt.*</param>
