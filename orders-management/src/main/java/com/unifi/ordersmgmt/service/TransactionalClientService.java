@@ -29,16 +29,15 @@ public class TransactionalClientService implements ClientService {
 	}
 
 	@Override
-	public void removeClient(Client c) {
+	public Client removeClient(Client c) {
 		// TODO Auto-generated method stub
-		mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
+		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(c.getIdentifier()) == null) {
 				throw new NotFoundClientException(
 						String.format("Il cliente con id %s non è presente nel database", c.getIdentifier()));
 			} else {
 				orderRepo.removeOrdersByClient(c.getIdentifier());
-				clientRepo.delete(c.getIdentifier());
-				return true;
+				return clientRepo.delete(c.getIdentifier());
 			}
 		});
 	}
