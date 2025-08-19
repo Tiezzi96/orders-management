@@ -15,7 +15,7 @@ public interface OrderService {
 
 	public Order addOrder(Order order);
 
-	public void removeOrder(Order order);
+	public Order removeOrder(Order order);
 
 	public List<Integer> findYearsOfOrders();
 
