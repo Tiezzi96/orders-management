@@ -519,7 +519,9 @@ public class OrderMongoRepositoryTest {
 		calendar.add(Calendar.DAY_OF_MONTH, -1); // Rimuovi 1 giorno
 		Date previousDate = calendar.getTime();
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 2);
+		insertNewOrderInDB(new Client("CLIENT-00002", "secondClient"), previousDate, 20.0, 3);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
+		when(clientMongoRepository.findById("CLIENT-00002")).thenReturn(new Client("CLIENT-00002", "secondClient"));
 		List<Order> ordersOfClientSelected = orderRepository
 				.findOrdersByClient(new Client("CLIENT-00001", "firstClient"));
 		System.out.println(ordersOfClientSelected);

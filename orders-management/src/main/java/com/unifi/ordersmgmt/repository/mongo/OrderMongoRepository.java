@@ -143,10 +143,9 @@ public class OrderMongoRepository implements OrderRepository {
 						.append(PRICE, order.getPrice());
 				orderCollection.deleteOne(clientSession, docToremove);
 			}
-			return ordersToRemove;
+			// return ordersToRemove;
 		}
-		List<Order> emptyList = new ArrayList<>();
-		return emptyList;
+		return ordersToRemove;
 	}
 
 	@Override
@@ -194,13 +193,8 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Order> findOrdersByClient(Client client) {
-		for (Document doc : orderCollection.find()) {
-			logger.info("client ID: {}", ((DBRef) doc.get(CLIENT)).getId());
-		}
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
-				.filter(d -> {
-					return ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
-				})
+				.filter(d -> ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier()))
 				.map(d -> new Order(d.get("id").toString(),
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
 						d.getDouble(PRICE)))
