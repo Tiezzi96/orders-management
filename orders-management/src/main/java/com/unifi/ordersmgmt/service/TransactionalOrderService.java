@@ -62,8 +62,8 @@ public class TransactionalOrderService implements OrderService {
 	}
 
 	@Override
-	public void removeOrder(Order order) {
-		mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
+	public Order removeOrder(Order order) {
+		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(order.getClient().getIdentifier()) == null) {
 				throw new NotFoundClientException(
 						String.format(CLIENT_MESSAGE_EXCEPTION, order.getClient().getIdentifier()));

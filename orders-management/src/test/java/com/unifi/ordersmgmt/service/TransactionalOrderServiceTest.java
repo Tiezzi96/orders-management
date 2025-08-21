@@ -167,10 +167,12 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findById(order.getIdentifier())).thenReturn(order);
 		when(orderRepo.delete(order.getIdentifier())).thenReturn(order);
 
-		orderService.removeOrder(order);
+		Order orderDeleted=orderService.removeOrder(order);
 
 		verify(clientRepo).findById(client.getIdentifier());
 		verify(orderRepo).delete(order.getIdentifier());
+		assertThat(orderDeleted).isEqualTo(order);
+
 	}
 
 	@Test

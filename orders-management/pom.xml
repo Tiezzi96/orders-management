@@ -354,7 +354,7 @@
 						<!-- Logging dettagliato -->
 						<verbose>true</verbose>
 						<mutators>
-							<mutator>DEFAULTS</mutator>
+							<mutator>STRONGER</mutator>
 						</mutators>
 					</configuration>
 					<executions>

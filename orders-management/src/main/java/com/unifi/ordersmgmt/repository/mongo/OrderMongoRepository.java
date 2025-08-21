@@ -2,6 +2,7 @@ package com.unifi.ordersmgmt.repository.mongo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -144,9 +145,9 @@ public class OrderMongoRepository implements OrderRepository {
 				orderCollection.deleteOne(clientSession, docToremove);
 			}
 			return ordersToRemove;
+		} else {
+			return Collections.emptyList();
 		}
-		List<Order> emptyList = new ArrayList<>();
-		return emptyList;
 	}
 
 	@Override
@@ -194,13 +195,8 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Order> findOrdersByClient(Client client) {
-		for (Document doc : orderCollection.find()) {
-			logger.info("client ID: {}", ((DBRef) doc.get(CLIENT)).getId());
-		}
 		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
-				.filter(d -> {
-					return ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
-				})
+				.filter(d -> ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier()))
 				.map(d -> new Order(d.get("id").toString(),
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
 						d.getDouble(PRICE)))

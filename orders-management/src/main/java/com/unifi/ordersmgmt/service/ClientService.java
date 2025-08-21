@@ -10,5 +10,5 @@ public interface ClientService {
 
 	public Client saveClient(Client client);
 
-	public void removeClient(Client c);
+	public Client removeClient(Client c);
 }

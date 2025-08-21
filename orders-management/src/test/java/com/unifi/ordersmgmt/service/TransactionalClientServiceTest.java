@@ -1,12 +1,15 @@
 package com.unifi.ordersmgmt.service;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,10 +60,12 @@ public class TransactionalClientServiceTest {
 		when(clientRepo.findAll()).thenReturn(asList(client, client2));
 
 		// Act
-		clientService.findAllClients();
+		List<Client> clients = clientService.findAllClients();
 
 		// Assert
 		verify(clientRepo, times(1)).findAll();
+		assertThat(clients).containsExactly(client, client2);
+
 	}
 
 	@Test
@@ -71,10 +76,12 @@ public class TransactionalClientServiceTest {
 		when(clientRepo.save(client)).thenReturn(client);
 
 		// Act
-		clientService.saveClient(client);
+		Client saved = clientService.saveClient(client);
 
 		// Assert
 		verify(clientRepo, times(1)).save(client);
+		assertThat(saved).isEqualTo(client);
+
 	}
 
 	@Test
@@ -86,11 +93,13 @@ public class TransactionalClientServiceTest {
 		when(clientRepo.delete(client.getIdentifier())).thenReturn(client);
 
 		// Act
-		clientService.removeClient(client);
+		Client clientRemoved = clientService.removeClient(client);
 
 		// Assert
 		verify(clientRepo).findById(client.getIdentifier());
 		verify(clientRepo).delete(client.getIdentifier());
+		assertThat(clientRemoved).isEqualTo(client);
+
 	}
 
 	@Test
