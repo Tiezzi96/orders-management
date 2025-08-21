@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -428,7 +429,7 @@ public class OrderMongoRepositoryTest {
 		when(clientMongoRepository.findById(secondClient.getIdentifier())).thenReturn(secondClient);
 		List<Order> ordersRemoved = orderRepository.removeOrdersByClient(secondClient.getIdentifier());
 		List<Order> ordersRemainInDB = getAllOrdersFromDB();
-		assertThat(ordersRemoved).isEmpty();
+		assertThat(ordersRemoved).isSameAs(Collections.emptyList()).isEmpty();
 		assertThat(ordersRemainInDB).containsExactly(new Order("ORDER-00001", newClient, date1, 10),
 				new Order("ORDER-00002", newClient, date2, 15));
 	}

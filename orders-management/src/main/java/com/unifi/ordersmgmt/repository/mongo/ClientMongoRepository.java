@@ -76,7 +76,7 @@ public class ClientMongoRepository implements ClientRepository {
 		Client clientToDelete = findById(idToDelete);
 		
 		if(clientToDelete!=null) {
-			clientCollection.deleteOne(clientSession, Filters.eq("id", idToDelete));
+			clientCollection.deleteOne(clientSession, Filters.eq("id", clientToDelete.getIdentifier()));
 			return clientToDelete;
 			
 		}

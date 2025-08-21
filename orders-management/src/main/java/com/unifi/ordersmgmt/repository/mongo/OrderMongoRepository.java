@@ -2,6 +2,7 @@ package com.unifi.ordersmgmt.repository.mongo;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -143,9 +144,10 @@ public class OrderMongoRepository implements OrderRepository {
 						.append(PRICE, order.getPrice());
 				orderCollection.deleteOne(clientSession, docToremove);
 			}
-			// return ordersToRemove;
+			return ordersToRemove;
+		} else {
+			return Collections.emptyList();
 		}
-		return ordersToRemove;
 	}
 
 	@Override
