@@ -4,7 +4,6 @@ public abstract class BaseElement {
 	protected String identifier;
 	
 	protected BaseElement() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	protected BaseElement(String id) {

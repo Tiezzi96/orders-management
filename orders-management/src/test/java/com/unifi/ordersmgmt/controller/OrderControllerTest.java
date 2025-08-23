@@ -55,7 +55,7 @@ public class OrderControllerTest {
 		when(clientService.findAllClients()).thenReturn(clients);
 		List<Integer> years = asList(2024);
 		when(orderService.findYearsOfOrders()).thenReturn(years);
-		controller.InitializeView();
+		controller.setupView();
 		verify(orderView).showAllClients(clients);
 		verify(orderView).setYearsOrders(years);
 	}

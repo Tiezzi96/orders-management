@@ -3,7 +3,6 @@ package com.unifi.ordersmgmt.transaction.mongo;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.*;
 
 import java.util.Date;
 import java.util.List;
@@ -101,31 +100,27 @@ public class MongoTransactionManagerTest {
 		assertThatThrownBy(() -> transactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			ClientSession session = clientRepo.getSession();
 			String clientID = insertNewClientInDB("new client", session);
-			String orderID = insertNewOrderInDB(clientID, new Date(), 10.0, session);
+			insertNewOrderInDB(clientID, new Date(), 10.0, session);
 			throw new MongoException("error: abort transaction");
 		})).isInstanceOf(MongoException.class);
 		List<Client> clientsInDatabase = findAllClientsInDB();
 		assertThat(clientsInDatabase).isEmpty();
 		List<Order> ordersInDatabase = findAllOrdersInDB();
-		System.out.println("ordersInDB: " + ordersInDatabase);
 		assertThat(ordersInDatabase).isEmpty();
 	}
 	
 	private List<Client> findAllClientsInDB() {
-		// TODO Auto-generated method stub
 		return StreamSupport.stream(clientCollection.find().spliterator(), false)
 				.map(d -> new Client(d.getString("id"), d.getString("name"))).collect(Collectors.toList());
 	}
 
 	private List<Order> findAllOrdersInDB() {
-		// TODO Auto-generated method stub
 		return StreamSupport.stream(orderCollection.find().spliterator(), false).map(d -> new Order(d.getString("id"),
 				findClientById(((DBRef) d.get("client")).getId().toString()), d.getDate("date"), d.getDouble("price")))
 				.collect(Collectors.toList());
 	}
 
 	private Client findClientById(String string) {
-		// TODO Auto-generated method stub
 		Document clientFound = clientCollection.find(Filters.eq("id", string)).first();
 		if (clientFound != null) {
 			return new Client(clientFound.getString("id"), clientFound.getString("name"));
@@ -144,7 +139,6 @@ public class MongoTransactionManagerTest {
 	}
 
 	private String insertNewOrderInDB(String client, Date date, double price, ClientSession session) {
-		// TODO Auto-generated method stub
 		String orderID = "ORDER-00001";
 		Document orderToInsert = new Document().append("id", orderID).append("client", new DBRef("client", client))
 				.append("date", date).append("price", price);

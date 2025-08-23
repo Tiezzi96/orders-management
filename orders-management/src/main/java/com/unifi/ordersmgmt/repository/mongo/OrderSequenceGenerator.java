@@ -16,14 +16,14 @@ public class OrderSequenceGenerator {
 
 	public OrderSequenceGenerator(MongoClient client, String db) {
 		this.db = client.getDatabase(db);
-	    }
+	}
 
 	public long getNextSequence(ClientSession session, String sequenceName) {
-		Document result = db.getCollection("counters").findOneAndUpdate(session, Filters.eq("_id", sequenceName), Updates.inc("seq", 1),
-				new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
+		Document result = db.getCollection("counters").findOneAndUpdate(session, Filters.eq("_id", sequenceName),
+				Updates.inc("seq", 1), new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
 		Number seqValue = result.get("seq", Number.class);
-		long nextSeq = seqValue.longValue();
-		return nextSeq;
+		return seqValue.longValue();
+
 	}
 
 	public String generateCodiceCliente(ClientSession session) {

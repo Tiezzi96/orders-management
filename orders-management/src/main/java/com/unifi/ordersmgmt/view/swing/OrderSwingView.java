@@ -677,15 +677,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void checkCompleteNewOrderInfo() {
-		if ((!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
+		btnNewOrder.setEnabled(isNewOrderInfoCompleted());
+	}
+	
+	private boolean isNewOrderInfoCompleted() {
+		return (!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
 				&& (!textFieldYearNewOrder.getText().trim().isEmpty())
 				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty())
-				&& (comboboxClients.getSelectedIndex() != -1)) {
-
-			btnNewOrder.setEnabled(true);
-		} else {
-			btnNewOrder.setEnabled(false);
-		}
+				&& (comboboxClients.getSelectedIndex() != -1);
 	}
 
 	@Override
@@ -943,7 +942,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void orderAdded(Order orderAdded) {
-		// TODO Auto-generated method stub
 		Order orderSelected = getOrderTableModel().getOrderAt(tableOrders.getSelectedRow());
 		int yearOfOrder = orderAdded.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear();
 

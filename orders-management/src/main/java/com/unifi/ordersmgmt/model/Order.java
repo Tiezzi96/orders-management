@@ -4,11 +4,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Order extends BaseElement {
 
 	private Date date;
 	private double price;
 	private Client client;
+	private static final Logger logger = LogManager.getLogger(Order.class);
 
 	public Order(String id, Client client, Date date, double price) {
 		super(id);
@@ -18,7 +22,6 @@ public class Order extends BaseElement {
 	}
 
 	public Order() {
-		// TODO Auto-generated constructor stub
 		this.identifier = null;
 		this.price = -1;
 		this.date = null;
@@ -46,8 +49,9 @@ public class Order extends BaseElement {
 
 	@Override
 	public String toString() {
-		return "Order{id='" + identifier + "', client=" + (client != null && client.getIdentifier() != null ? client.getIdentifier() : "null")+", date=" + date + ", price=" + price
-				+ "}";
+		return "Order{id='" + identifier + "', client="
+				+ (client != null && client.getIdentifier() != null ? client.getIdentifier() : "null") + ", date="
+				+ date + ", price=" + price + "}";
 	}
 
 	@Override
@@ -65,11 +69,11 @@ public class Order extends BaseElement {
 		} else if (!this.identifier.equals(otherOrder.identifier)) {
 			return false;
 		} else if (!this.client.equals(otherOrder.getClient())) {
-			System.out.println("different client ");
+			logger.info("different clients");
 			return false;
 		} else if (!this.date.toInstant().truncatedTo(ChronoUnit.DAYS)
 				.equals(otherOrder.getDate().toInstant().truncatedTo(ChronoUnit.DAYS))) {
-			System.out.println("different date " + date + "   " + otherOrder.getDate());
+			logger.info("different dates: {}, {}", date, otherOrder.getDate());
 
 			return false;
 		} else if (this.price != otherOrder.getPrice()) {

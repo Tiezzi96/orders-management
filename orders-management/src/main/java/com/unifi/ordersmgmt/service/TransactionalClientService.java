@@ -16,21 +16,17 @@ public class TransactionalClientService implements ClientService {
 
 	@Override
 	public List<Client> findAllClients() {
-		// TODO Auto-generated method stub
-		List<Client> clients = mongoTransactionManager
+		return mongoTransactionManager
 				.executeTransaction((clientRepo, orderRepo) -> clientRepo.findAll());
-		return clients;
 	}
 
 	@Override
 	public Client saveClient(Client client) {
-		// TODO Auto-generated method stub
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> clientRepo.save(client));
 	}
 
 	@Override
 	public Client removeClient(Client c) {
-		// TODO Auto-generated method stub
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(c.getIdentifier()) == null) {
 				throw new NotFoundClientException(

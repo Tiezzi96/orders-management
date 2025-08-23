@@ -68,7 +68,7 @@ public class OrderSwingApp implements Callable<Void> {
 				OrderController controller = new OrderController(newGui, orderService, clientService);
 				newGui.setOrderController(controller);
 				newGui.setVisible(true);
-				controller.InitializeView();
+				controller.setupView();
 
 			} catch (Exception e) {
 				logger.error("Startup error", e);

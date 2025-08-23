@@ -7,7 +7,6 @@ public class Client extends BaseElement {
 	private String name;
 
 	public Client() {
-		// TODO Auto-generated constructor stub
 		this.identifier = null;
 		this.name = null;
 	}
@@ -18,7 +17,6 @@ public class Client extends BaseElement {
 	}
 
 	public Client(String name) {
-		// TODO Auto-generated constructor stub
 		this.name = name;
 		this.identifier = null;
 	}
@@ -34,7 +32,6 @@ public class Client extends BaseElement {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return Objects.toString(identifier, "null") + ", " +
         Objects.toString(name, "null");
 	}

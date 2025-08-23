@@ -197,7 +197,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		orderRepository.save(order4);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		window.table("OrdersTable").requireRowCount(1);
@@ -222,7 +222,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		orderRepository.removeOrdersByClient(client1.getIdentifier());
 		clientRepository.delete(client1.getIdentifier());
 		window.comboBox("yearsCombobox").selectItem("2025");
@@ -251,7 +251,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
@@ -279,7 +279,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).click();
@@ -306,7 +306,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		Order orderOfClient2 = new Order("ORDER-00001", client2,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		orderRepository.save(orderOfClient2);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		clientRepository.delete(client1.getIdentifier());
@@ -340,7 +340,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -376,7 +376,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -402,7 +402,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		Order order1 = new Order("", client1,
 				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		orderRepository.save(order1);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -430,7 +430,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		Order order1 = new Order("", client1,
 				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		orderRepository.save(order1);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("31");
@@ -465,7 +465,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -500,7 +500,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
 		orderRepository.save(order1);
 		orderRepository.save(order2);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order1);
 		window.table("OrdersTable").selectRows(rowOrderToDeleted);
@@ -526,7 +526,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
 		orderRepository.save(order1);
 		orderRepository.save(order2);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.table("OrdersTable").selectRows(rowOrderToDeleted);
@@ -557,7 +557,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
 		orderRepository.save(order1);
 		orderRepository.save(order2);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.table("OrdersTable").selectRows(rowOrderToDelete);
@@ -589,7 +589,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.table("OrdersTable").selectRows(roworderToModify);
@@ -631,7 +631,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.table("OrdersTable").selectRows(roworderToModify);
@@ -670,7 +670,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> {
-			orderController.InitializeView();
+			orderController.setupView();
 		});
 		window.list("clientsList").selectItem(client1.toString());
 		window.comboBox("yearsCombobox").clearSelection();
@@ -711,7 +711,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> {
-			orderController.InitializeView();
+			orderController.setupView();
 		});
 		window.list("clientsList").selectItem(client1.toString());
 		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
@@ -753,7 +753,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
 		orderRepository.save(order1);
 		orderRepository.save(order2);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.table("OrdersTable").selectRows(rowOrderToDeleted);
@@ -794,7 +794,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
 		orderRepository.save(order1);
 		orderRepository.save(order2);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
 		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.table("OrdersTable").selectRows(rowOrderToDelete);
@@ -840,7 +840,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> {
-			orderController.InitializeView();
+			orderController.setupView();
 		});
 		window.comboBox("yearsCombobox").selectItem(Pattern.compile("-- Nessun anno --"));
 		window.list("clientsList").selectItem(1);
@@ -869,7 +869,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> {
-			orderController.InitializeView();
+			orderController.setupView();
 		});
 		window.comboBox("yearsCombobox").selectItem(Pattern.compile("-- Nessun anno --"));
 		window.list("clientsList").clearSelection();
@@ -897,7 +897,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
 		window.list("clientsList").selectItem(1);
 		window.comboBox("comboboxClients").selectItem(client2.toString());
@@ -932,7 +932,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
 		window.list("clientsList").selectItem(1);
 		window.comboBox("comboboxClients").selectItem(client1.toString());
@@ -965,7 +965,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
 		window.list("clientsList").clearSelection();
 		window.comboBox("comboboxClients").selectItem(client2.toString());
@@ -1007,7 +1007,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
 		window.list("clientsList").selectItem(1);
 		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
@@ -1049,7 +1049,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order1);
 		orderRepository.save(order2);
 		orderRepository.save(order3);
-		GuiActionRunner.execute(() -> orderController.InitializeView());
+		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");

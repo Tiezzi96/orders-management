@@ -24,7 +24,7 @@ public class OrderController {
 		this.clientService = clientService;
 	}
 
-	public void InitializeView() {
+	public void setupView() {
 		orderView.showAllClients(clientService.findAllClients());
 		orderView.setYearsOrders(orderService.findYearsOfOrders());
 
