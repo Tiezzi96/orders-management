@@ -939,9 +939,9 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.showAllOrders(asList(firstOrder, secondOrder, thirdOrder));
 		});
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + firstClient.getIdentifier() + " nel "
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + firstClient.getIdentifier() + " nel "
 						+ "2025" + " è di " + String.format("%.2f", firstOrder.getPrice() + secondOrder.getPrice())
-						+ "€");
+						+ "€</center></html>");
 		window.textBox("panelOrderErrorMessage").requireText("");
 
 	}
@@ -1032,8 +1032,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderAdded(order);
 		});
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + secondClient.getIdentifier() + " nel "
-						+ "2025" + " è di " + String.format("%.2f", order.getPrice()) + "€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + secondClient.getIdentifier() + " nel "
+						+ "2025" + " è di " + String.format("%.2f", order.getPrice()) + "€</center></html>");
 	}
 
 	@Test
@@ -1058,8 +1058,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderAdded(secondOrder);
 		});
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + firstClient.getIdentifier() + " nel 2025"
-						+ " è di " + String.format("%.2f", firstOrder.getPrice()) + "€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + firstClient.getIdentifier() + " nel 2025"
+						+ " è di " + String.format("%.2f", firstOrder.getPrice()) + "€</center></html>");
 	}
 
 	@Test
@@ -1084,8 +1084,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderAdded(orderOfClientAndYearNotSelected);
 		});
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + firstClient.getIdentifier() + " nel 2025"
-						+ " è di " + String.format("%.2f", orderOfClientAndYearSelected.getPrice()) + "€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + firstClient.getIdentifier() + " nel 2025"
+						+ " è di " + String.format("%.2f", orderOfClientAndYearSelected.getPrice()) + "€</center></html>");
 	}
 
 	@Test
@@ -1287,10 +1287,10 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.showAllOrders(asList(orderOfClient1YearFixture, orderOfClient1CurrentYear));
 		});
 
-		window.label("revenueLabel").requireText("Il costo totale degli ordini del cliente "
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
 				+ firstClient.getIdentifier() + " è di "
 				+ String.format("%.2f", orderOfClient1CurrentYear.getPrice() + orderOfClient1YearFixture.getPrice())
-				+ "€");
+				+ "€</center></html>");
 		window.textBox("panelOrderErrorMessage").requireText("");
 
 	}
@@ -1453,8 +1453,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderUpdated(orderModified);
 		});
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + secondClient.getIdentifier() + " nel "
-						+ "2025" + " è di " + String.format("%.2f", orderModified.getPrice()) + "€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + secondClient.getIdentifier() + " nel "
+						+ "2025" + " è di " + String.format("%.2f", orderModified.getPrice()) + "€</center></html>");
 
 		Order orderModifiedSecondTime = new Order("1", firstClient,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20.1);
@@ -1494,8 +1494,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderUpdated(orderModifiedThirdTime);
 		});
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + secondClient.getIdentifier() + " è di "
-						+ String.format("%.2f", secondOrder.getPrice() + orderModifiedThirdTime.getPrice()) + "€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + secondClient.getIdentifier() + " è di "
+						+ String.format("%.2f", secondOrder.getPrice() + orderModifiedThirdTime.getPrice()) + "€</center></html>");
 		window.textBox("panelOrderErrorMessage").requireText("");
 	}
 
@@ -1526,8 +1526,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.orderUpdated(firstOrderModified);
 		});
-		window.label("revenueLabel").requireText("Il costo totale degli ordini del cliente "
-				+ secondClient.getIdentifier() + " è di " + String.format("%.2f", secondOrder.getPrice()) + "€");
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
+				+ secondClient.getIdentifier() + " è di " + String.format("%.2f", secondOrder.getPrice()) + "€</center></html>");
 		window.textBox("panelOrderErrorMessage").requireText("");
 	}
 

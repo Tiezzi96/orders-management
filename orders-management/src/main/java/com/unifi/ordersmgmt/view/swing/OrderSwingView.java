@@ -52,6 +52,8 @@ import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.view.OrderView;
 
+import com.unifi.ordersmgmt.utils.*;
+
 public class OrderSwingView extends JFrame implements OrderView {
 
 	/**
@@ -535,7 +537,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 			if (clientSelected != null) {
 				logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
 				orderController.allOrdersByClient(clientSelected);
-			}else {
+			} else {
 				orderController.getAllOrders();
 			}
 		}
@@ -589,7 +591,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		year = Integer.valueOf(textFieldYearNewOrder.getText());
 
-		if (isValidDate(day, month, year)) {
+		if (AppUtils.isValidDate(day, month, year)) {
 
 			Date newDate = Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant());
 			updates.put("date", newDate);
@@ -633,7 +635,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		double price = Double.parseDouble(textFieldRevenueNewOrder.getText().replace(",", "."));
 
-		if (isValidDate(day, month, year)) {
+		if (AppUtils.isValidDate(day, month, year)) {
 			LocalDateTime localDate = LocalDateTime.of(year, month, day, 0, 0);
 			orderController.addOrder(
 					new Order("", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), price));
@@ -650,28 +652,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	}
 
-	private boolean isValidDate(int day, int month, int year) {
-		// anno bisestile se divisibile per 4 non per 100 ma divisibile per 400
-		boolean isLeap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
-		int maxDay;
-
-		switch (month) {
-		case 2:
-			maxDay = isLeap ? 29 : 28;
-			break;
-		case 4:
-		case 6:
-		case 9:
-		case 11:
-			maxDay = 30;
-			break;
-		default:
-			maxDay = 31;
-		}
-		return year >= (2025 - 100) && year <= 2025 && month >= 1 && month <= 12 && (day >= 1 && day <= maxDay);
-
-	}
-
 	private DocumentFilter createTextFilter(int maxLength, String regex, Runnable onChange, String spaces) {
 		return new TextDocumentFilter(maxLength, regex, onChange, spaces);
 	}
@@ -679,12 +659,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private void checkCompleteNewOrderInfo() {
 		btnNewOrder.setEnabled(isNewOrderInfoCompleted());
 	}
-	
+
 	private boolean isNewOrderInfoCompleted() {
-		return (!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
+		return (!textFieldDayNewOrder.getText().trim().isEmpty())
+				&& (!textFieldMonthNewOrder.getText().trim().isEmpty())
 				&& (!textFieldYearNewOrder.getText().trim().isEmpty())
-				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty())
-				&& (comboboxClients.getSelectedIndex() != -1);
+				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty()) && (comboboxClients.getSelectedIndex() != -1);
 	}
 
 	@Override
@@ -835,7 +815,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		logger.info("reimposta totale prezzo");
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() != -1) {
 			Client clientSelected = listClients.getSelectedValue();
-			String totalCostTemplate = "Il costo totale degli ordini del cliente %s nel %s è di %s€";
+			String totalCostTemplate = "<html><center>Il costo totale degli ordini del cliente <br>%s nel %s è di %s€</center></html>";
 			String message = String
 					.format(totalCostTemplate, clientSelected.getIdentifier(), comboboxYears.getSelectedItem(),
 							String.format("%.2f", (orders.stream()
@@ -846,7 +826,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() == -1) {
 			Client clientSelected = listClients.getSelectedValue();
-			String totalCostTemplate = "Il costo totale degli ordini del cliente %s è di %s€";
+			String totalCostTemplate = "<html><center>Il costo totale degli ordini del cliente <br>%s è di %s€</center></html>";
 			String message = String.format(totalCostTemplate, clientSelected.getIdentifier(),
 					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
 			lblrevenue.setText(message);

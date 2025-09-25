@@ -167,7 +167,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"40.0");
 		window.label("revenueLabel").requireText(
-				"Il costo totale degli ordini del cliente CLIENT-00002" + " nel 2024" + " è di " + "40,00€");
+				"<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00002" + " nel 2024" + " è di " + "40,00€</center></html>");
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"10.0");
 		window.label("revenueLabel").requireText(
-				"Il costo totale degli ordini del cliente CLIENT-00001" + " nel 2025" + " è di " + "10,00€");
+				"<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00001" + " nel 2025" + " è di " + "10,00€</center></html>");
 	}
 
 	@Test
@@ -585,7 +585,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				"20.0" });
 
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + "CLIENT-00002" + " è di " + "60,00€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + "CLIENT-00002" + " è di " + "60,00€</center></html>");
 		assertThat(window.comboBox("yearsCombobox").contents()).contains("2021");
 	}
 
@@ -647,7 +647,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("panelOrderErrorMessage").requireEmpty();
 		assertThat(window.comboBox("yearsCombobox").contents()).contains("" + 2019);
 		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + "CLIENT-00001" + " è di " + "10,00€");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + "CLIENT-00001" + " è di " + "10,00€</center></html>");
 	}
 
 	@Test
