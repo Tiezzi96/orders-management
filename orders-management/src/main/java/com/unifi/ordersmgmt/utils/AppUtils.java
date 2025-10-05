@@ -1,7 +1,8 @@
 package com.unifi.ordersmgmt.utils;
 
 public final class AppUtils {
-	private AppUtils() {}
+	private AppUtils() {
+	}
 
 	public static boolean isValidDate(int day, int month, int year) {
 		// anno bisestile se divisibile per 4 non per 100 ma divisibile per 400
@@ -25,9 +26,6 @@ public final class AppUtils {
 	}
 
 	public static boolean isLeapYear(int year) {
-		return year % 4 == 0 
-				&&(
-						year % 100 != 0 
-				|| year % 400 == 0);
+		return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 	}
 }

@@ -82,7 +82,7 @@ public class ClientMongoRepositoryTest {
 
 		}
 	}
-	
+
 	@Test
 	public void testCreateClientCollectionIfNotExistingInDatabase() {
 		String clientCollectionNotExisting = "client_collection_not_existing_in_db";
@@ -101,7 +101,6 @@ public class ClientMongoRepositoryTest {
 		List<Client> clients = clientRepository.findAll();
 		assertThat(clients).isEmpty();
 	}
-	
 
 	@Test
 	public void testFindAllClientsWhenDBIsNotEmpty() {
@@ -120,7 +119,7 @@ public class ClientMongoRepositoryTest {
 		logger.debug("clients in database: {}", clients);
 		assertThat(clients).containsExactly(firstClient, secondClient);
 	}
-	
+
 	@Test
 	public void testFindByIdNotFound() {
 		Client clientFound = clientRepository.findById("CLIENT-00001");

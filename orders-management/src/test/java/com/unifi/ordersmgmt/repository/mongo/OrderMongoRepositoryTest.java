@@ -503,7 +503,7 @@ public class OrderMongoRepositoryTest {
 		orderCollection.insertOne(orderToInsert);
 		return orderID;
 	}
-	
+
 	@Test
 	public void testFindOrdersByClientWhenDBIsEmpty() {
 		List<Order> ordersOfClientSelected = orderRepository

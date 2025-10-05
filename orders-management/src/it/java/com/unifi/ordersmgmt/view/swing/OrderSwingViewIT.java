@@ -204,8 +204,9 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(order1.getIdentifier(), order1.getClient().getName(),
 				order1.getDate().toString(), String.valueOf(order1.getPrice()));
-		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client1.getIdentifier()
-				+ " nel " + "2025" + " è di " + String.format("%.2f", order1.getPrice()) + "€</center></html>");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client1.getIdentifier()
+						+ " nel " + "2025" + " è di " + String.format("%.2f", order1.getPrice()) + "€</center></html>");
 	}
 
 	@Test
@@ -692,8 +693,9 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly("ORDER-00003", order3.getClient().getName(),
 				order3.getDate().toString(), String.valueOf(order3.getPrice()));
-		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client1.getIdentifier()
-				+ " è di " + String.format("%.2f", order3.getPrice()).replace(".", ",") + "€</center></html>");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client1.getIdentifier()
+						+ " è di " + String.format("%.2f", order3.getPrice()).replace(".", ",") + "€</center></html>");
 	}
 
 	@Test
@@ -737,9 +739,10 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		assertThat(tableContents[1]).containsExactly("ORDER-00003", order3.getClient().getName(),
 				order3.getDate().toString(), String.valueOf(order3.getPrice()));
 		window.label("revenueLabel")
-				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client1.getIdentifier() + " nel " + "2025"
-						+ " è di "
-						+ String.format("%.2f", order3.getPrice() + orderModified.getPrice()).replace(".", ",") + "€</center></html>");
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client1.getIdentifier()
+						+ " nel " + "2025" + " è di "
+						+ String.format("%.2f", order3.getPrice() + orderModified.getPrice()).replace(".", ",")
+						+ "€</center></html>");
 	}
 
 	@Test
@@ -882,7 +885,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		assertThat(tableContents[2]).containsExactly(order2.getIdentifier(), order2.getClient().getName(),
 				order2.getDate().toString(), String.valueOf(order2.getPrice()));
 	}
-	
+
 	@Test
 	@GUITest
 	public void testAddOrderOfClientSelectedButtonSuccess() {
@@ -914,8 +917,10 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				order2.getDate().toString(), String.valueOf(order2.getPrice()));
 		assertThat(tableContents[1]).containsExactly("ORDER-00004", orderAdded.getClient().getName(),
 				orderAdded.getDate().toString(), String.valueOf(orderAdded.getPrice()));
-		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client2.getIdentifier()
-				+ " è di " + String.format("%.2f", order2.getPrice() + orderAdded.getPrice()) + "€</center></html>");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client2.getIdentifier()
+						+ " è di " + String.format("%.2f", order2.getPrice() + orderAdded.getPrice())
+						+ "€</center></html>");
 	}
 
 	@Test
@@ -945,8 +950,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly("ORDER-00002", order2.getClient().getName(),
 				order2.getDate().toString(), String.valueOf(order2.getPrice()));
-		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>" + client2.getIdentifier()
-				+ " è di " + String.format("%.2f", order2.getPrice()) + "€</center></html>");
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
+				+ client2.getIdentifier() + " è di " + String.format("%.2f", order2.getPrice()) + "€</center></html>");
 		String[] years = window.comboBox("yearsCombobox").contents();
 		assertThat(years).containsExactly("2025", "2024", "2023", "-- Nessun anno --");
 	}
@@ -1031,10 +1036,11 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents).isEmpty();
 		window.label("revenueLabel").requireText("");
-		window.textBox("panelOrderErrorMessage").requireText("Non ci sono ordini per il cliente "+client2.getIdentifier());
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non ci sono ordini per il cliente " + client2.getIdentifier());
 
 	}
-	
+
 	@Test
 	@GUITest
 	public void testViewAllOrdersAndAnnualRevenueAfterSelectingAClientNoYearSelected() {

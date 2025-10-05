@@ -32,7 +32,7 @@ import com.unifi.ordersmgmt.transaction.*;
 import com.unifi.ordersmgmt.transaction.mongo.*;
 
 public class OrderServiceMongoRepositoryIT {
-	
+
 	private MongoClient mongoClient;
 	private TransactionalOrderService orderService;
 	private ClientMongoRepository clientRepository;
@@ -66,7 +66,7 @@ public class OrderServiceMongoRepositoryIT {
 	public void tearDown() {
 		mongoClient.close();
 	}
-	
+
 	@Test
 	public void testAddOrderWhenClientExistingInDB() {
 		logger.info(clientRepository.findById("CLIENT-00001"));
@@ -90,7 +90,7 @@ public class OrderServiceMongoRepositoryIT {
 			return;
 		}
 	}
-	
+
 	@Test
 	public void testRemoveOrderWhenOrderNoExistingInDB() {
 		Client clientOfOrderToRemove = new Client("CLIENT-00001", "first client");
@@ -127,7 +127,7 @@ public class OrderServiceMongoRepositoryIT {
 		Order orderFound = orderRepository.findById(orderToRemove.getIdentifier());
 		assertThat(orderFound).isNull();
 	}
-	
+
 	@Test
 	public void testallOrdersByYear() {
 		Order order1 = new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
@@ -188,7 +188,7 @@ public class OrderServiceMongoRepositoryIT {
 					.isEqualTo(e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testUpdateOrderWhenOrderNoExistingInDB() {
 		Client clientOfOrderToUpdate = new Client("CLIENT-00001", "first client");
@@ -256,7 +256,7 @@ public class OrderServiceMongoRepositoryIT {
 		assertThat(orderFound).isEqualTo(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 		logger.info("order Updated: {}", new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 	}
-	
+
 	@Test
 	public void testFindOrdersOfAClient() {
 		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),

@@ -744,6 +744,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 			logger.debug("listClients.getSelectedIndex() != -1 : {}", (listClients.getSelectedIndex() != -1));
 			Client clientSelected = getClientSelected();
 			if (currentYearIsNotSelected && listClients.getSelectedIndex() == -1) {
+				// nel caso siamo nell'anno 2024 eho eleimnato l'ultimo ordine
+				comboboxYears.setSelectedItem(NO_YEAR_ITEM);
 				orderController.yearsOfTheOrders();
 			} else {
 
@@ -766,6 +768,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		if (!currentYearIsNotSelected && aYearIsSelected) {
 			getOrderTableModel().removedAllOrders();
 			panelOrderError.setText("Non sono presenti ordini per il " + yearSelected);
+			lblrevenue.setText("");
 		}
 		if (clientSelected != null && !aYearIsSelected) {
 			getOrderTableModel().removedAllOrders();

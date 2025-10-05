@@ -1,8 +1,6 @@
 package com.unifi.ordersmgmt.transaction.mongo;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
@@ -25,6 +23,7 @@ public class MongoTransactionManager implements TransactionManager {
 	private String ordersCollectionName;
 	private String databaseName;
 	private static final Logger logger = LogManager.getLogger(MongoTransactionManager.class);
+
 	public MongoTransactionManager(MongoClient mongoclient, String clientsCollectionName, String ordersCollectionName,
 			String databaseName) {
 		super();
@@ -41,7 +40,6 @@ public class MongoTransactionManager implements TransactionManager {
 		TransactionOptions options = TransactionOptions.builder().readPreference(ReadPreference.primary())
 				.readConcern(ReadConcern.LOCAL).writeConcern(WriteConcern.MAJORITY).build();
 		logger.info("transaction op initializate successfully.");
-
 
 		ClientSession clientSession = mongoclient.startSession();
 		logger.info("mongoclient session started");

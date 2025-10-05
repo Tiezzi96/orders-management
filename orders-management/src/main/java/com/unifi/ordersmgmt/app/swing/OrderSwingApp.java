@@ -28,7 +28,7 @@ public class OrderSwingApp implements Callable<Void> {
 	private int mongoPort = 27017;
 
 	@Option(names = { "--db-name" }, description = "Database name")
-	private String databaseName = "budget";
+	private String databaseName = "ordersmgmt";
 
 	@Option(names = { "--db-clients-collection" }, description = "Collection clients name")
 	private String clientsCollection = "clients";

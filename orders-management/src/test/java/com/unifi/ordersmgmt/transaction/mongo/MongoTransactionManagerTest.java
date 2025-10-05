@@ -94,7 +94,7 @@ public class MongoTransactionManagerTest {
 		assertThat(ordersInDatabase).containsOnly(new Order(result.getKey().get(1),
 				new Client(result.getKey().get(0), "new client"), result.getValue(), 10.0));
 	}
-	
+
 	@Test
 	public void testRollBack() {
 		assertThatThrownBy(() -> transactionManager.executeTransaction((clientRepo, orderRepo) -> {
@@ -108,7 +108,7 @@ public class MongoTransactionManagerTest {
 		List<Order> ordersInDatabase = findAllOrdersInDB();
 		assertThat(ordersInDatabase).isEmpty();
 	}
-	
+
 	private List<Client> findAllClientsInDB() {
 		return StreamSupport.stream(clientCollection.find().spliterator(), false)
 				.map(d -> new Client(d.getString("id"), d.getString("name"))).collect(Collectors.toList());

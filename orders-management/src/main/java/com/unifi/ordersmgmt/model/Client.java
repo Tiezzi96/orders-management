@@ -20,23 +20,20 @@ public class Client extends BaseElement {
 		this.name = name;
 		this.identifier = null;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	@Override
 	public String toString() {
-		return Objects.toString(identifier, "null") + ", " +
-        Objects.toString(name, "null");
+		return Objects.toString(identifier, "null") + ", " + Objects.toString(name, "null");
 	}
-	
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
@@ -55,9 +52,9 @@ public class Client extends BaseElement {
 		return true;
 
 	}
-	
+
 	@Override
 	public int hashCode() {
-	    return Objects.hash(identifier); 
+		return Objects.hash(identifier);
 	}
 }
