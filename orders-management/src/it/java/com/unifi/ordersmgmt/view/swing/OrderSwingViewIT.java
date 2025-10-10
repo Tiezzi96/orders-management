@@ -504,8 +504,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
-		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order1);
-		window.table("OrdersTable").selectRows(rowOrderToDeleted);
+		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order1);
+		window.table("OrdersTable").selectRows(rowOrderToDelete);
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		List<String[]> rows = Arrays.asList(tableContents);
@@ -530,8 +530,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
-		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order2);
-		window.table("OrdersTable").selectRows(rowOrderToDeleted);
+		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToDelete);
 		clientRepository.delete(clientToDelete.getIdentifier());
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
 		window.textBox("panelClientErrorMessage")
@@ -592,9 +592,9 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> orderController.setupView());
-		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.comboBox("yearsCombobox").selectItem("2025");
-		window.table("OrdersTable").selectRows(roworderToModify);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
@@ -634,9 +634,9 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> orderController.setupView());
-		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 		window.comboBox("yearsCombobox").selectItem("2025");
-		window.table("OrdersTable").selectRows(roworderToModify);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
@@ -676,8 +676,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		});
 		window.list("clientsList").selectItem(client1.toString());
 		window.comboBox("yearsCombobox").clearSelection();
-		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
-		window.table("OrdersTable").selectRows(roworderToModify);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		window.comboBox("comboboxClients").selectItem(client2.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
@@ -717,8 +717,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 			orderController.setupView();
 		});
 		window.list("clientsList").selectItem(client1.toString());
-		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
-		window.table("OrdersTable").selectRows(roworderToModify);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order1);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
@@ -759,8 +759,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
-		int rowOrderToDeleted = orderSwingView.getOrderTableModel().getOrderIndex(order2);
-		window.table("OrdersTable").selectRows(rowOrderToDeleted);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		clientRepository.delete(clientToDelete.getIdentifier());
 		window.comboBox("comboboxClients").selectItem(clientToDelete.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
@@ -800,8 +800,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2024");
-		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
-		window.table("OrdersTable").selectRows(rowOrderToDelete);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		orderRepository.delete(order2.getIdentifier());
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
@@ -813,7 +813,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("1");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("70.50");
-		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
 		window.textBox("panelOrderErrorMessage").requireText("Ordine non più presente nel DB: " + order2.toString());
 
@@ -1016,9 +1015,9 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem(1);
-		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 
-		window.table("OrdersTable").selectRows(roworderToModify);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
@@ -1071,6 +1070,155 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 				order2.getDate().toString(), String.valueOf(order2.getPrice()));
 		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di "
 				+ String.format("%.2f", order1.getPrice() + order2.getPrice() + order3.getPrice()) + "€");
+	}
+
+	@Test
+	@GUITest
+	public void testWhenANotCurrentYearIsSelected_And_TheOnlyOrderOfThatYearIsremoved_ThenYearShouldBeRemovedAndYearFilterDisabled() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		GuiActionRunner.execute(() -> orderController.setupView());
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
+		window.comboBox("yearsCombobox").selectItem("2024");
+		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToDelete);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0)).containsExactly("ORDER-00001", client1.getName(),
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		window.label("revenueLabel").requireText(
+				"Il costo totale degli ordini presenti nel DB è di " + String.format("%.2f", order1.getPrice()) + "€");
+		window.textBox("panelOrderErrorMessage").requireText("Non sono presenti ordini per il 2024");
+	}
+
+	@Test
+	@GUITest
+	public void testWhenNotCurrentYearAndClientAreSelected_And_TheOnlyOrderOfThatYearAndClientIsRemoved_ThenYearShouldBeRemovedAndYearFilterDisabled() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.setupView());
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.list("clientsList").selectItem(1);
+		int rowOrderToDelete = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToDelete);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0)).containsExactly("ORDER-00003", client2.getName(),
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0");
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
+				+ client2.getIdentifier() + " è di " + String.format("%.2f", order3.getPrice()) + "€</center></html>");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente " + client2.getIdentifier());
+	}
+
+	@Test
+	@GUITest
+	public void testWhenANotCurrentYearAndClientAreSelected_And_TheOnlyOrderIsUpdatedWithDifferentClient_ThenYearShouldNotBeRemoved() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.setupView());
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.list("clientsList").selectItem(1);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
+		window.comboBox("comboboxClients").selectItem(0);
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("6");
+		window.textBox("textField_yearOfDateOrder").enterText("2024");
+		window.textBox("textField_revenueOrder").enterText("20.20");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).isEmpty();
+		assertThat(window.comboBox("yearsCombobox").contents()).contains("2024");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente " + client2.getIdentifier());
+		window.label("revenueLabel").requireText("");
+	}
+
+	@Test
+	@GUITest
+	public void testWhenNotCurrentYearAndClientAreSelected_And_OnlyOrderUpdatedWithDifferentClientAndYear_ThenYearShouldBeRemoved() {
+		Client client1 = clientRepository.save(new Client("client 1 name"));
+		Client client2 = clientRepository.save(new Client("client 2 name"));
+		Order order1 = new Order("", client1,
+				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order order2 = new Order("", client2,
+				Date.from(LocalDate.of(2024, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		Order order3 = new Order("", client2,
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()), 30);
+		orderRepository.save(order1);
+		orderRepository.save(order2);
+		orderRepository.save(order3);
+		GuiActionRunner.execute(() -> orderController.setupView());
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.list("clientsList").selectItem(1);
+		int rowOrderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
+		window.table("OrdersTable").selectRows(rowOrderToModify);
+		window.comboBox("comboboxClients").selectItem(0);
+		window.textBox("textField_dayOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_revenueOrder").setText("");
+
+		window.textBox("textField_dayOfDateOrder").enterText("30");
+		window.textBox("textField_monthOfDateOrder").enterText("6");
+		window.textBox("textField_yearOfDateOrder").enterText("2023");
+		window.textBox("textField_revenueOrder").enterText("20.20");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		String[][] tableContents = window.table("OrdersTable").contents();
+		List<String[]> rows = Arrays.asList(tableContents);
+		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0)).containsExactly("ORDER-00003", client2.getName(),
+				Date.from(LocalDate.of(2025, 4, 2).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0");
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		assertThat(window.comboBox("yearsCombobox").contents()).contains("2023");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente " + client2.getIdentifier());
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
+				+ client2.getIdentifier() + " è di " + String.format("%.2f", order3.getPrice()) + "€</center></html>");
+
 	}
 
 }
