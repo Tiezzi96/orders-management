@@ -27,7 +27,7 @@ public class ClientSequenceGenerator {
 	}
 
 	public String generateCodiceCliente(ClientSession session) {
-		long nextId = getNextSequence(session, "client");// clients era il nome precedente
+		long nextId = getNextSequence(session, "client");
 		return String.format("CLIENT-%05d", nextId);
 	}
 

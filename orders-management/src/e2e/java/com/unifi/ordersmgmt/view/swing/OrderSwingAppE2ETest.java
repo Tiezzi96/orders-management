@@ -32,6 +32,8 @@ import com.mongodb.client.model.UpdateOptions;
 @RunWith(GUITestRunner.class)
 public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
+	private static final String NO_YEAR_ITEM = "Tutti gli anni";
+
 	private static final String DB_NAME = "test-db";
 
 	private static final String COLLECTION_NAME = "clients";
@@ -568,7 +570,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testAddNewOrderForClientDifferentFromClientSelectedWithNewYear() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 
 		window.list("clientsList").selectItem(1);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -594,7 +596,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testAddNewOrderWithNoClientSelectedNoYearSelected() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -631,7 +633,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testModifyOrderWhenNoYearsSelectedAndClientChangedIsDifferentFromClientSelected() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem("CLIENT-00001, client 1");
 		window.table("OrdersTable").selectRows(0);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
@@ -655,7 +657,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testModifyOrderWhenNoYearsSelectedNoClientSelected() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 		window.table("OrdersTable").selectRows(0);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
@@ -692,7 +694,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testShowAllOrdersClientsNoYearsSelected() {
 		window.list("clientsList").selectItem(0);
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
 				.click();
 		window.table("OrdersTable").requireRowCount(4);

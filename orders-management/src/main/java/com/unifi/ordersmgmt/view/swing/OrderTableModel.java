@@ -23,7 +23,7 @@ public class OrderTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LogManager.getLogger(OrderTableModel.class);
 	private transient List<Order> orders;
-	private static final String[] columns = { "Id", "Cliente", "Data", "Importo ($)" };
+	private static final String[] columns = { "Id", "Cliente", "Data", "Importo (€)" };
 
 	public OrderTableModel() {
 		this.orders = new ArrayList<>();
@@ -96,6 +96,7 @@ public class OrderTableModel extends AbstractTableModel {
 
 	public void removeOrder(Order orderRemoved) {
 		orders.remove(orderRemoved);
+		fireTableDataChanged();
 	}
 
 }

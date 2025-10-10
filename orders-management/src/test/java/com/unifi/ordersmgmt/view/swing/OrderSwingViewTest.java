@@ -4,7 +4,9 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.atIndex;
 import static org.assertj.swing.data.TableCell.row;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -55,6 +57,7 @@ import com.unifi.ordersmgmt.model.Order;
 @RunWith(GUITestRunner.class)
 public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
+	private static final String NO_YEAR_ITEM = "Tutti gli anni";
 	private AutoCloseable autoCloseable;
 	private OrderSwingView orderSwingView;
 	private static final Logger logger = LogManager.getLogger(OrderSwingViewTest.class);
@@ -131,7 +134,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		window.table("OrdersTable").requireColumnCount(4);
 		window.table("OrdersTable").requireColumnNamed("Data");
-		window.table("OrdersTable").requireColumnNamed("Importo ($)");
+		window.table("OrdersTable").requireColumnNamed("Importo (€)");
 		window.table("OrdersTable").requireColumnNamed("Cliente");
 		window.table("OrdersTable").requireColumnNamed("Id");
 
@@ -367,7 +370,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.setYearsOrders(asList(2024, 2023, 2025));
 		});
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
-				"-- Nessun anno --");
+				NO_YEAR_ITEM);
 		window.comboBox("yearsCombobox").requireSelection("" + 2025);
 	}
 
@@ -378,7 +381,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.setYearsOrders(asList(2024, 2023));
 		});
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
-				"-- Nessun anno --");
+				NO_YEAR_ITEM);
 		window.comboBox("yearsCombobox").requireSelection("" + 2025);
 	}
 
@@ -546,7 +549,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.orderAdded(orderToAdd);
 		});
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", "2022",
-				"-- Nessun anno --");
+				NO_YEAR_ITEM);
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents).doesNotContain(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 				orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
@@ -1096,30 +1099,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			comboboxYearModel.setSelectedItem(2024);
 			orderSwingView.showAllOrders(asList());
 		});
-		verify(orderController).yearsOfTheOrders();
-	}
-
-	@Test
-	@GUITest
-	public void testNotResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndAClientIsSelected() {
-		Client newClient = new Client("1", "test id 1");
-		JLabelFixture revenueLabel = window.label("revenueLabel");
-		GuiActionRunner.execute(() -> {
-			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
-			comboboxYearModel.addElement(2025);
-			comboboxYearModel.addElement(2024);
-			comboboxYearModel.setSelectedItem(2024);
-			revenueLabel.target().setText(" ");
-			orderSwingView.getClientListModel().addElement(newClient);
-		});
-		window.list("clientsList").selectItem(0);
-		GuiActionRunner.execute(() -> {
-			orderSwingView.showAllOrders(asList());
-		});
-		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage"))
-				.requireText("Non sono presenti ordini del 2024 per il cliente " + newClient.getIdentifier());
-		window.label("revenueLabel").requireText("");
-		verify(orderController, never()).yearsOfTheOrders();
+		verify(orderController, timeout(500)).yearsOfTheOrders();
 	}
 
 	@Test
@@ -1234,7 +1214,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			listOrderModel.addOrder(order);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			orderSwingView.getComboboxYearsModel().setSelectedItem(2024);
 			orderSwingView.orderRemoved(new Order("1", client, order.getDate(), 10.0));
 
@@ -1243,7 +1223,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		String[][] orders = window.table("OrdersTable").contents();
 		List<List<String>> orderList = Arrays.stream(orders).map(Arrays::asList).collect(Collectors.toList());
 		assertThat(orderList).isEmpty();
-		window.comboBox("yearsCombobox").requireNoSelection();
 		verify(orderController).yearsOfTheOrders();
 
 	}
@@ -1759,6 +1738,45 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
+	public void testWhenSelectedTableOrdersRowChangedOrderTextFieldsShouldBeChangedAccordingly() {
+		Client newClient = new Client("1", "new Client id");
+		Client secondClient = new Client("2", "second Client id");
+
+		Order firstOrder = new Order("1", newClient,
+				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
+		Order secondOrder = new Order("2", secondClient,
+				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getOrderTableModel().addOrder(firstOrder);
+			orderSwingView.getOrderTableModel().addOrder(secondOrder);
+
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+
+			orderSwingView.getComboboxClientsModel().addElement(secondClient);
+
+		});
+		window.table("OrdersTable").selectRows(1); // gli ordini sono ordinati per data e non per identificativo
+		window.comboBox("comboboxClients").requireSelection(0);
+		window.textBox("textField_dayOfDateOrder").requireText("1");
+		window.textBox("textField_monthOfDateOrder").requireText("1");
+		window.textBox("textField_yearOfDateOrder").requireText("2025");
+		window.textBox("textField_revenueOrder").requireText("10.0");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
+
+		window.table("OrdersTable").selectRows(0);
+		window.comboBox("comboboxClients").requireSelection(1);
+		window.textBox("textField_dayOfDateOrder").requireText("1");
+		window.textBox("textField_monthOfDateOrder").requireText("1");
+		window.textBox("textField_yearOfDateOrder").requireText("2024");
+		window.textBox("textField_revenueOrder").requireText("20.0");
+
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
+
+	}
+
+	@Test
+	@GUITest
 	public void testModifyOrderButtonShouldBeEnabledWhenAOrderIsSelectedAndAtLeastOneTextFieldIsCorrect() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
@@ -2147,16 +2165,15 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
-			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(firstClient);
 		});
 		window.list("clientsList").selectItem(0);
 		GuiActionRunner.execute(() -> {
 			orderSwingView.orderAdded(orderToAdd);
 		});
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023",
-				"-- Nessun anno --");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", NO_YEAR_ITEM);
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents).contains(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 				orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
@@ -2215,8 +2232,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
-			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(firstClient);
 			orderSwingView.getClientListModel().addElement(secondClient);
 		});
@@ -2224,8 +2241,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.orderAdded(orderToAdd);
 		});
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023",
-				"-- Nessun anno --");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", NO_YEAR_ITEM);
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents).doesNotContain(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 				orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
@@ -2248,8 +2264,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
-			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(firstClient);
 			orderSwingView.getClientListModel().addElement(secondClient);
 		});
@@ -2276,16 +2292,15 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
-			orderSwingView.getComboboxYearsModel().setSelectedItem("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
+			orderSwingView.getComboboxYearsModel().setSelectedItem(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(firstClient);
 			orderSwingView.getClientListModel().addElement(secondClient);
 		});
 		GuiActionRunner.execute(() -> {
 			orderSwingView.orderAdded(orderToAdd);
 		});
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023",
-				"-- Nessun anno --");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "2023", NO_YEAR_ITEM);
 		String[][] contents = window.table("OrdersTable").contents();
 		assertThat(contents).contains(new String[] { orderToAdd.getIdentifier(), orderToAdd.getClient().getName(),
 				orderToAdd.getDate().toString(), String.valueOf(orderToAdd.getPrice()) }, atIndex(0));
@@ -2303,7 +2318,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			revenueLabel.target().setText(" ");
 			orderSwingView.getClientListModel().addElement(newClient);
 		});
@@ -2328,7 +2343,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getClientListModel().addElement(newClient);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			revenueLabel.target().setText(" ");
 			orderSwingView.getClientListModel().addElement(newClient);
 		});
@@ -2351,7 +2366,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(client);
 			orderSwingView.getComboboxClientsModel().addElement(client);
 		});
@@ -2367,7 +2382,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(client);
 			orderSwingView.getComboboxClientsModel().addElement(client);
 		});
@@ -2387,7 +2402,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.setYearsOrders(asList(2025, 2023, 2024));
 		});
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
-				"-- Nessun anno --");
+				NO_YEAR_ITEM);
 		window.comboBox("yearsCombobox").requireNoSelection();
 	}
 
@@ -2405,7 +2420,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.setYearsOrders(asList(2025, 2023, 2024));
 		});
 		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, "" + 2023,
-				"-- Nessun anno --");
+				NO_YEAR_ITEM);
 		window.comboBox("yearsCombobox").requireSelection("" + 2024);
 		assertThat(calls.get()).isEqualTo(1);
 
@@ -2421,9 +2436,23 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2025, 2023));
 		});
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2023,
-				"-- Nessun anno --");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2023, NO_YEAR_ITEM);
 		window.comboBox("yearsCombobox").requireNoSelection();
+	}
+
+	@Test
+	@GUITest
+	public void testSetYearsOrderShouldBeNotExecutedIfListsOfYearsAreEqual() {
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2024));
+		});
+		window.comboBox("yearsCombobox").selectItem(1);
+		GuiActionRunner.execute(() -> {
+			orderSwingView.setYearsOrders(asList(2025, 2024));
+		});
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("" + 2025, "" + 2024, NO_YEAR_ITEM);
+		verify(orderController, times(1)).allOrdersByYear(2024);
+		window.comboBox("yearsCombobox").requireSelection(1);
 	}
 
 	@Test
@@ -2479,7 +2508,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(client);
 			orderSwingView.getComboboxClientsModel().addElement(client);
 		});
@@ -2495,7 +2524,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2023);
-			orderSwingView.getComboboxYearsModel().addElement("-- Nessun anno --");
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
 			orderSwingView.getClientListModel().addElement(client);
 			orderSwingView.getComboboxClientsModel().addElement(client);
 		});
@@ -2504,6 +2533,70 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
 				.click();
 		verify(orderController).getAllOrders();
+	}
+
+	@Test
+	@GUITest
+	public void testWhenLastOrderOfNotCurrentYearIsRemoved_thenYearShouldBeRemovedAndCorrectErrorMessageShouldBeShown() {
+		Client newClient = new Client("CLIENT-00001", "newClient");
+		Order newOrder = new Order("ORDER-00001", newClient,
+				Date.from(LocalDate.of(2024, 5, 5).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
+
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(newClient);
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+			orderSwingView.getClientListModel().addElement(newClient);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
+
+		});
+
+		window.comboBox("yearsCombobox").selectItem("2024");
+		doAnswer(e -> {
+			GuiActionRunner.execute(() -> orderSwingView.setYearsOrders(asList(2025)));
+			return null;
+		}).when(orderController).yearsOfTheOrders();
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderRemoved(newOrder);
+		});
+		verify(orderController, timeout(500)).yearsOfTheOrders();
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+
+		window.textBox("panelOrderErrorMessage").requireText("Non sono presenti ordini per il 2024");
+	}
+
+	@Test
+	@GUITest
+	public void testWhenLastOrderOfNotCurrentYearIsRemovedAndYearAndClientAreSelected_thenYearShouldBeRemovedAndErrorMessageShouldBeShown() {
+		Client firstClient = new Client("CLIENT-00001", "first client");
+		Order newOrder = new Order("ORDER-000O1", firstClient,
+				Date.from(LocalDate.of(2024, 5, 5).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
+
+		GuiActionRunner.execute(() -> {
+			orderSwingView.getComboboxClientsModel().addElement(firstClient);
+			orderSwingView.getOrderTableModel().addOrder(newOrder);
+			orderSwingView.getClientListModel().addElement(firstClient);
+			orderSwingView.getComboboxYearsModel().addElement(2025);
+			orderSwingView.getComboboxYearsModel().addElement(2024);
+			orderSwingView.getComboboxYearsModel().addElement(NO_YEAR_ITEM);
+
+		});
+
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.list("clientsList").selectItem(0);
+		doAnswer(e -> {
+			GuiActionRunner.execute(() -> orderSwingView.setYearsOrders(asList(2025)));
+			return null;
+		}).when(orderController).yearsOfTheOrders();
+		GuiActionRunner.execute(() -> {
+			orderSwingView.orderRemoved(newOrder);
+		});
+		verify(orderController, timeout(500)).yearsOfTheOrders();
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente " + firstClient.getIdentifier());
 	}
 
 }

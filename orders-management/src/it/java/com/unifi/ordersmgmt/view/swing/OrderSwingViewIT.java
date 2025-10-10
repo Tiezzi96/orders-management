@@ -41,6 +41,7 @@ import com.unifi.ordersmgmt.transaction.mongo.MongoTransactionManager;
 
 public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
+	private static final String NO_YEAR_ITEM = "Tutti gli anni";
 	private MongoClient mongoClient;
 	private ClientRepository clientRepository;
 	private OrderRepository orderRepository;
@@ -421,7 +422,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
 				+ String.format("%.2f", order1.getPrice() + 10.20) + "€");
 		GuiActionRunner.execute(() -> orderController.yearsOfTheOrders());
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "-- Nessun anno --");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", NO_YEAR_ITEM);
 	}
 
 	@Test
@@ -449,7 +450,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini nel " + "2024" + " è di "
 				+ String.format("%.2f", order1.getPrice() + 10.20) + "€");
 		GuiActionRunner.execute(() -> orderController.yearsOfTheOrders());
-		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", "-- Nessun anno --");
+		assertThat(window.comboBox("yearsCombobox").contents()).containsExactly("2025", "2024", NO_YEAR_ITEM);
 	}
 
 	@Test
@@ -845,7 +846,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderController.setupView();
 		});
-		window.comboBox("yearsCombobox").selectItem(Pattern.compile("-- Nessun anno --"));
+		window.comboBox("yearsCombobox").selectItem(Pattern.compile(NO_YEAR_ITEM));
 		window.list("clientsList").selectItem(1);
 		window.table("OrdersTable").requireRowCount(2);
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -874,7 +875,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderController.setupView();
 		});
-		window.comboBox("yearsCombobox").selectItem(Pattern.compile("-- Nessun anno --"));
+		window.comboBox("yearsCombobox").selectItem(Pattern.compile(NO_YEAR_ITEM));
 		window.list("clientsList").clearSelection();
 		window.table("OrdersTable").requireRowCount(3);
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -901,7 +902,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> orderController.setupView());
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem(1);
 		window.comboBox("comboboxClients").selectItem(client2.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -938,7 +939,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> orderController.setupView());
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem(1);
 		window.comboBox("comboboxClients").selectItem(client1.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -953,7 +954,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
 				+ client2.getIdentifier() + " è di " + String.format("%.2f", order2.getPrice()) + "€</center></html>");
 		String[] years = window.comboBox("yearsCombobox").contents();
-		assertThat(years).containsExactly("2025", "2024", "2023", "-- Nessun anno --");
+		assertThat(years).containsExactly("2025", "2024", "2023", NO_YEAR_ITEM);
 	}
 
 	@Test
@@ -971,7 +972,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> orderController.setupView());
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 		window.comboBox("comboboxClients").selectItem(client2.toString());
 		window.textBox("textField_dayOfDateOrder").enterText("1");
@@ -1013,7 +1014,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		orderRepository.save(order2);
 		orderRepository.save(order3);
 		GuiActionRunner.execute(() -> orderController.setupView());
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem(1);
 		int roworderToModify = orderSwingView.getOrderTableModel().getOrderIndex(order2);
 
@@ -1031,7 +1032,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
 		String[] years = window.comboBox("yearsCombobox").contents();
-		assertThat(years).containsExactly("2025", "2024", "2023", "-- Nessun anno --");
+		assertThat(years).containsExactly("2025", "2024", "2023", NO_YEAR_ITEM);
 		window.table("OrdersTable").requireRowCount(0);
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents).isEmpty();
@@ -1058,7 +1059,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> orderController.setupView());
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
 				.click();
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -1071,4 +1072,5 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di "
 				+ String.format("%.2f", order1.getPrice() + order2.getPrice() + order3.getPrice()) + "€");
 	}
+
 }
