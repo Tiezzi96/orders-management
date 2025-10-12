@@ -53,16 +53,13 @@ public class TransactionalClientServiceTest {
 
 	@Test
 	public void testFindClients() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Client client2 = new Client("CLIENT-00002", "Client 2");
 
 		when(clientRepo.findAll()).thenReturn(asList(client, client2));
 
-		// Act
 		List<Client> clients = clientService.findAllClients();
 
-		// Assert
 		verify(clientRepo, times(1)).findAll();
 		assertThat(clients).containsExactly(client, client2);
 
@@ -70,15 +67,12 @@ public class TransactionalClientServiceTest {
 
 	@Test
 	public void testSave() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 
 		when(clientRepo.save(client)).thenReturn(client);
 
-		// Act
 		Client saved = clientService.saveClient(client);
 
-		// Assert
 		verify(clientRepo, times(1)).save(client);
 		assertThat(saved).isEqualTo(client);
 
@@ -86,16 +80,13 @@ public class TransactionalClientServiceTest {
 
 	@Test
 	public void testRemoveClientShouldRemoveClientWhenClientExists() {
-		// Arrange
 		Client client = new Client("CLIENT-00001", "Client 1");
 
 		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
 		when(clientRepo.delete(client.getIdentifier())).thenReturn(client);
 
-		// Act
 		Client clientRemoved = clientService.removeClient(client);
 
-		// Assert
 		verify(clientRepo).findById(client.getIdentifier());
 		verify(clientRepo).delete(client.getIdentifier());
 		assertThat(clientRemoved).isEqualTo(client);
@@ -104,12 +95,10 @@ public class TransactionalClientServiceTest {
 
 	@Test
 	public void testDeleteClientShouldNotDeleteCliemtWhenClientNoExists() {
-		// Arrange
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 
 		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);
 
-		// Assert
 		assertThatExceptionOfType(NotFoundClientException.class)
 				.isThrownBy(() -> clientService.removeClient(clientNotExist));
 		verify(clientRepo).findById(clientNotExist.getIdentifier());

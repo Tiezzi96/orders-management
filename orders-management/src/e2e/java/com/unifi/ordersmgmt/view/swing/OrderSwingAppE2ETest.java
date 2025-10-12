@@ -714,4 +714,109 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di " + "100,00€");
 	}
 
+	@Test
+	@GUITest
+	public void testEdgeCaseRemovedLastOrderOfANotCurrentYearSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0");
+		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di " + "30,00€");
+		window.textBox("panelOrderErrorMessage").requireText("Non sono presenti ordini per il 2024");
+
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseRemovedLastOrderOfANotCurrentYearAndClientSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(1);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.list("clientsList").selectItem(0);
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(1);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00001 è di "
+						+ "10,00€</center></html>");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente CLIENT-00001");
+
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearAndClientSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(1);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.list("clientsList").selectItem(0);
+		window.table("OrdersTable").selectRows(0);
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2022);
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00003", "client 1",
+				Date.from(LocalDate.of(2022, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+
+		assertThat(window.comboBox("yearsCombobox").contents()).contains("2022");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00001 è di "
+						+ "40,00€</center></html>");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente CLIENT-00001");
+
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").selectRows(0);
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").enterText("" + 8);
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2018);
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(3);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		assertThat(window.comboBox("yearsCombobox").contents()).contains("2018");
+		assertThat(tableContents[0]).containsExactly("ORDER-00004", "client 2",
+				Date.from(LocalDate.of(2018, 8, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"40.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(tableContents[2]).containsExactly("ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0");
+		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di " + "70,00€");
+		window.textBox("panelOrderErrorMessage").requireText("Non sono presenti ordini per il 2024");
+
+	}
+
 }
