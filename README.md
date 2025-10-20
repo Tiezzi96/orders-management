@@ -52,6 +52,7 @@ Per eseguire i test è necessario è necessario:
 - posizionarsi nella root del progetto ed eseguire il comando:<br> `mvn -f orders-management/pom.xml clean verify`
 
 Il comando permette di ripulire i target precedenti e lanciare la suite di test contenuto nal modulo *orders-management*. 
+Per eseguire i test da Eclipse è possibile utilizzare la procedura `Run As -> Junit Test`. Per gli Integration e gli E2E test deve essere avviato il comando `mvn -f orders-management/pom.xml docker:start` in precedenza.
 
 
 ## Esecuzione del Code Coverage e del Mutation Testing

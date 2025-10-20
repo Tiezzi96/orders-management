@@ -254,7 +254,7 @@ public class OrderServiceMongoRepositoryIT {
 		orderService.updateOrder(orderToUpdate, updates);
 		Order orderFound = orderRepository.findById(orderToUpdate.getIdentifier());
 		assertThat(orderFound).isEqualTo(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
-		logger.info("order Updated: {}", new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
+		logger.info("order updated: {}", new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
 	}
 
 	@Test

@@ -62,7 +62,6 @@ public class OrderTableModel extends AbstractTableModel {
 
 	public void addOrder(Order order) {
 		orders.add(order);
-		logger.info("ORDER: {}", order);
 		Collections.sort(orders, Comparator.comparing(Order::getDate));
 		fireTableDataChanged();
 	}

@@ -102,7 +102,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("clientsList");
 		window.label(JLabelMatcher.withText("NUOVO CLIENTE"));
 		window.label(JLabelMatcher.withText("INFO ORDINE"));
-		window.label(JLabelMatcher.withText("Identificativo"));
+		window.label(JLabelMatcher.withText("Nominativo"));
 		window.label(JLabelMatcher.withName("revenueLabel"));
 		window.label(JLabelMatcher.withText("CLIENTI"));
 		window.label(JLabelMatcher.withText("Cliente"));
@@ -122,7 +122,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireDisabled();
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).requireDisabled();
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).requireDisabled();
 		window.button(JButtonMatcher
@@ -627,7 +627,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireEnabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireEnabled();
 
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
@@ -640,7 +640,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("1");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireEnabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireEnabled();
 
 	}
 
@@ -657,35 +657,35 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText(" ");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").setText("");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 
 		window.comboBox("comboboxClients").selectItem(0);
 		window.textBox("textField_dayOfDateOrder").setText("1");
 		window.textBox("textField_monthOfDateOrder").setText("");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 
 		window.comboBox("comboboxClients").selectItem(0);
 		window.textBox("textField_dayOfDateOrder").setText("1");
 		window.textBox("textField_monthOfDateOrder").setText("1");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").setText(" ");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 
 		window.comboBox("comboboxClients").clearSelection();
 		window.textBox("textField_dayOfDateOrder").setText("1");
 		window.textBox("textField_monthOfDateOrder").setText("1");
 		window.textBox("textField_yearOfDateOrder").setText("2025");
 		window.textBox("textField_revenueOrder").setText(" ");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 
 	}
 
@@ -701,7 +701,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		LocalDateTime localDateTime = LocalDateTime.of(2025, 1, 1, 0, 0);
 		verify(orderController).addOrder(
@@ -713,7 +713,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_revenueOrder").requireEmpty();
 		window.textBox("panelOrderErrorMessage").requireText("");
 		window.comboBox("comboboxClients").requireNoSelection();
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).requireDisabled();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).requireDisabled();
 
 	}
 
@@ -729,7 +729,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2026");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -743,7 +743,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("1924");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -766,7 +766,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -780,7 +780,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -803,7 +803,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -817,7 +817,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -831,7 +831,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -845,7 +845,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2000");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -859,7 +859,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2023");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -873,7 +873,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2024");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -887,7 +887,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2100");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -901,7 +901,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("20.1");
 		window.comboBox("comboboxClients").selectItem(0);
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_monthOfDateOrder").requireEmpty();
@@ -1205,7 +1205,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderWhenOrdersTableISEmpty() {
+	public void testRemoveOrderWhenOrdersTableIsEmpty() {
 		Client client = new Client("1", "test id 1");
 		Order order = new Order("1", client,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -1777,7 +1777,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonShouldBeEnabledWhenAOrderIsSelectedAndAtLeastOneTextFieldIsCorrect() {
+	public void testModifyOrderButtonShouldBeEnabledWhenAnOrderIsSelectedAndAtLeastOneTextFieldIsCorrect() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 

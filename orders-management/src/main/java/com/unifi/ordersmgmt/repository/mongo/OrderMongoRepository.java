@@ -74,7 +74,7 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public Order save(Order obj) {
 		if (obj.getIdentifier().trim().isEmpty()) {
-			obj.setIdentifier(seqGen.generateCodiceCliente(clientSession));
+			obj.setIdentifier(seqGen.generateCodiceOrdine(clientSession));
 			logger.info("Generated new order id {}", obj.getIdentifier());
 		}
 		Document docToInsert = new Document().append("id", obj.getIdentifier())

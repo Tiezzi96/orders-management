@@ -23,7 +23,7 @@ public class ClientSequenceGenerator {
 				Updates.inc("seq", 1), new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
 		Number seqValue = result.get("seq", Number.class);
 		return seqValue.longValue();
-		
+
 	}
 
 	public String generateCodiceCliente(ClientSession session) {

@@ -108,13 +108,12 @@ public class TransactionalOrderService implements OrderService {
 	public List<Order> allOrdersByClient(Client client) {
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(client.getIdentifier()) == null) {
-				throw new NotFoundClientException(
-						String.format(CLIENT_MESSAGE_EXCEPTION, client.getIdentifier()));
+				throw new NotFoundClientException(String.format(CLIENT_MESSAGE_EXCEPTION, client.getIdentifier()));
 			}
 			return orderRepo.findOrdersByClient(client);
 		});
 	}
-	
+
 	@Override
 	public List<Order> findAllOrders() {
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> orderRepo.findAll());

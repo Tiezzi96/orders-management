@@ -35,19 +35,39 @@
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>
 			**/OrderSwingView.java
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		<!-- Dependencies version  -->
+		<mongo.java.driver.version>3.12.14</mongo.java.driver.version>
+		<picocli.version>4.3.0</picocli.version>
+		<org.assertj.mockito.version>4.11.0</org.assertj.mockito.version>
+		<org.testcontainers.version>1.19.1</org.testcontainers.version>
+		<org.assertj.swing.version>3.17.1</org.assertj.swing.version>
+		<org.apache.commons.version>3.12.0</org.apache.commons.version>
+		<ch.qos.logpack.version>1.2.3</ch.qos.logpack.version>
+		<javax.xml.bind.version>2.3.1</javax.xml.bind.version>
+		<!-- Plugins versions -->
+		<maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
+		<maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
+		<maven.docker.plugin.version>0.34.1</maven.docker.plugin.version>
+		<maven.build.helper.plugin.version>3.0.0</maven.build.helper.plugin.version>
+		<maven.assembly.plugin.version>3.7.1</maven.assembly.plugin.version>
+
+		<maven.sonar.plugin.version>4.0.0.4121</maven.sonar.plugin.version>
+		<maven.jacoco.plugin.version>0.8.12</maven.jacoco.plugin.version>
+		<maven.coveralls.plugin.version>4.3.0</maven.coveralls.plugin.version>
+		<maven.pitest.plugin.version>1.17.4</maven.pitest.plugin.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
-			<version>3.12.14</version>
+			<version>${mongo.java.driver.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>
-			<version>4.3.0</version>
+			<version>${picocli.version}</version>
 		</dependency>
 
 		<dependency>
@@ -67,20 +87,20 @@
 			<!-- required to see Mongo Java Driver-->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
+			<version>${ch.qos.logpack.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-swing-junit</artifactId>
-			<version>3.17.1</version>
+			<version>${org.assertj.swing.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>4.11.0</version>
+			<version>${org.assertj.mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -88,21 +108,21 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>1.19.1</version>
+			<version>${org.testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>mongodb</artifactId>
-			<version>1.19.1</version>
+			<version>${org.testcontainers.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency><!-- dependency per javax.utils.pair-->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.12.0</version>
+			<version>${org.apache.commons.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -112,15 +132,35 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${maven.failsafe.plugin.version}</version>
 				<executions>
 					<execution>
-						<id>default-it</id>
+						<id>integration-tests</id>
+						<phase>integration-test</phase>
 						<goals>
 							<goal>integration-test</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>verify-results</id>
+						<phase>verify</phase>
+						<goals>
 							<goal>verify</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>e2e-tests</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>integration-test</goal>
+						</goals>
 						<configuration>
-							<skipTests>${skipItest}</skipTests>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+							</excludes>
+							<includes>
+								<include>**/*E2ETest.java</include>
+							</includes>
 						</configuration>
 					</execution>
 				</executions>
@@ -128,7 +168,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.2</version>
+				<version>${maven.surefire.plugin.version}</version>
 				<configuration>
 					<excludes>
 						<exclude>**/*IT.java</exclude>
@@ -139,7 +179,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>${maven.build.helper.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>add-test-source</id>
@@ -159,7 +199,7 @@
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.34.1</version>
+				<version>${maven.docker.plugin.version}</version>
 				<configuration>
 					<!-- Rimuove automaticamente i volumi al termine -->
 					<removeVolumes>true</removeVolumes>
@@ -220,7 +260,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>3.7.1</version>
+				<version>${maven.assembly.plugin.version}</version>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -247,12 +287,12 @@
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
-					<version>4.0.0.4121</version>
+					<version>${maven.sonar.plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.12</version>
+					<version>${maven.jacoco.plugin.version}</version>
 					<configuration>
 						<excludes>
 							<exclude>**/model/*.*</exclude>
@@ -278,55 +318,19 @@
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
 					<artifactId>coveralls-maven-plugin</artifactId>
-					<version>4.3.0</version>
+					<version>${maven.coveralls.plugin.version}</version>
 					<dependencies>
 						<dependency> <!-- Required when using JDK 9 or higher -->
 							<groupId>javax.xml.bind</groupId>
 							<artifactId>jaxb-api</artifactId>
-							<version>2.3.1</version>
+							<version>${javax.xml.bind.version}</version>
 						</dependency>
 					</dependencies>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>2.22.1</version>
-					<executions>
-						<execution>
-							<id>integration-tests</id>
-							<phase>integration-test</phase>
-							<goals>
-								<goal>integration-test</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>verify-results</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>verify</goal>
-							</goals>
-						</execution>
-						<execution>
-						<id>e2e-tests</id>
-						<phase>integration-test</phase>
-						<goals>
-							<goal>integration-test</goal>
-						</goals>
-						<configuration>
-							<excludes>
-								<exclude>**/*IT.java</exclude>
-							</excludes>
-							<includes>
-								<include>**/*E2ETest.java</include>
-							</includes>
-						</configuration>
-					</execution>
-					</executions>
-				</plugin>
-				<plugin>
 					<groupId>org.pitest</groupId>
 					<artifactId>pitest-maven</artifactId>
-					<version>1.17.4</version>
+					<version>${maven.pitest.plugin.version}</version>
 					<configuration>
 
 						<skipTests>${skipPitest}</skipTests>
@@ -354,8 +358,10 @@
 						<!-- Logging dettagliato -->
 						<verbose>true</verbose>
 						<mutators>
-							<mutator>STRONGER</mutator>
+							<mutator>DEFAULTS</mutator> <!-- testato anche per
+							STRONGER -->
 						</mutators>
+						<mutationThreshold>100</mutationThreshold>
 					</configuration>
 					<executions>
 						<execution>
@@ -378,20 +384,6 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>integration-tests</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-failsafe-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</build>

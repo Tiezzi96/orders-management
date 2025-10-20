@@ -176,7 +176,7 @@ public class OrderMongoRepositoryTest {
 		Client newClient = new Client("CLIENT-00001", "firstClient");
 		Order newOrder = new Order("", newClient, new Date(), 10.0);
 		logger.info("new Order: {}", newOrder);
-		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
+		when(seqGen.generateCodiceOrdine(session)).thenReturn("ORDER-00001");
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
 		Order orderSaved = orderRepository.save(newOrder);
 		assertThat(orderSaved)
@@ -205,8 +205,8 @@ public class OrderMongoRepositoryTest {
 
 	@Test
 	public void testDeleteWhenOrderNotExistInDB() {
-		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
-		Order orderRemoved = orderRepository.delete(seqGen.generateCodiceCliente(session));
+		when(seqGen.generateCodiceOrdine(session)).thenReturn("ORDER-00001");
+		Order orderRemoved = orderRepository.delete(seqGen.generateCodiceOrdine(session));
 		assertThat(orderRemoved).isNull();
 
 	}

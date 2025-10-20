@@ -129,8 +129,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testAllOrdersByYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
-		logger.info("client1: {}", client1);
-		logger.info("client2: {}", client2);
+		logger.debug("client1: {}", client1);
+		logger.debug("client2: {}", client2);
 		Order order1 = new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("ORDER-00002", client2,
@@ -285,8 +285,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).click();
-		logger.info("client1: {}", client1);
-		logger.info("client1 id: {}", client1.getIdentifier());
+		logger.debug("client1: {}", client1);
+		logger.debug("client1 id: {}", client1.getIdentifier());
 		assertThat(window.list("clientsList").contents())
 				.noneSatisfy(item -> assertThat(item).contains(client1.getIdentifier()));
 
@@ -349,7 +349,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		Order orderAdded = new Order("", client1,
 				Date.from(LocalDate.of(2025, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.20);
 		window.table("OrdersTable").requireRowCount(3);
@@ -385,7 +385,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		Order orderAdded = new Order("", client1,
 				Date.from(LocalDate.of(2025, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.20);
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -411,7 +411,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("1");
 		window.textBox("textField_yearOfDateOrder").enterText("2024");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		Order orderAdded = new Order("", client1,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.20);
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -439,7 +439,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("12");
 		window.textBox("textField_yearOfDateOrder").enterText("2024");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		Order orderAdded = new Order("", client1,
 				Date.from(LocalDate.of(2024, 12, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.20);
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -475,7 +475,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("2024");
 		window.textBox("textField_revenueOrder").enterText("10.20");
 		clientRepository.delete(client1.getIdentifier());
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		window.textBox("panelClientErrorMessage")
 				.requireText("" + "Cliente non più presente nel DB: " + client1.toString());
 		String[][] tableContents = window.table("OrdersTable").contents();
@@ -831,8 +831,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testAllOrdersByClient() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
-		logger.info("client1: {}", client1);
-		logger.info("client2: {}", client2);
+		logger.debug("client1: {}", client1);
+		logger.debug("client2: {}", client2);
 		Order order1 = new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("ORDER-00002", client2,
@@ -860,8 +860,8 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testAllOrders() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
-		logger.info("client1: {}", client1);
-		logger.info("client2: {}", client2);
+		logger.debug("client1: {}", client1);
+		logger.debug("client2: {}", client2);
 		Order order1 = new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("ORDER-00002", client2,
@@ -908,7 +908,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		Order orderAdded = new Order("", client2,
 				Date.from(LocalDate.of(2025, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.20);
 		window.table("OrdersTable").requireRowCount(2);
@@ -945,7 +945,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("2023");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		window.table("OrdersTable").requireRowCount(1);
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly("ORDER-00002", order2.getClient().getName(),
@@ -978,7 +978,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("2025");
 		window.textBox("textField_revenueOrder").enterText("10.20");
-		window.button(JButtonMatcher.withText("Aggiungi ordine")).click();
+		window.button(JButtonMatcher.withText("<html><center>Aggiungi<br>ordine</center></html>")).click();
 		Order orderAdded = new Order("", client2,
 				Date.from(LocalDate.of(2025, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.20);
 		window.table("OrdersTable").requireRowCount(4);

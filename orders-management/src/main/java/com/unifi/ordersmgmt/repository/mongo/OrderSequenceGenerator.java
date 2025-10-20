@@ -26,7 +26,7 @@ public class OrderSequenceGenerator {
 
 	}
 
-	public String generateCodiceCliente(ClientSession session) {
+	public String generateCodiceOrdine(ClientSession session) {
 		long nextId = getNextSequence(session, "orders");
 		return String.format("ORDER-%05d", nextId);
 	}

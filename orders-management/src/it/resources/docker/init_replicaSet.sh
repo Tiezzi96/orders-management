@@ -1,4 +1,3 @@
-#mongo --eval "rs.initiate();"
 mongo --quiet --eval "rs.initiate({
   _id: 'rs0',
   members: [

@@ -16,8 +16,7 @@ public class TransactionalClientService implements ClientService {
 
 	@Override
 	public List<Client> findAllClients() {
-		return mongoTransactionManager
-				.executeTransaction((clientRepo, orderRepo) -> clientRepo.findAll());
+		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> clientRepo.findAll());
 	}
 
 	@Override

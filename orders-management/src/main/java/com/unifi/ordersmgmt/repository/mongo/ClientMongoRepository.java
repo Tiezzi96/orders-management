@@ -19,7 +19,7 @@ import com.unifi.ordersmgmt.repository.ClientRepository;
 
 public class ClientMongoRepository implements ClientRepository {
 
-	private static final Logger logger = LogManager.getLogger(ClientMongoRepository.class); 
+	private static final Logger logger = LogManager.getLogger(ClientMongoRepository.class);
 	private ClientSession clientSession;
 	private MongoCollection<Document> clientCollection;
 	private ClientSequenceGenerator seqGen;
@@ -69,16 +69,16 @@ public class ClientMongoRepository implements ClientRepository {
 	@Override
 	public Client delete(String idToDelete) {
 		Client clientToDelete = findById(idToDelete);
-		
-		if(clientToDelete!=null) {
+
+		if (clientToDelete != null) {
 			clientCollection.deleteOne(clientSession, Filters.eq("id", clientToDelete.getIdentifier()));
 			return clientToDelete;
-			
+
 		}
 		return null;
 	}
-	
-	@Override 
+
+	@Override
 	public ClientSession getSession() {
 		return clientSession;
 	}

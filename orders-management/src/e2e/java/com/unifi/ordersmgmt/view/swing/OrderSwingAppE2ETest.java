@@ -296,7 +296,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2024);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		window.list("clientsList").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00003", "client 1",
@@ -322,7 +323,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2024);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		window.list("clientsList").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00001", "client 1",
@@ -346,7 +348,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2025);
 		window.textBox("textField_revenueOrder").enterText("100.25");
 		removeClientFromDatabase("CLIENT-00001");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		assertThat(window.textBox("panelClientErrorMessage").text()).contains("CLIENT-00001");
 		String[] clientListContents = window.list("clientsList").contents();
 		assertThat(clientListContents).noneMatch(e -> e.contains("CLIENT-00001"));
@@ -578,7 +581,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2021);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		window.comboBox("yearsCombobox").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00004", "client 2",
@@ -604,7 +608,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2021);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 
 		window.comboBox("yearsCombobox").requireNoSelection();
 		window.list("clientsList").requireNoSelection();
