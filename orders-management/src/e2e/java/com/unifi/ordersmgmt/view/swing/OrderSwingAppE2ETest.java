@@ -340,7 +340,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddNewOrderWhenClientSelectedNoExists() {
+	public void testAddNewOrderWhenClientSelectedDoesNotExists() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
 		window.textBox("textField_dayOfDateOrder").enterText("13");
@@ -391,7 +391,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testDeleteOrderWhenOrderNoExists() {
+	public void testDeleteOrderWhenOrderDoesNotExists() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(0);
 		removeOrderFromDatabase("ORDER-00003");
@@ -415,7 +415,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testDeleteOrderWhenClientNoExists() {
+	public void testDeleteOrderWhenClientDoesNotExists() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.table("OrdersTable").selectRows(1);
 		removeClientFromDatabase("CLIENT-00002");
@@ -467,7 +467,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenYearChangedIsDifferentThanYearSelected() {
+	public void testModifyOrderWhenYearOrderChangedIsDifferentThanYearSelected() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(1);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -493,7 +493,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenClientChangedIsDifferentThanClientSelected() {
+	public void testModifyOrderWhenClientOrderChangedIsDifferentThanClientSelected() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem("CLIENT-00001, client 1");
 		window.table("OrdersTable").selectRows(0);
@@ -516,7 +516,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenClientNoExists() {
+	public void testModifyOrderWhenClientDoesNotExist() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(0);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
@@ -544,7 +544,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenOrderNoExist() {
+	public void testModifyOrderWhenOrderDoesNotExist() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.table("OrdersTable").selectRows(1);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -572,7 +572,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddNewOrderForClientDifferentFromClientSelectedWithNewYear() {
+	public void testAddOrderToClientDifferentFromClientSelectedWithNewYear() {
 		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 
 		window.list("clientsList").selectItem(1);
@@ -599,7 +599,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddNewOrderWithNoClientSelectedNoYearSelected() {
+	public void testAddOrderWithNoClientSelectedNoYearSelected() {
 		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 
@@ -637,7 +637,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenNoYearsSelectedAndClientChangedIsDifferentFromClientSelected() {
+	public void testModifyOrderWhenNoYearsSelectedAndClientOrderChangedIsDifferentFromClientSelected() {
 		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem("CLIENT-00001, client 1");
 		window.table("OrdersTable").selectRows(0);
@@ -697,7 +697,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllOrdersClientsNoYearsSelected() {
+	public void testShowAllClientsOrdersWhenNoYearsSelected() {
 		window.list("clientsList").selectItem(0);
 		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
@@ -721,7 +721,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testEdgeCaseRemovedLastOrderOfANotCurrentYearSelected() {
+	public void testEdgeCaseRemovedLastOrderOfNotCurrentYearWhenYearSelected() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(0);
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
@@ -743,7 +743,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testEdgeCaseRemovedLastOrderOfANotCurrentYearAndClientSelected() {
+	public void testEdgeCaseRemovedLastOrderOfANotCurrentYearWhenYearAndClientAreSelected() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(1);
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
@@ -766,7 +766,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearAndClientSelected() {
+	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearWhenYearAndClientAreSelected() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(1);
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
@@ -796,7 +796,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearSelected() {
+	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearWhenYearSelected() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(0);
 		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();

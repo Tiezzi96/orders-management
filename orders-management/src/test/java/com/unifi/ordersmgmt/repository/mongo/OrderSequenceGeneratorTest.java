@@ -46,7 +46,7 @@ public class OrderSequenceGeneratorTest {
 	}
 
 	@Test
-	public void testGenerateCodiceClienteIncrementsSequence() {
+	public void testGenerateCodiceOrdineIncrementsSequence() {
 		try (ClientSession session = mongoClient.startSession()) {
 			String codice1 = generator.generateCodiceOrdine(session);
 			String codice2 = generator.generateCodiceOrdine(session);

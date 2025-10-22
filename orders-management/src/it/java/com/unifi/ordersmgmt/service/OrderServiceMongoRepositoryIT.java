@@ -68,8 +68,8 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testAddOrderWhenClientExistingInDB() {
-		logger.info(clientRepository.findById("CLIENT-00001"));
+	public void testAddOrderWhenClientExistsInDB() {
+		logger.debug(clientRepository.findById("CLIENT-00001"));
 		Order order = new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.0);
 		orderService.addOrder(order);
@@ -78,7 +78,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testAddNewOrderWhenClientNoExistingInDB() {
+	public void testAddOrderWhenClientDoesNotExistInDB() {
 		Client clientOfOrderToAdd = new Client("CLIENT-00003", "test identifier");
 		Order orderToAdd = new Order("ORDER-00001", clientOfOrderToAdd, new Date(), 10);
 		try {
@@ -92,7 +92,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testRemoveOrderWhenOrderNoExistingInDB() {
+	public void testRemoveOrderWhenOrderDoesNotExistInDB() {
 		Client clientOfOrderToRemove = new Client("CLIENT-00001", "first client");
 		Order orderToRemove = new Order("ORDER-00001", clientOfOrderToRemove, new Date(), 10);
 		try {
@@ -105,7 +105,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testRemoveOrderWhenClientNoExistingInDB() {
+	public void testRemoveOrderWhenClientDoesNotExistInDB() {
 		Client clientOfOrderToRemove = new Client("CLIENT-00001", "first client");
 		clientRepository.delete(clientOfOrderToRemove.getIdentifier());
 		Order order = new Order("ORDER-00001", clientOfOrderToRemove, new Date(), 10);
@@ -119,17 +119,17 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testRemoveOrderWhenClientAndOrderExistingInDB() {
+	public void testRemoveOrderWhenClientAndOrderExistInDB() {
 		Order orderToRemove = orderRepository
 				.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"), new Date(), 10));
-		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "first client"), new Date(), 10));
+		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"), new Date(), 10));
 		orderService.removeOrder(orderToRemove);
 		Order orderFound = orderRepository.findById(orderToRemove.getIdentifier());
 		assertThat(orderFound).isNull();
 	}
 
 	@Test
-	public void testallOrdersByYear() {
+	public void testAllOrdersByYear() {
 		Order order1 = new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		orderRepository.save(order1);
@@ -144,7 +144,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testFindYearsOfTheOrders() {
+	public void testFindYearsOfOrders() {
 		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
 		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
@@ -156,7 +156,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testFindOrdersOfAClientAndYear() {
+	public void testFindOrdersByClientAndYear() {
 		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
 		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
@@ -171,7 +171,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testFindOrdersOfAClientAndYearWhenClientNoExistingInDB() {
+	public void testFindOrdersBYClientAndYearWhenClientDoesNotExistInDB() {
 		Client client1 = new Client("CLIENT-00001", "first client");
 		orderRepository.save(new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
@@ -190,7 +190,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testUpdateOrderWhenOrderNoExistingInDB() {
+	public void testUpdateOrderWhenOrderDoesNotExistInDB() {
 		Client clientOfOrderToUpdate = new Client("CLIENT-00001", "first client");
 		Order orderToUpdate = new Order("ORDER-00001", clientOfOrderToUpdate, new Date(), 10);
 		Map<String, Object> updates = new HashMap<String, Object>();
@@ -212,7 +212,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testUpdateOrderWhenClientNoExistingInDB() {
+	public void testUpdateOrderWhenClientDoesNotExistInDB() {
 		Client clientOfOrderToUpdate = new Client("CLIENT-00001", "first client");
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Date date2 = new Date();
@@ -237,7 +237,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testUpdateOrderWhenClientAndOrderExistingInDB() {
+	public void testUpdateOrderWhenClientAndOrderExistInDB() {
 		Order orderToUpdate = orderRepository
 				.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"), new Date(), 10));
 		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "first client"), new Date(), 10));
@@ -258,7 +258,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testFindOrdersOfAClient() {
+	public void testFindOrdersByClient() {
 		orderRepository.save(new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));
 		orderRepository.save(new Order("ORDER-00002", new Client("CLIENT-00002", "second client"),
@@ -275,7 +275,7 @@ public class OrderServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testFindOrdersOfAClientWhenClientNoExistingInDB() {
+	public void testFindOrdersByClientWhenClientDoesNotExistInDB() {
 		Client client1 = new Client("CLIENT-00001", "first client");
 		orderRepository.save(new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10));

@@ -105,7 +105,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAShowAllClients() {
+	public void testShowAllClients() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		GuiActionRunner.execute(() -> orderController.showAllClients());
@@ -115,7 +115,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddClientButton() {
+	public void testAddClient() {
 		window.textBox("textField_clientName").enterText("test identifier");
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).click();
 		assertThat(window.list("clientsList").contents())
@@ -154,7 +154,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testViewOrdersAndAnnualTotalPriceByYear() {
+	public void testShowOrdersAndTotalPriceByYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("ORDER-00001", client1,
@@ -183,7 +183,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testViewOrdersAndAnnualPriceByClientAndYear() {
+	public void testShowOrdersAndTotalPriceByClientAndYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("ORDER-00001", client1,
@@ -212,7 +212,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testViewOrdersAndAnnualRevenueByClientAndYearWhenClientIsNotPresentInDatabase() {
+	public void testShowOrdersAndTotalPriceByClientAndYearWhenClientIsNotPresentInDatabase() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("ORDER-00001", client1,
@@ -241,7 +241,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testViewAllOrdersAndAnnualRevenueAfterSelectingAClient() {
+	public void testShowAllOrdersAndTotalPriceAfterSelectingAClient() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("ORDER-00001", client1,
@@ -269,7 +269,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveClientButtonWithSuccess() {
+	public void testRemoveClient() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("ORDER-00001", client1,
@@ -302,7 +302,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveClientButtonThrowError() {
+	public void testRemoveClientThrowError() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order orderOfClient2 = new Order("ORDER-00001", client2,
@@ -330,7 +330,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderOfYearSelectedButtonSuccess() {
+	public void testAddOrderWhenYearOfOrderSelected() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -366,7 +366,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderOfNotYearSelectedButtonSuccess() {
+	public void testAddOrderWhenDifferentYearSelected() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -399,7 +399,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderOfFirstDayOfYearButtonSuccess() {
+	public void testAddOrderWithOrderOfFirstDayOfYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Order order1 = new Order("", client1,
 				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -427,7 +427,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderOfLastDayOfYearButtonSuccess() {
+	public void testAddOrderWithOrderOfLastDayOfYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Order order1 = new Order("", client1,
 				Date.from(LocalDate.of(2024, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -455,7 +455,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderButtonErrorNoExistingClient() {
+	public void testAddOrderWhenClientDoesNotExistShowError() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -493,7 +493,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderButtonSuccess() {
+	public void testRemoveOrder() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -519,7 +519,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderButtonErrorClientNotExistInDB() {
+	public void testRemoveOrderWhenClientDoesNotExistInDBShowError() {
 		Client clientRemainInList = clientRepository.save(new Client("client 1 name"));
 		Client clientToDelete = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", clientRemainInList,
@@ -550,7 +550,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderButtonErrorOrderNotExistInDB() {
+	public void testRemoveOrderWhenOrderDoesNotExistInDBShowError() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -579,7 +579,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderOfYearSelectedMaintainingSameYearButtonSuccess() {
+	public void testModifyOrderWhenYearSelectedMaintainingSameYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -621,7 +621,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderOfYearSelectedChangeYearButtonSuccess() {
+	public void testModifyOrderWhenYearSelectedAndChangingYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -659,7 +659,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderOfClientSelectedChangeClientButtonSuccess() {
+	public void testModifyOrderWhenClientSelectedAndYearNotSelectedAndChangingClient() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -701,7 +701,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderOfClientAndYearSelectedMaintainingClientButtonSuccess() {
+	public void testModifyOrderWhenClientAndYearSelectedMaintainingSameClient() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -748,7 +748,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonErrorClientNotExistInDB() {
+	public void testModifyOrderWhenClientOrderDoesNotExistInDB() {
 		Client clientRemainInList = clientRepository.save(new Client("client 1 name"));
 		Client clientToDelete = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", clientRemainInList,
@@ -789,7 +789,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonErrorOrderNotExistInDB() {
+	public void testModifyOrderWhenOrderDoesNotExistInDBShowError() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -888,7 +888,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderOfClientSelectedButtonSuccess() {
+	public void testAddOrderWhenClientOfOrderIsSelectedAndYearNotSelected() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -925,7 +925,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderWithDifferentClientRespectToClientSelected() {
+	public void testAddOrderWhenDifferentClientIsSelectedAndYearNotSelected() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -958,7 +958,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderNoClientNoYearSelectedButtonSuccess() {
+	public void testAddOrderWhenNoClientNoYearSelected() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -1000,7 +1000,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderClientSelectedAndChangeClientChangeYear() {
+	public void testModifyClientOfOrderSelectedAndChangeClientChangeYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,
@@ -1043,7 +1043,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testViewAllOrdersAndAnnualRevenueAfterSelectingAClientNoYearSelected() {
+	public void testShowAllOrdersAndTotalPriceAfterSelectingAClientNoYearSelected() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("ORDER-00001", client1,
@@ -1074,7 +1074,7 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenANotCurrentYearIsSelected_And_TheOnlyOrderOfThatYearIsremoved_ThenYearShouldBeRemovedAndYearFilterDisabled() {
+	public void testWhenANotCurrentYearIsSelected_And_TheOnlyOrderOfThatYearIsRemoved_ThenYearShouldBeRemovedAndYearFilterDisabled() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
 		Order order1 = new Order("", client1,

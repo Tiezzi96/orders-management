@@ -157,7 +157,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllClientsShouldRemovedPreviousContentBeforeAddClientsInOrderToClientListAndCombobox() {
+	public void testShowAllClientsShouldRemovePreviousContentBeforeAddingClientsInOrderToClientListAndComboBox() {
 		Client firstClient = new Client("1", "first id");
 		Client secondClient = new Client("2", "second id");
 		GuiActionRunner.execute(() -> {
@@ -174,7 +174,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testClientRemovedShouldRemovedClientSelectedFromListsAndCombobox() {
+	public void testClientRemovedShouldRemovedClientSelectedFromListsAndComboBox() {
 		Client clientToRemove = new Client("1", "client to remove id");
 		Client anotherClient = new Client("2", "client id 2");
 		GuiActionRunner.execute(() -> {
@@ -195,7 +195,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowErrorClientShouldShowErrorInTheClientErrorLabel() {
+	public void testShowErrorClientShouldShowErrorInClientErrorLabel() {
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.showErrorClient("error message", newClient);
@@ -206,7 +206,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenTextFieldAreNotEmptyAddClientButtonShouldBeEnabled() {
+	public void testWhenTextFieldIsNotEmptyAddClientButtonShouldBeEnabled() {
 		window.textBox(JTextComponentMatcher.withName("textField_clientName")).enterText("test");
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).requireEnabled();
 		window.textBox(JTextComponentMatcher.withName("textField_clientName")).setText("");
@@ -216,7 +216,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testClientAddedShouldAddedClientToListAndComboboxListAndResetTextFieldAndErrorClient() {
+	public void testClientAddedShouldAddClientToListAndComboboxAndResetTextFieldAndErrorClientLabel() {
 		Client clientToAdd = new Client("1", "test 1");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.clientAdded(clientToAdd);
@@ -233,7 +233,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testClientAddedShouldAddedClientToListAndComboboxInOrderAndResetTextFieldAndErrorClient() {
+	public void testClientAddedShouldAddClientToListAndComboboxInOrderAndResetTextFieldAndErrorClientLabel() {
 		Client firstClient = new Client("1", "first client id");
 		Client secondClient = new Client("2", "second client id");
 		Client thirdClient = new Client("3", "third client id");
@@ -262,8 +262,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddClientButtonShouldDelegateOrderControllerAddClientAndResetErrorLabel() {
-		// se il client non ha id verrà assegnato dal controller
+	public void testAddClientButtonShouldDelegateToOrderControllerAddClientAndResetErrorLabel() {
 		window.textBox(JTextComponentMatcher.withName("textField_clientName")).enterText("test client 1");
 		window.button(JButtonMatcher.withText("Aggiungi cliente")).click();
 		verify(orderController).addClient(new Client("test client 1"));
@@ -317,7 +316,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllOrdersRemovedPreviousOrdersBeforeAddOrdersToOrderTable() {
+	public void testShowAllOrdersShouldRemovePreviousOrdersBeforeAddingOrdersToOrderTable() {
 		Client newClient = new Client("1", "newClient id");
 		Order firstOrder = new Order("1", newClient, new Date(), 10);
 		Order secondOrder = new Order("2", newClient, new Date(), 10);
@@ -339,7 +338,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllOrdersRemovedPreviousOrdersBeforeAddOrdersInOrderToOrderTable() {
+	public void testShowAllOrdersShouldRemovePreviousOrdersBeforeAddingOrdersInOrderToOrderTable() {
 		Client newClient = new Client("1", "newClient id");
 		LocalDateTime previousLocalDateTime = LocalDateTime.of(2025, 3, 25, 14, 30, 45);
 		LocalDateTime nextLocalDateTime = LocalDateTime.of(2025, 3, 25, 15, 30, 45);
@@ -365,7 +364,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSetYearsOrdersInOrderAndResetWhenThereIsCurrentYear() {
+	public void testSetYearsShouldSortAndResetSelectionWhenCurrentYearIsPresent() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2024, 2023, 2025));
 		});
@@ -376,7 +375,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSetYearsOrdersInOrderAndResetWhenThereIsNotCurrentYear() {
+	public void testSetYearsShouldSortAndResetSelectionWhenCurrentYearIsNotPresent() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2024, 2023));
 		});
@@ -387,7 +386,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSelectYearShouldDelegateOrdersControllerFindYearsOrders() {
+	public void testSelectYearShouldDelegateToOrderControllerAllOrdersByYear() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2023);
 			orderSwingView.getComboboxYearsModel().addElement(2024);
@@ -398,7 +397,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSelectYearWhenClientIsSelectedShouldDelegateOrdersControllerFindOrdersByYear() {
+	public void testSelectYearWhenClientAndYearAreSelectedShouldDelegateToOrderControllerFindOrdersByYearAndClient() {
 		Client firstClient = new Client("1", "first client id");
 		Client secondClient = new Client("2", "second client id");
 		GuiActionRunner.execute(() -> {
@@ -417,7 +416,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSwitchOrderSelectionTable() {
+	public void testOrderTableSelectionShouldSupportToggleShiftAndClick() {
 		Client firstClient = new Client("1", "client 1");
 		LocalDateTime previouslocalDateTime = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
 		LocalDateTime nextlocalDateTime = LocalDateTime.of(2025, 1, 3, 0, 0, 0);
@@ -475,7 +474,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedWhenItsYearIsSelectedAndResetErrorLabel() {
+	public void testOrderAddedWhenItsYearIsSelectedShouldAddOrderAndResetErrorLabel() {
 		Client firstClient = new Client("1", "first client id");
 		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
 		Order orderToAdd = new Order("1", firstClient,
@@ -496,7 +495,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedInOrderWhenItsYearIsSelectedAndResetErrorLabel_MantainingOrderPreSelected() {
+	public void testOrderAddedShouldAddOrderInSortedOrderWhenItsYearIsSelectedAndResetErrorLabelMaintainingOrderPreSelected() {
 		Client firstClient = new Client("1", "first client id");
 		LocalDateTime previouslocalDateTime = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
 		LocalDateTime currentlocalDateTime = LocalDateTime.of(2025, 1, 2, 0, 0, 0);
@@ -536,7 +535,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedWhenItsYearsIsNotSelectedAndResetErrorLabel() {
+	public void testOrderAddedShouldUpdateYearsButNotAddOrderToTableWhenItsYearIsNotSelectedAndResetErrorLabel() {
 		Client firstClient = new Client("1", "first client id");
 		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
 		Order orderToAdd = new Order("1", firstClient,
@@ -560,7 +559,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testControlThatOnlyCorrectValueIsInsertedInDateAndPriceTextFields() {
+	public void testOnlyCorrectValuesShouldBeAcceptedInDateTextFields() {
 		window.textBox("textField_dayOfDateOrder").enterText("day");
 		window.textBox("textField_dayOfDateOrder").requireEmpty();
 		window.textBox("textField_dayOfDateOrder").enterText("203");
@@ -600,7 +599,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	@RunsInEDT
 	@Test
 	@GUITest
-	public void testControlThatOnlyCorrectValueIsInsertedInPriceTextField() {
+	public void testOnlyCorrectValuesShouldBeAcceptedInPriceTextField() {
 		window.textBox("textField_revenueOrder").enterText("price");
 		window.textBox("textField_revenueOrder").requireEmpty();
 		window.textBox("textField_revenueOrder").enterText("500.203");
@@ -617,7 +616,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenTextFieldsAreNotEmptyAndClientIsSelectedThenAddOrderButtonShouldbeEnabled() {
+	public void testWhenTextFieldsAreNotEmptyAndClientIsSelectedThenAddOrderButtonShouldBeEnabled() {
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxClientsModel().addElement(newClient);
@@ -646,7 +645,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenATextFieldIsEmptyOrClientIsNotSelectedThenAddOrderButtonShouldbeDisabled() {
+	public void testWhenAnyTextFieldIsBlankOrClientIsNotSelectedAddOrderButtonShouldBeDisabled() {
 
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
@@ -691,7 +690,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenDateIsCorrectAndResetErrorLabel() {
+	public void testAddOrderButtonShouldDelegateToOrderControllerAddOrderWhenDateIsCorrectAndResetTextFieldsAndErrorLabel() {
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxClientsModel().addElement(newClient);
@@ -719,7 +718,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenYearIsNotCorrect() {
+	public void testAddOrderButtonShouldNotDelegateToOrderControllerAddOrderWhenYearIsNotCorrect() {
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxClientsModel().addElement(newClient);
@@ -756,7 +755,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenMonthIsNotCorrect() {
+	public void testAddOrderButtonShouldNotDelegateToOrderControllerNewOrderWhenMonthIsNotCorrect() {
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxClientsModel().addElement(newClient);
@@ -792,7 +791,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddOrderButtonShouldDelegateToOrderControllerNewOrderWhenDayIsNotCorrect() {
+	public void testAddOrderButtonShouldNotDelegateToOrderControllerNewOrderWhenDayIsNotCorrect() {
 
 		Client newClient = new Client("1", "new Client id");
 		GuiActionRunner.execute(() -> {
@@ -913,7 +912,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenShowAllOrdersAndAClientIsSelected() {
+	public void testShowAllOrdersWhenClientAndYearAreSelectedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient, new Date(), 10.1);
@@ -947,7 +946,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenShowAllOrdersAndAnyClientIsSelected() {
+	public void testShowAllOrdersWhenNoClientIsSelectedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient, new Date(), 10.1);
@@ -968,7 +967,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearSelectedIsAddedAndClientIsNotSelected() {
+	public void testOrderAddedWhenYearOfOrderIsSelectedAndClientIsNotSelectedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient,
@@ -991,7 +990,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearNotSelectedIsAddedAndClientIsNotSelected() {
+	public void testOrderAddedWhenOrderYearAndClientAreNotSelectedShouldNotUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order currentYearOrder = new Order("1", firstClient,
@@ -1014,7 +1013,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearSelectedAndClientSelectedIsAdded() {
+	public void testOrderAddedWhenOrderYearAndClientAreSelectedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1038,7 +1037,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearNotSelectedAndClientSelectedIsAdded() {
+	public void testOrderAddedWhenOrderYearNotSelectedAndOrderClientSelectedShouldNotUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient,
@@ -1064,7 +1063,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearNotSelectedAndClientNotSelectedIsAdded() {
+	public void testOrderAddedWhenOrderYearNotSelectedAndOrderClientNotSelectedShouldNotUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order orderOfClientAndYearSelected = new Order("1", firstClient,
@@ -1091,7 +1090,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testResetShowOrderOfCurrentYearWhenShowOrderIsCalledWithEmptyArgumentAndAnyClientIsSelected() {
+	public void testShowAllOrdersWhenCalledWithEmptyListAndClientIsNotSelectedShouldInvokeYearsOfTheOrders() {
 		GuiActionRunner.execute(() -> {
 			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
 			comboboxYearModel.addElement(2025);
@@ -1104,7 +1103,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testNotResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndCurrentYearIsSelected() {
+	public void testShowAllOrdersWhenCalledWithEmptyListAndCurrentYearIsSelectedShouldNotInvokeYearsOfTheOrdersAndUpdateOrderErrorLabel() {
 		JLabel revenueLabel = window.label("revenueLabel").target();
 		GuiActionRunner.execute(() -> {
 			DefaultComboBoxModel<Object> comboboxYearModel = orderSwingView.getComboboxYearsModel();
@@ -1122,7 +1121,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderOfAClientWhenOrderRemanentInListIsEmptyAndAnyClientIsSelected() {
+	public void testRemoveOrdersByClientWhenNoClientIsSelectedShouldRemoveClientOrdersFromTable() {
 		Client firstClient = new Client("1", "test id 1");
 		Order order1 = new Order("1", firstClient,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -1150,7 +1149,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderOfAClientWhenOrderRemanentInListIsEmptyAndAnOtherClientIsSelected() {
+	public void testRemoveOrdersByClientWhenAnotherClientIsSelectedShouldRemoveClientOrders() {
 		Client firstClient = new Client("1", "test id 1");
 		Client secondClient = new Client("2", "test id 2");
 		Order orderOfClient1CurrentYear = new Order("1", firstClient,
@@ -1174,13 +1173,15 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> orderSwingView
 				.removeOrdersByClient(new Client(firstClient.getIdentifier(), firstClient.getName())));
 		String[][] tableContents = window.table("OrdersTable").contents();
+		window.list("clientsList").selectItem(0);
+		window.list("clientsList").selectItem(0);
 		assertThat(tableContents).isEmpty();
 		verify(orderController, never()).yearsOfTheOrders();
 	}
 
 	@Test
 	@GUITest
-	public void testRemoveOrderWhenOrdersRemainedInTableAreNotEmptyAndUpdateTotalRevenue() {
+	public void testOrderRemovedWhenOrdersTableIsNotEmptyShouldUpdateTotalRevenue() {
 		Client client = new Client("1", "test id 1");
 		Order order = new Order("1", client,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -1205,7 +1206,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderWhenOrdersTableIsEmpty() {
+	public void testOrderRemovedWhenOrdersTableIsEmpty() {
 		Client client = new Client("1", "test id 1");
 		Order order = new Order("1", client,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -1242,7 +1243,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllOrdersWhenOrdersOfClientSelectedAreShowedUpdateTotalPriceAndResetOrderError() {
+	public void testShowAllOrdersWhenClientIsSelectedShouldUpdateTotalPriceAndResetOrderError() {
 		Client firstClient = new Client("1", "test id 1");
 		Client secondClient = new Client("2", "test id 2");
 		Order orderOfClient1CurrentYear = new Order("1", firstClient,
@@ -1275,7 +1276,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderModifiedWhenItsYearIsSelectedAndResetErrorLabel() {
+	public void testOrderUpdatedWhenItsYearIsSelectedShouldUpdateTableAndResetErrorLabel() {
 		Client client = new Client("1", "first client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2025);
@@ -1298,7 +1299,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderModifiedWhenItsYearIsNotSelected() {
+	public void testOrderUpdatedWhenItsYearIsNotSelectedShouldNotUpdateTable() {
 		Client client = new Client("1", "first client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2025);
@@ -1316,7 +1317,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderModifiedWhenOrderToModifyIsPresentAndItsYearIsSelected() {
+	public void testOrderUpdatedWhenOrderToModifyIsPresentAndItsYearIsSelectedShouldUpdateRowAndTotalPrice() {
 		Client client = new Client("1", "first client id");
 		LocalDateTime localDate = LocalDateTime.of(2025, 1, 2, 0, 0, 0);
 		Order preOrder = new Order("1", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), 10);
@@ -1351,7 +1352,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearSelectedIsModifiedAndClientIsNotSelected() {
+	public void testOrderUpdatedWhenAnOrderOftheYearSelectedIsModifiedAndClientIsNotSelectedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient,
@@ -1380,7 +1381,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearSelectedIsModifiedWithADifferentYearAndClientIsNotSelected() {
+	public void testOrderUpdatedWhenOrderYearIsModifiedToAnotherOneAndClientIsNotSelectedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient,
@@ -1409,7 +1410,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenAnOrderOftheYearSelectedAndOfAClientSelectedIsModified() {
+	public void testOrderUpdatedWhenYearAndClientAreSelectedAndOrderClientIsModifiedShouldUpdateTotalPriceAndOrderErrorLabel() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1447,7 +1448,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenAnOrderOfAClientSelectedIsModifiedWithTheSameClient() {
+	public void testOrderUpdatedWhenClientOrderIsSelectedYearNoSelectedAndPriceIsModifiedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1462,8 +1463,8 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 			orderSwingView.getComboboxYearsModel().setSelectedItem(2025);
-			orderSwingView.getOrderTableModel().addOrder(order);
-			orderSwingView.getOrderTableModel().addOrder(secondOrder);
+			orderSwingView.showAllOrders(asList(order, secondOrder));
+
 		});
 		window.list("clientsList").selectItem(1);
 		window.comboBox("yearsCombobox").clearSelection();
@@ -1482,7 +1483,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenAnOrderOfAClientSelectedIsModifiedWithADifferentClient() {
+	public void testOrderUpdatedWhenNoYearisSelectedAndOrderClientIsSelectedAndOrderIsModifiedWithADifferentClientShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1515,7 +1516,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenAnOrderOfAClientNotSelectedAndYearNotSelectedIsModified() {
+	public void testOrderUpdatedWhenClientAndYearAreNotSelectedAndOrderIsModifiedShouldUpdateTotalPrice() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1548,7 +1549,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenModifyOnlyPriceOfOrder() {
+	public void testOrderUpdatedWhenDifferentClientIsSelectedAndNoYearIsSelectedAndOnlyOrderPriceIsModifiedShouldNotShowOrderUpdateTotalPriceAndErrorLabel() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		JLabelFixture revenueLabel = window.label("revenueLabel");
@@ -1572,6 +1573,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.orderUpdated(firstOrderModified);
 		});
+		assertThat(window.table("OrdersTable").contents()).isEmpty();
 		window.textBox("panelOrderErrorMessage").requireText("Non ci sono ordini per il cliente 1");
 		window.label("revenueLabel").requireText("");
 
@@ -1579,7 +1581,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPrice_ClientSelected_ClientModified_TableIsEmpty() {
+	public void testOrderUpdatedWhenClientAndYearAreSelectedAndOrderYearChangesShouldRemoveOrderFromTable() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1607,7 +1609,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPriceWhenOrderHasIdNull() {
+	public void testOrderUpdatedWhenOrderHasIdNullShouldNotAddOrderToTableOrChangeRevenueLabel() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		GuiActionRunner.execute(() -> {
@@ -1627,12 +1629,13 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 
 		assertThat(window.table("OrdersTable").contents()).isEmpty();
+		window.label("revenueLabel").requireText(" ");
 
 	}
 
 	@GUITest
 	@Test
-	public void testUpdateTotalPrice_NoYearNoClient_Selected_OrderPriceChanged_NoError() {
+	public void testOrderUpdatedWhenNoYearNoClientAreSelectedAndOrderPriceChangedShouldNotBeError() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order order = new Order("1", secondClient,
@@ -1663,7 +1666,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenTableOrdersRowIsSelectedOrderTextFieldsShouldBeReportOrderData() {
+	public void testOrderTableRowSelectionWhenRowIsSelectedShouldDisplayOrderDataInOrderTextFields() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -1690,7 +1693,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenTableOrdersRowIsDeselectedOrderTextFieldsShouldBeEmpty() {
+	public void testOrdersTableSelectionWhenRowIsDeselectedShouldClearsOrderTextFields() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -1738,7 +1741,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenSelectedTableOrdersRowChangedOrderTextFieldsShouldBeChangedAccordingly() {
+	public void testOrdersTableSelectionWhenSelectedRowChangesShouldUpdateOrderTextFields() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -1777,7 +1780,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonShouldBeEnabledWhenAnOrderIsSelectedAndAtLeastOneTextFieldIsCorrect() {
+	public void testModifyOrderButtonWhenAnOrderIsSelectedAndAnyFieldIsInvalidShouldBeDisabled() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -1842,7 +1845,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonShouldDelegateToOrderControllerModifyOrderWhenDateIsCorrectAndResetErrorLabel() {
+	public void testModifyOrderButtonWhenDateIsCorrectShouldDelegateToOrderControllerAndClearFieldsAndResetErrorLabel() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -1911,7 +1914,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonShouldDelegateToOrderControllerNewOrderWhenDayIsNotCorrect() {
+	public void testModifyOrderButtonWhenDayIsIncorrectShouldNotDelegateToOrderControllerAndClearFieldsAndShowErrorMessage() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -2022,7 +2025,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonShouldDelegateToOrderControllerModifyOrderWhenMonthIsNotCorrect() {
+	public void testModifyOrderButtonWhenMonthIsIncorrectShouldNotDelegateToOrderControllerAndClearFieldsAndShowErrorMessage() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -2067,7 +2070,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderButtonShouldDelegateToOrderControllerModifyOrderWhenYearIsNotCorrect() {
+	public void testModifyOrderButtonWhenYearIncorrectShouldNotDelegateToOrderControllerAndClearFieldsAndShowErrorMessage() {
 		Client newClient = new Client("1", "new Client id");
 		Client secondClient = new Client("2", "second Client id");
 
@@ -2113,7 +2116,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderButtonShouldBeEnebledOnlyWhenAOrderIsSelected() {
+	public void testRemoveOrderButtonWhenAnOrderIsSelectedShouldBeEnabled() {
 		Client client = new Client("1", "test id 1");
 		Order order = new Order("1", client,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -2130,7 +2133,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testRemoveOrderButtonShouldDelegateToOrderControllerDeleteOrder() {
+	public void testRemoveOrderButtonWhenClickedShouldDelegateToOrderControllerToDeleteOrderAndResetFields() {
 		Client client = new Client("1", "test id 1");
 		Order order = new Order("1", client,
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
@@ -2156,7 +2159,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedWhenItsClientIsSelectedAndResetErrorLabel() {
+	public void testOrderAddedWhenClientIsSelectedAndYearNotSelectedShouldAddOrderAndResetErrorLabel() {
 		Client firstClient = new Client("1", "first client id");
 		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
 		Order orderToAdd = new Order("1", firstClient,
@@ -2185,7 +2188,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	@RunsInEDT
 	@Test
 	@GUITest
-	public void testAllOrdersButtonShouldBeVisibleOnlyWhenAClientIsSelected() {
+	public void testAllOrdersButtonWhenAClientSelectionChangesShouldBeVisibleOnlyIfClientIsSelected() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getClientListModel().addElement(new Client("1", "new client 1"));
 		});
@@ -2201,7 +2204,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	@RunsInEDT
 	@Test
 	@GUITest
-	public void testShowAllOrdersShouldDelegateToControllerFindAllOrdersAndRevenue() {
+	public void testShowAllOrdersShouldDelegateToControllerAndRemoveClientSelectionAndHideShowAllOrdersButton() {
 		Client client = new Client("1", "new client id");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getClientListModel().addElement(client);
@@ -2222,7 +2225,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedWhenItsClientIsNotSelectedAndResetErrorLabel() {
+	public void testOrderAddedWhenDifferentClientIsSelectedShouldNotAddOrderAndResetErrorLabel() {
 		Client firstClient = new Client("1", "first client id");
 		Client secondClient = new Client("2", "second client id");
 		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
@@ -2252,7 +2255,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedWhenItsClientIsNotSelectedShouldVerifyOrderControllerYearsofTheOrders() {
+	public void testOrderAddedWhenDifferentClientIsSelectedShouldInvokeOrderControllerYearsofTheOrders() {
 		Client firstClient = new Client("1", "first client id");
 		Client secondClient = new Client("2", "second client id");
 		LocalDateTime localDateTime = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
@@ -2282,7 +2285,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testOrderAddedWhenItsNoOneClientIsSelectedAndYearAndResetErrorLabel() {
+	public void testOrderAddedWhenClientAndYearAreNotSelectedShouldAddOrderAndResetErrorLabel() {
 		Client firstClient = new Client("1", "first client id");
 		Client secondClient = new Client("2", "second client id");
 		LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
@@ -2311,7 +2314,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndNoClientNoYearSelected() {
+	public void testShowAllOrdersWhenIsCalledWithEmptyListAndNoClientSelectedAndNoYearSelectedShouldInvokeYearsOfTheOrders() {
 		Client newClient = new Client("1", "test id 1");
 		JLabelFixture revenueLabel = window.label("revenueLabel");
 		GuiActionRunner.execute(() -> {
@@ -2336,7 +2339,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testResetShowOrderWhenShowOrderIsCalledWithEmptyArgumentAndNoYearSelected() {
+	public void testShowAllOrdersWhenIsCalledWithEmptyListAndNoYearSelectedShouldInvokeYearsOfTheOrders() {
 		Client newClient = new Client("1", "test id 1");
 		JLabelFixture revenueLabel = window.label("revenueLabel");
 		GuiActionRunner.execute(() -> {
@@ -2361,7 +2364,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSelectNoYearsItemAndClientShouldDelegateOrderControllerFindOrdersByClient() {
+	public void testYearsComboboxWhenClientAndNoYearItemAreSelectedShouldInvokeAllOrdersByClient() {
 		Client client = new Client("1", "client1");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
@@ -2377,7 +2380,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSelectClientAndNoYearShouldDelegateOrderControllerFindOrdersByClient() {
+	public void testClientSelectionWhenNoYearItemAndClientAreSelectedShouldInvokeAllOrdersByClient() {
 		Client client = new Client("1", "client1");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
@@ -2393,11 +2396,11 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSetYearsOrdersShouldResetNoSelectionWhenComboBoxYearsIsUpdated() {
+	public void testSetYearsOrdersWhenNoYearItemIsSelectedAndYearsComboBoxIsUpdatedShouldClearSelection() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2025, 2024));
 		});
-		window.comboBox("yearsCombobox").selectItem(2);
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2025, 2023, 2024));
 		});
@@ -2408,7 +2411,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSetYearsOrdersShouldresetSelectionWithoutOtherSelections() {
+	public void testSetYearsOrdersWhenYearIsSelectedShouldRestoreSameSelectionWithoutOtherSelections() {
 		AtomicInteger calls = new AtomicInteger();
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2025, 2024));
@@ -2428,7 +2431,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSetYearsOrderShouldClearSelectionIfPreviouslySelectedItemIsNoLongerAvailable() {
+	public void testSetYearsOrdersWhenPreviouslySelectedItemIsNoLongerAvailableShouldClearSelection() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2025, 2024));
 		});
@@ -2442,7 +2445,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSetYearsOrderShouldBeNotExecutedIfListsOfYearsAreEqual() {
+	public void testSetYearsOrdersWhenListsOfYearsAreEqualShouldDoNothing() {
 		GuiActionRunner.execute(() -> {
 			orderSwingView.setYearsOrders(asList(2025, 2024));
 		});
@@ -2457,7 +2460,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testUpdateTotalPriceWhenShowAllOrdersAndNoClientNoYearSelected() {
+	public void testShowAllOrdersWhenNoClientAndNoYearAreSelectedShouldUpdateTotalPriceAndResetErrorLabel() {
 		Client firstClient = new Client("1", "first client identifier");
 		Client secondClient = new Client("2", "second client identifier");
 		Order firstOrder = new Order("1", firstClient, new Date(), 10.1);
@@ -2485,7 +2488,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllOrdersByYearShouldbeRefreshWhenAnyClientIsSelected() {
+	public void testClientSelectionWhenAnyClientIsDeselectedShouldInvokeAllOrdersByYearTwice() {
 		Client firstClient = new Client("1", "first client id");
 		Client secondClient = new Client("2", "second client id");
 		GuiActionRunner.execute(() -> {
@@ -2503,7 +2506,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testSelectNoClientAndNoYeaItemShouldDelegateOrderControllerFindAllOrders() {
+	public void testClientSelectionNoYearItemSelectedAndAnyClientIsDeselectedShouldDelegateToOrderControllerToGetAllOrders() {
 		Client client = new Client("1", "client1");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
@@ -2512,14 +2515,14 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getClientListModel().addElement(client);
 			orderSwingView.getComboboxClientsModel().addElement(client);
 		});
-		window.comboBox("yearsCombobox").selectItem(2);
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 		verify(orderController).getAllOrders();
 	}
 
 	@Test
 	@GUITest
-	public void testShowAllOrderButtonWhenNoYeaItemShouldDelegateOrderControllerFindAllOrders() {
+	public void testShowAllOrdersButtonWhenNoYearItemIsSelectedAndNoClientSelectedShouldDelegateToOrderControllerToGetAllOrders() {
 		Client client = new Client("1", "client1");
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
@@ -2529,7 +2532,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxClientsModel().addElement(client);
 		});
 		window.list("clientsList").selectItem(0);
-		window.comboBox("yearsCombobox").selectItem(2);
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
 				.click();
 		verify(orderController).getAllOrders();
@@ -2537,7 +2540,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenLastOrderOfNotCurrentYearIsRemoved_thenYearShouldBeRemovedAndCorrectErrorMessageShouldBeShown() {
+	public void testOrderRemovedWhenLastOrderOfNotCurrentYearIsRemovedShouldRemoveYearAndShowOrderErrorMessage() {
 		Client newClient = new Client("CLIENT-00001", "newClient");
 		Order newOrder = new Order("ORDER-00001", newClient,
 				Date.from(LocalDate.of(2024, 5, 5).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
@@ -2568,9 +2571,9 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testWhenLastOrderOfNotCurrentYearIsRemovedAndYearAndClientAreSelected_thenYearShouldBeRemovedAndErrorMessageShouldBeShown() {
+	public void testOrderRemovedWhenNotCurrentYearAndClientAreSelectedAndLastOrderOfYearIsRemovedShouldRemoveYearAndShowOrderErrorMessage() {
 		Client firstClient = new Client("CLIENT-00001", "first client");
-		Order newOrder = new Order("ORDER-000O1", firstClient,
+		Order newOrder = new Order("ORDER-00001", firstClient,
 				Date.from(LocalDate.of(2024, 5, 5).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
 
 		GuiActionRunner.execute(() -> {

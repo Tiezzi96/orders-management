@@ -84,7 +84,7 @@ public class ClientMongoRepositoryTest {
 	}
 
 	@Test
-	public void testCreateClientCollectionIfNotExistingInDatabase() {
+	public void testCreateClientCollectionIfDoesNotExistInDatabase() {
 		String clientCollectionNotExisting = "client_collection_not_existing_in_db";
 		clientRepository = new ClientMongoRepository(mongoClient, mongoClient.startSession(), "budget",
 				clientCollectionNotExisting, seqGen);
@@ -175,7 +175,7 @@ public class ClientMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteWhenClientNotExistInDB() {
+	public void testDeleteWhenClientDoesNotExistInDB() {
 		String cod1 = "CLIENT-00001";
 		Client removed = clientRepository.delete(cod1);
 		assertThat(removed).isNull();

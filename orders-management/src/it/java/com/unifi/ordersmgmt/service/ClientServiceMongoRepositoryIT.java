@@ -71,7 +71,7 @@ public class ClientServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testRemoveClientWhenClientExistingInDatabase() {
+	public void testRemoveClientWhenClientExistsInDatabase() {
 		Client clientToRemove = clientRepository.save(new Client("CLIENT-00001", "CLIENT 1"));
 		clientRepository.save(new Client("CLIENT-00002", "CLIENT 2"));
 		clientService.removeClient(clientToRemove);
@@ -80,7 +80,7 @@ public class ClientServiceMongoRepositoryIT {
 	}
 
 	@Test
-	public void testRemoveClientWhenClienNotExistingInDatabase() {
+	public void testRemoveClientWhenClientDoesNotExistInDatabase() {
 		Client clientNotExistInDB = new Client("CLIENT-00001", "client not exist in db");
 		try {
 			clientService.removeClient(clientNotExistInDB);

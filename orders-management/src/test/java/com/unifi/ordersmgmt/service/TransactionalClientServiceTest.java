@@ -94,7 +94,7 @@ public class TransactionalClientServiceTest {
 	}
 
 	@Test
-	public void testDeleteClientShouldNotDeleteCliemtWhenClientNoExists() {
+	public void testRemoveClientShouldNotRemoveClientWhenClientDoesNotExist() {
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 
 		when(clientRepo.findById(clientNotExist.getIdentifier())).thenReturn(null);

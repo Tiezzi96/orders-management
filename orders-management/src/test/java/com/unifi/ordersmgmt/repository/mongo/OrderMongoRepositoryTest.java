@@ -89,7 +89,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testCreateClientCollectionIfNotExistingInDatabase() {
+	public void testCreateClientCollectionIfDoesNotExistInDatabase() {
 		String orderCollectionNotExisting = "order_collection_not_existing_in_db";
 		orderRepository = new OrderMongoRepository(mongoClient, mongoClient.startSession(), "budget",
 				orderCollectionNotExisting, clientMongoRepository, seqGen);
@@ -97,7 +97,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testNotCreateClientCollectionIfExistingInDatabase() {
+	public void testNotCreateClientCollectionIfExistsInDatabase() {
 		String orderCollectionExisting = "order";
 		MongoDatabase db = mongoClient.getDatabase("budget");
 		List<String> previousCollectionsDB = new ArrayList<String>();
@@ -204,7 +204,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteWhenOrderNotExistInDB() {
+	public void testDeleteWhenOrderDoesNotExistInDB() {
 		when(seqGen.generateCodiceOrdine(session)).thenReturn("ORDER-00001");
 		Order orderRemoved = orderRepository.delete(seqGen.generateCodiceOrdine(session));
 		assertThat(orderRemoved).isNull();
@@ -212,7 +212,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteWhenOrderExistInDB() {
+	public void testDeleteWhenOrderExistsInDB() {
 		String orderID = insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
 		Date currentDate = new Date(); // Data corrente
 		Calendar calendar = Calendar.getInstance();
@@ -443,7 +443,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testModifyOrderWhenOrderExistInDB() {
+	public void testModifyOrderWhenOrderExistsInDB() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
 		Date date1 = new Date();
 		String orderID = insertNewOrderInDB(newClient, date1, 10, 1);
@@ -478,7 +478,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testModifyOrderWhenOrderNotExistInDB() {
+	public void testModifyOrderWhenOrderDoesNotExistInDB() {
 		String orderID = "ORDER-00001";
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Order orderModified = orderRepository.updateOrder(orderID, updates);

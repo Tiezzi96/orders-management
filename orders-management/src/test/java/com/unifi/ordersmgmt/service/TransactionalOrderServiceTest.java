@@ -62,7 +62,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testallOrdersByYear() {
+	public void testAllOrdersByYear() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -75,7 +75,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testGetyearsofOrders() {
+	public void testGetYearsOfOrders() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -94,7 +94,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testfindallOrdersByClientByYearSuccess() {
+	public void testFindAllOrdersByClientByYearSuccess() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
@@ -104,15 +104,15 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findOrdersByClientAndYear(client, 2024)).thenReturn(asList(order, order2));
 		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
 
-		List<Order> years = orderService.findallOrdersByClientByYear(client, 2024);
+		List<Order> orders = orderService.findallOrdersByClientByYear(client, 2024);
 
 		verify(orderRepo).findOrdersByClientAndYear(client, 2024);
-		assertThat(years).containsExactly(order, order2);
+		assertThat(orders).containsExactly(order, order2);
 
 	}
 
 	@Test
-	public void testfindallOrdersByClientByYearWhenClientNoExists() {
+	public void testFindAllOrdersByClientByYearWhenClientDoesNotExist() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Order order = new Order("ORDER-00001", client,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 100.0);
@@ -146,7 +146,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testAddOrderShouldNotSaveOrderWhenClientNoExists() {
+	public void testAddOrderShouldNotSaveOrderWhenClientDoesNotExist() {
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 		Order order = new Order("ORDER-00001", clientNotExist, new Date(), 100.0);
 
@@ -176,7 +176,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testDeleteOrderShouldNotDeleteOrderWhenClientNoExists() {
+	public void testRemoveOrderShouldNotRemoveOrderWhenClientDoesNotExist() {
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 		Order order = new Order("ORDER-00001", clientNotExist, new Date(), 100.0);
 
@@ -189,7 +189,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testDeleteOrderShouldNotDeleteOrderWhenOrderNoExists() {
+	public void testRemoveOrderShouldNotRemoveOrderWhenOrderDoesNotExist() {
 		Client client = new Client("CLIENT-00001", "Client Not Exist");
 		Order orderNotExist = new Order("ORDER-00001", client, new Date(), 100.0);
 
@@ -225,7 +225,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testUpdateOrderShouldNotUpdateOrderWhenClientNoExists() {
+	public void testUpdateOrderShouldNotUpdateOrderWhenClientDoesNotExist() {
 		Client clientNotExist = new Client("CLIENT-00001", "Client Not Exist");
 		Client clientOriginal = new Client("CLIENT-00002", "client ");
 		Order order = new Order("ORDER-00001", clientOriginal, new Date(), 100.0);
@@ -260,7 +260,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testUpdateOrderShouldNotUpdateOrderWhenOriginalClientNoExists() {
+	public void testUpdateOrderShouldNotUpdateOrderWhenOriginalClientDoesNotExist() {
 		Client clientForUpdate = new Client("CLIENT-00001", "client");
 		Client clientOriginal = new Client("CLIENT-00002", "Client Not Exist");
 		Order order = new Order("ORDER-00001", clientOriginal, new Date(), 100.0);
@@ -282,7 +282,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testupdateOrderShouldNotDeleteOrderWhenOrderNoExists() {
+	public void testUpdateOrderShouldNotUpdateOrderWhenOrderDoesNotExist() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Client client2 = new Client("CLIENT-00002", "Client 2");
 		Order orderNotExist = new Order("ORDER-00001", client, new Date(), 100.0);
@@ -301,7 +301,7 @@ public class TransactionalOrderServiceTest {
 	}
 
 	@Test
-	public void testallOrdersByClientSuccess() {
+	public void testAllOrdersByClientSuccess() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 		Client client2 = new Client("CLIENT-00002", "Client 2");
 		Order order = new Order("ORDER-00001", client,
@@ -312,15 +312,15 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.findOrdersByClient(client)).thenReturn(asList(order));
 		when(clientRepo.findById(client.getIdentifier())).thenReturn(client);
 
-		List<Order> years = orderService.allOrdersByClient(client);
+		List<Order> orders = orderService.allOrdersByClient(client);
 
 		verify(orderRepo).findOrdersByClient(client);
-		assertThat(years).containsExactly(order).doesNotContain(order2);
+		assertThat(orders).containsExactly(order).doesNotContain(order2);
 
 	}
 
 	@Test
-	public void testallOrdersByClientWhenClientNoExists() {
+	public void testAllOrdersByClientWhenClientDoesNotExist() {
 		Client client = new Client("CLIENT-00001", "Client 1");
 
 		when(clientRepo.findById(client.getIdentifier())).thenReturn(null);
