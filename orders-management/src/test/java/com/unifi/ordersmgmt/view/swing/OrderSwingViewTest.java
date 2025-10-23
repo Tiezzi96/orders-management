@@ -416,10 +416,10 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		LocalDateTime nextlocalDateTime = LocalDateTime.of(2025, 1, 3, 0, 0, 0);
 		Order orderToAddPrevious = new Order("1", firstClient,
 				Date.from(previouslocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 10);
-		Order orderToAddNext = new Order("3", null, // testo il caso in cui il client non è presente e graficamente è
-													// riportato "--" nella tabella
+		Order orderToAddNext = new Order("3", null,
 				Date.from(nextlocalDateTime.atZone(ZoneId.systemDefault()).toInstant()), 20);
-
+		// testo il caso in cui il client non è presente e graficamente è riportato "--"
+		// nella tabella
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
@@ -428,41 +428,64 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getOrderTableModel().addOrder(orderToAddNext);
 		});
 
-		// Caso 1: click ripetuto sulla stessa riga (Deselezione)
+		// Click ripetuto sulla stessa riga, riga deselezionata
 		window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
-		assertThat(window.table("OrdersTable").selectionValue()).isNull();
+		window.table("OrdersTable").requireNoSelection();
 
 		// Abilitazione della selezione multipla per testare toggle ed extend
 		GuiActionRunner.execute(() -> {
 			orderSwingView.getOrderTable().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		});
 
-		// Caso 2: CTRL + click su riga selezionata => toggle == true, extend == false
+		// CTRL + click su riga selezionata, la deseleziona
 		window.table("OrdersTable").selectRows(0);
 		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
 		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").requireNoSelection();
 
-		// Caso 3: CTRL + click su riga diversa => toggle == true, extend == false
+		// CTRL + click su riga diversa, ne seleziona due
 		window.table("OrdersTable").selectRows(0);
 		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
 		window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").requireSelectedRows(0, 1);
 
-		// Caso 4: SHIFT + click => toggle == false, extend == true
-		window.table("OrdersTable").selectRows(0);
+		window.table("OrdersTable").unselectRows(0, 1);
+		window.table("OrdersTable").requireNoSelection();
+
+		// SHIFT + click su righe differenti, ne seleziona due
 		window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").requireSelectedRows(0, 1);
 
-		// Caso 5: SHIFT + CTRL + click => toggle == true, extend == true
+		window.table("OrdersTable").unselectRows(0, 1);
+		window.table("OrdersTable").requireNoSelection();
+
+		// SHIFT + CTRL + click su righe differenti, ne seleziona due
+		window.table("OrdersTable").selectRows(0);
+		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").click(row(1).column(0), MouseButton.LEFT_BUTTON);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
+		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").requireSelectedRows(0, 1);
+
+		window.table("OrdersTable").unselectRows(0, 1);
+		window.table("OrdersTable").requireNoSelection();
+
+		// CTRL + SHIFT +click sulla stessa riga, la riga resta selezionata
+		window.table("OrdersTable").selectRows(0);
 		window.table("OrdersTable").pressKey(KeyEvent.VK_CONTROL);
 		window.table("OrdersTable").pressKey(KeyEvent.VK_SHIFT);
 		window.table("OrdersTable").click(row(0).column(0), MouseButton.LEFT_BUTTON);
 		window.table("OrdersTable").releaseKey(KeyEvent.VK_SHIFT);
 		window.table("OrdersTable").releaseKey(KeyEvent.VK_CONTROL);
+		window.table("OrdersTable").requireSelectedRows(0);
 
 	}
 
@@ -521,7 +544,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		assertThat(window.table("OrdersTable").contents()[2]).containsExactly(orderToAddNext.getIdentifier(),
 				orderToAddNext.getClient().getName(), orderToAddNext.getDate().toString(),
 				String.valueOf(orderToAddNext.getPrice()));
-		// check if order preselected is always selected
+		// controllo se l'ordine preselezionato è sempre selezionato
 		window.table("OrdersTable").requireSelectedRows(2);
 		window.textBox(JTextComponentMatcher.withName("panelOrderErrorMessage")).requireText("");
 
@@ -1820,7 +1843,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_revenueOrder").enterText("");
 		window.comboBox("comboboxClients").selectItem(0);
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireDisabled();
-		// no ComboBox clients item selected. Button modify order disabled
+
 		window.textBox("textField_revenueOrder").setText("");
 		window.textBox("textField_revenueOrder").enterText("10.00");
 		window.textBox("textField_dayOfDateOrder").setText("");
@@ -1920,7 +1943,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		});
 		window.table("OrdersTable").selectRows(0);
-		// pulisco il date text field dalla data attuale dell'ordine
+		// pulisco i text fields dalla data attuale dell'ordine
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
 		window.textBox("textField_yearOfDateOrder").setText("");

@@ -79,7 +79,8 @@ public class OrderController {
 			orderService.addOrder(order);
 			orderView.orderAdded(order);
 		} catch (NotFoundClientException e) {
-			logger.warn("Client order not found: orderID={}, client={}", order.getIdentifier(), order.getClient(), e);
+			logger.warn("Client order not found: orderID={}, client={}, errorMessage={}", order.getIdentifier(),
+					order.getClient(), e.getMessage());
 			orderView.showErrorClient(CLIENT_ERROR_MESSAGE, order.getClient());
 			orderView.clientRemoved(order.getClient());
 			orderView.removeOrdersByClient(order.getClient());
@@ -92,14 +93,14 @@ public class OrderController {
 			orderService.removeOrder(orderToDelete);
 			orderView.orderRemoved(orderToDelete);
 		} catch (NotFoundClientException e) {
-			logger.warn("Client order to remove not found: orderID={}, client={}", orderToDelete.getIdentifier(),
-					orderToDelete.getClient(), e);
+			logger.warn("Client order to remove not found: orderID={}, client={}, errorMessage={}",
+					orderToDelete.getIdentifier(), orderToDelete.getClient(), e.getMessage());
 			orderView.showErrorClient(CLIENT_ERROR_MESSAGE, orderToDelete.getClient());
 			orderView.clientRemoved(orderToDelete.getClient());
 			orderView.removeOrdersByClient(orderToDelete.getClient());
 		} catch (NotFoundOrderException e) {
-			logger.warn("Order to remove not found: orderID={}, client={}", orderToDelete.getIdentifier(),
-					orderToDelete.getClient(), e);
+			logger.warn("Order to remove not found: orderID={}, client={}, errorMessage={}",
+					orderToDelete.getIdentifier(), orderToDelete.getClient(), e.getMessage());
 			orderView.showOrderError("Ordine non più presente nel DB", orderToDelete);
 			orderView.orderRemoved(orderToDelete);
 
@@ -114,21 +115,21 @@ public class OrderController {
 			logger.debug("Order controller order modify: {}", orderModified);
 			orderView.orderUpdated(orderModified);
 		} catch (NotFoundOrderException e) {
-			logger.warn("order to update not found: orderID={}, client={}", orderToModify.getIdentifier(),
-					orderToModify.getClient(), e);
+			logger.warn("order to update not found: orderID={}, client={}, errorMessage={}",
+					orderToModify.getIdentifier(), orderToModify.getClient(), e.getMessage());
 			orderView.showOrderError("Ordine non più presente nel DB", orderToModify);
 			orderView.orderRemoved(orderToModify);
 
 		} catch (NotFoundClientException e) {
 			if (e.getMessage().contains("originale")) {
-				logger.warn("Original client order to update not found: orderID={}, client={}",
-						orderToModify.getIdentifier(), orderToModify.getClient(), e);
+				logger.warn("Original client order to update not found: orderID={}, client={}, errorMessage={}",
+						orderToModify.getIdentifier(), orderToModify.getClient(), e.getMessage());
 				orderView.showErrorClient(CLIENT_ERROR_MESSAGE, orderToModify.getClient());
 				orderView.clientRemoved(orderToModify.getClient());
 				orderView.removeOrdersByClient(orderToModify.getClient());
 			} else {
-				logger.warn("New client order to update not found: orderID={}, client={}",
-						orderToModify.getIdentifier(), updates.get(CLIENT), e);
+				logger.warn("New client order to update not found: orderID={}, client={}, errorMessage={}",
+						orderToModify.getIdentifier(), updates.get(CLIENT), e.getMessage());
 				orderView.showErrorClient(CLIENT_ERROR_MESSAGE, ((Client) (updates.get(CLIENT))));
 				orderView.clientRemoved(((Client) (updates.get(CLIENT))));
 				orderView.removeOrdersByClient(((Client) (updates.get(CLIENT))));

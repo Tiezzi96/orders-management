@@ -29,6 +29,8 @@
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>
 			**/swing/**/*.java
 		</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<!-- ignore sonar rule "Local variable and method parameter names should
+		comply with a naming convention"-->
 		<sonar.issue.ignore.multicriteria.e2.ruleKey>
 			java:S117
 		</sonar.issue.ignore.multicriteria.e2.ruleKey>

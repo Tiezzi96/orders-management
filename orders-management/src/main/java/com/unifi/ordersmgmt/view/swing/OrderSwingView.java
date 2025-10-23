@@ -61,7 +61,15 @@ public class OrderSwingView extends JFrame implements OrderView {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static final Color LIGHT_GREEN = new Color(207, 234, 217);
+	private static final Color DARK_GREEN = new Color(15, 81, 50);
 	private static final String NO_YEAR_ITEM = "Tutti gli anni";
+	private static final Color NIGHT_BLUE = new Color(23, 35, 51);
+	private static final Color LIGHT_GRAY = new Color(245, 245, 245);
+	private static final Color GRAY = new Color(89, 89, 89);
+	private static final Color LIGHT_RED = new Color(255, 102, 102);
+	private static final Color MEDIUM_GREEN = new Color(24, 103, 64);
+	private static final Color ORANGE_RED = new Color(255, 51, 51);
 	private static final Logger logger = LogManager.getLogger(OrderSwingView.class);
 	private JPanel contentPane;
 	private static final String FONT_TEXT = "Segoe UI";
@@ -103,7 +111,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		contentPane.setLayout(null);
 		// racchiude l'intero pannello cliente
 		JPanel panel_clientManagement = new JPanel();
-		panel_clientManagement.setBackground(new Color(1, 1, 1));
+		panel_clientManagement.setBackground(Color.BLACK);
 		panel_clientManagement.setBounds(0, 52, 1000, 304);
 		contentPane.add(panel_clientManagement);
 		panel_clientManagement.setLayout(null);
@@ -111,7 +119,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		JPanel panel_clientTitle = new JPanel();
 		panel_clientTitle.setForeground(Color.WHITE);
 		panel_clientTitle.setBounds(360, 0, 640, 58);
-		panel_clientTitle.setBackground(new Color(24, 103, 64));
+		panel_clientTitle.setBackground(MEDIUM_GREEN);
 
 		panel_clientManagement.add(panel_clientTitle);
 		panel_clientTitle.setLayout(null);
@@ -138,7 +146,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		listClients.setName("clientsList");
 		listClients.setSelectionBackground(Color.LIGHT_GRAY);
 		listClients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listClients.setBackground(new Color(207, 234, 217)); // #CFEAD9
+		listClients.setBackground(LIGHT_GREEN);
 		listClients.setFixedCellHeight(35);
 		scrollPaneClientsList.setViewportView(listClients);
 
@@ -155,14 +163,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 		paneClientError.setText("");
 		paneClientError.setEditable(false);
 		paneClientError.setName("panelClientErrorMessage");
-		paneClientError.setForeground(new Color(255, 102, 102));
-		paneClientError.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		paneClientError.setForeground(LIGHT_RED);
+		paneClientError.setBackground(DARK_GREEN);
 		paneClientError.setBounds(10, 5, 340, 43);
 		panel_clientManagement.add(paneClientError);
 
 		JPanel panel_newClient = new JPanel();
 		panel_newClient.setBounds(0, 58, 360, 243);
-		panel_newClient.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		panel_newClient.setBackground(DARK_GREEN);
 		panel_clientManagement.add(panel_newClient);
 		panel_newClient.setLayout(null);
 
@@ -186,7 +194,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldNewClient.setName("textField_clientName");
 		textFieldNewClient.setBorder(null);
 		textFieldNewClient.setBounds(133, 60, 180, 16);
-		textFieldNewClient.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		textFieldNewClient.setBackground(DARK_GREEN);
 		textFieldNewClient.setCaretColor(Color.WHITE);
 		textFieldNewClient.setForeground(Color.WHITE);
 		textFieldNewClient.setColumns(10);
@@ -219,7 +227,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		JPanel panel_revenueLabel = new JPanel();
 		panel_revenueLabel.setBorder(null);
 		panel_revenueLabel.setBounds(0, 5, 360, 88);
-		panel_revenueLabel.setBackground(new Color(245, 245, 245));
+		panel_revenueLabel.setBackground(LIGHT_GRAY);
 		panel_orderManagement.add(panel_revenueLabel);
 		panel_revenueLabel.setLayout(null);
 
@@ -227,13 +235,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblrevenue.setText(" ");
 		lblrevenue.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		lblrevenue.setBounds(2, 0, 355, 88);
-		lblrevenue.setForeground(new Color(89, 89, 89));
+		lblrevenue.setForeground(GRAY);
 		lblrevenue.setHorizontalAlignment(SwingConstants.CENTER);
 		lblrevenue.setName("revenueLabel");
 		panel_revenueLabel.add(lblrevenue);
 
 		JPanel panel_orderViewAndAdd = new JPanel();
-		panel_orderViewAndAdd.setBackground(new Color(207, 234, 217)); // #CFEAD9
+		panel_orderViewAndAdd.setBackground(LIGHT_GREEN);
 		panel_orderViewAndAdd.setBounds(0, 95, 360, 355);
 		panel_orderManagement.add(panel_orderViewAndAdd);
 		panel_orderViewAndAdd.setLayout(null);
@@ -252,12 +260,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 		comboboxYears.setFont(new Font(FONT_TEXT, Font.BOLD, 16));
 		comboboxYears.setName("yearsCombobox");
 		comboboxYears.setBorder(null);
-		comboboxYears.setBackground(new Color(245, 245, 245));
+		comboboxYears.setBackground(LIGHT_GRAY);
 
 		JScrollPane scrollPanelOrdersList = new JScrollPane();
 
-		scrollPanelOrdersList.setBackground(new Color(207, 234, 217)); // #CFEAD9
-		scrollPanelOrdersList.getViewport().setBackground(new Color(207, 234, 217));
+		scrollPanelOrdersList.setBackground(LIGHT_GREEN);
+		scrollPanelOrdersList.getViewport().setBackground(LIGHT_GREEN);
 
 		scrollPanelOrdersList.setBounds(3, 48, 620, 350);
 		scrollPanelOrdersList.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
@@ -324,7 +332,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldDayNewOrder.setBorder(null);
 		textFieldDayNewOrder.setName("textField_dayOfDateOrder");
 		textFieldDayNewOrder.setBounds(125, 103, 31, 22);
-		textFieldDayNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldDayNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldDayNewOrder);
 		textFieldDayNewOrder.setColumns(10);
 
@@ -333,7 +341,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldMonthNewOrder.setBorder(null);
 		textFieldMonthNewOrder.setName("textField_monthOfDateOrder");
 		textFieldMonthNewOrder.setBounds(169, 103, 31, 22);
-		textFieldMonthNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldMonthNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldMonthNewOrder);
 		textFieldMonthNewOrder.setColumns(10);
 
@@ -343,7 +351,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldYearNewOrder.setColumns(10);
 		textFieldYearNewOrder.setBorder(null);
 		textFieldYearNewOrder.setBounds(212, 103, 56, 22);
-		textFieldYearNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldYearNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldYearNewOrder);
 
 		JLabel lblRevenueNewOrder = new JLabel("Importo");
@@ -357,7 +365,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderViewAndAdd.add(lblRevenueNewOrder_1);
 
 		JSeparator separator_1_1_1_1 = new JSeparator();
-		separator_1_1_1_1.setForeground(new Color(0, 0, 0));
+		separator_1_1_1_1.setForeground(Color.BLACK);
 		separator_1_1_1_1.setBounds(118, 191, 150, 12);
 		panel_orderViewAndAdd.add(separator_1_1_1_1);
 
@@ -367,13 +375,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldRevenueNewOrder.setColumns(10);
 		textFieldRevenueNewOrder.setBorder(null);
 		textFieldRevenueNewOrder.setBounds(118, 168, 150, 22);
-		textFieldRevenueNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldRevenueNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldRevenueNewOrder);
 
 		panelOrderError = new JTextPane();
 		panelOrderError.setText("");
 		panelOrderError.setEditable(false);
-		panelOrderError.setForeground(new Color(255, 51, 51));
+		panelOrderError.setForeground(ORANGE_RED);
 		panelOrderError.setName("panelOrderErrorMessage");
 		panelOrderError.setBounds(10, 255, 340, 93);
 		panel_orderViewAndAdd.add(panelOrderError);
@@ -381,7 +389,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		btnNewOrder = new JButton("<html><center>Aggiungi<br>ordine</center></html>");
 		btnNewOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnNewOrder.setEnabled(false);
-		btnNewOrder.setBorder(new LineBorder(new Color(23, 35, 51), 1, true));
+		btnNewOrder.setBorder(new LineBorder(NIGHT_BLUE, 1, true));
 		btnNewOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 		btnNewOrder.setBounds(3, 400, 204, 45);
 		panel_orderView.add(btnNewOrder);
@@ -394,7 +402,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderView.add(btnModifyOrder);
 		btnModifyOrder.setEnabled(false);
 		btnModifyOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
-		btnModifyOrder.setBorder(new LineBorder(new Color(23, 35, 51), 1, true));
+		btnModifyOrder.setBorder(new LineBorder(NIGHT_BLUE, 1, true));
 
 		btnRemoveOrder = new JButton();
 		btnRemoveOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -404,7 +412,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		btnRemoveOrder.setEnabled(false);
 		panel_orderView.add(btnRemoveOrder);
 		btnRemoveOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
-		btnRemoveOrder.setBorder(new LineBorder(new Color(23, 35, 51), 1, true));
+		btnRemoveOrder.setBorder(new LineBorder(NIGHT_BLUE, 1, true));
 
 		btnShowAllClientsOrders = new JButton("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>");
 		btnShowAllClientsOrders.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -415,7 +423,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderView.add(btnShowAllClientsOrders);
 
 		JPanel panel_headBar = new JPanel();
-		panel_headBar.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		panel_headBar.setBackground(DARK_GREEN);
 		panel_headBar.setBounds(0, 0, 1000, 53);
 		contentPane.add(panel_headBar);
 
