@@ -141,7 +141,7 @@ public class TransactionalOrderServiceTest {
 
 		assertThat(order).isEqualTo(orderSaved);
 		assertThat(orderSaved).isNotNull();
-		verify(clientRepo, times(2)).findById(client.getIdentifier());
+		verify(clientRepo).findById(client.getIdentifier());
 		verify(orderRepo).save(order);
 	}
 
@@ -154,7 +154,7 @@ public class TransactionalOrderServiceTest {
 		when(orderRepo.save(order)).thenReturn(order);
 
 		assertThatExceptionOfType(NotFoundClientException.class).isThrownBy(() -> orderService.addOrder(order));
-		verify(clientRepo, times(2)).findById(clientNotExist.getIdentifier());
+		verify(clientRepo).findById(clientNotExist.getIdentifier());
 		verify(orderRepo, never()).save(any());
 	}
 

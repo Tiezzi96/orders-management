@@ -431,7 +431,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		});
 
 		btnNewOrder.addActionListener(e -> {
-			logger.info("Creating new order");
+			logger.debug("Creating new order (UI)");
 			newOrder();
 		});
 
@@ -473,12 +473,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 		});
 
 		btnModifyOrder.addActionListener(e -> {
-			logger.info("Updating order");
+			logger.debug("Updating order (UI)");
 			updateOrder();
 		});
 
 		btnRemoveOrder.addActionListener(e -> {
-			logger.info("Removing order");
+			logger.debug("Removing order (UI)");
 			removeOrder();
 		});
 
@@ -602,7 +602,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void updateOrder() {
-		logger.info("request order updated");
+		logger.debug("request order updated");
 		Order orderToModify = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
@@ -641,7 +641,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty()) && (comboboxClients.getSelectedIndex() != -1)
 				&& tableOrders.getSelectedRow() != -1) {
 
-			logger.info("Data info to modify order are completed");
+			logger.debug("Data info to modify order are completed");
 			btnModifyOrder.setEnabled(true);
 		} else {
 			btnModifyOrder.setEnabled(false);
@@ -649,7 +649,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void newOrder() {
-		logger.info("add order request");
+		logger.debug("add order request");
 		int day = Integer.parseInt(textFieldDayNewOrder.getText());
 
 		int month = Integer.parseInt(textFieldMonthNewOrder.getText());

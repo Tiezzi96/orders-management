@@ -22,12 +22,12 @@ public class TableOrder extends JTable {
 		Component c = super.prepareRenderer(renderer, row, column);
 		if (!isRowSelected(row)) {
 			if (row % 2 == 0) {
-				c.setBackground(Color.LIGHT_GRAY); // Colore per righe pari
+				c.setBackground(Color.LIGHT_GRAY);
 			} else {
-				c.setBackground(Color.WHITE); // Colore per righe dispari
+				c.setBackground(Color.WHITE);
 			}
 		} else {
-			c.setBackground(Color.YELLOW); // Colore per righe selezionate
+			c.setBackground(Color.YELLOW);
 		}
 
 		return c;

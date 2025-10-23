@@ -36,8 +36,6 @@ public class MongoTransactionManager implements TransactionManager {
 
 	@Override
 	public <R> R executeTransaction(TransactionalFunction<R> transactionalFunction) {
-		logger.info("clientService initialized successfully.");
-
 		TransactionOptions options = TransactionOptions.builder().readPreference(ReadPreference.primary())
 				.readConcern(ReadConcern.LOCAL).writeConcern(WriteConcern.MAJORITY).build();
 		logger.info("transaction op initialized successfully.");
@@ -55,7 +53,7 @@ public class MongoTransactionManager implements TransactionManager {
 			TransactionBody<R> body = () -> transactionalFunction.apply(clientMongoRepository, orderMongoRepository);
 			return clientSession.withTransaction(body, options);
 		} catch (MongoException e) {
-			logger.info("exception thrown: {}", e.getMessage(), e);
+			logger.error("exception thrown", e);
 			throw e;
 		}
 

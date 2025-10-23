@@ -69,7 +69,6 @@ public class OrderServiceMongoRepositoryIT {
 
 	@Test
 	public void testAddOrderWhenClientExistsInDB() {
-		logger.debug(clientRepository.findById("CLIENT-00001"));
 		Order order = new Order("ORDER-00001", new Client("CLIENT-00001", "first client"),
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10.0);
 		orderService.addOrder(order);
@@ -254,7 +253,8 @@ public class OrderServiceMongoRepositoryIT {
 		orderService.updateOrder(orderToUpdate, updates);
 		Order orderFound = orderRepository.findById(orderToUpdate.getIdentifier());
 		assertThat(orderFound).isEqualTo(new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
-		logger.info("order updated: {}", new Order(orderToUpdate.getIdentifier(), clientOfOrderUpdated, date2, 20.5));
+		logger.debug("order updated: id={}, client={}, date={}, price={} ", orderToUpdate.getIdentifier(),
+				clientOfOrderUpdated, date2, 20.5);
 	}
 
 	@Test

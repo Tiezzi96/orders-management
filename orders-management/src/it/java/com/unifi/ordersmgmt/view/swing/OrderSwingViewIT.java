@@ -9,8 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
@@ -48,7 +46,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	private OrderSwingView orderSwingView;
 	private OrderController orderController;
 	private FrameFixture window;
-	private static final Logger logger = LogManager.getLogger(OrderSwingViewIT.class);
 
 	@Override
 	protected void onSetUp() throws Exception {
@@ -129,8 +126,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testAllOrdersByYear() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
-		logger.debug("client1: {}", client1);
-		logger.debug("client2: {}", client2);
 		Order order1 = new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("ORDER-00002", client2,
@@ -285,8 +280,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem(client1.toString());
 		window.button(JButtonMatcher.withText("Rimuovi cliente")).click();
-		logger.debug("client1: {}", client1);
-		logger.debug("client1 id: {}", client1.getIdentifier());
 		assertThat(window.list("clientsList").contents())
 				.noneSatisfy(item -> assertThat(item).contains(client1.getIdentifier()));
 
@@ -831,8 +824,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testAllOrdersByClient() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
-		logger.debug("client1: {}", client1);
-		logger.debug("client2: {}", client2);
 		Order order1 = new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("ORDER-00002", client2,
@@ -860,8 +851,6 @@ public class OrderSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testAllOrders() {
 		Client client1 = clientRepository.save(new Client("client 1 name"));
 		Client client2 = clientRepository.save(new Client("client 2 name"));
-		logger.debug("client1: {}", client1);
-		logger.debug("client2: {}", client2);
 		Order order1 = new Order("ORDER-00001", client1,
 				Date.from(LocalDate.of(2025, 4, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("ORDER-00002", client2,

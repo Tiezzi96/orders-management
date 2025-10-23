@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import com.mongodb.client.ClientSession;
@@ -19,7 +16,6 @@ import com.unifi.ordersmgmt.repository.ClientRepository;
 
 public class ClientMongoRepository implements ClientRepository {
 
-	private static final Logger logger = LogManager.getLogger(ClientMongoRepository.class);
 	private ClientSession clientSession;
 	private MongoCollection<Document> clientCollection;
 	private ClientSequenceGenerator seqGen;
@@ -60,7 +56,6 @@ public class ClientMongoRepository implements ClientRepository {
 		if (clientToSave.getIdentifier() == null) {
 			clientToSave.setIdentifier(seqGen.generateCodiceCliente(clientSession));
 		}
-		logger.info("CLIENT TO SAVE: {}", clientToSave);
 		Document doc = new Document().append("id", clientToSave.getIdentifier()).append("name", clientToSave.getName());
 		clientCollection.insertOne(clientSession, doc);
 		return new Client(doc.getString("id"), doc.getString("name"));

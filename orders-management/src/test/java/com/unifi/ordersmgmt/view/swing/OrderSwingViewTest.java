@@ -29,9 +29,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.text.JTextComponent;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.core.MouseButton;
@@ -60,7 +57,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 	private static final String NO_YEAR_ITEM = "Tutti gli anni";
 	private AutoCloseable autoCloseable;
 	private OrderSwingView orderSwingView;
-	private static final Logger logger = LogManager.getLogger(OrderSwingViewTest.class);
 	@Mock
 	private OrderController orderController;
 	private FrameFixture window;
@@ -406,11 +402,9 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxYearsModel().addElement(2024);
 			orderSwingView.getComboboxYearsModel().addElement(2025);
 		});
-		logger.info("secondClient: {}", secondClient);
 		window.comboBox("yearsCombobox").clearSelection();
 		window.list("clientsList").selectItem(Pattern.compile("" + secondClient.toString()));
 		window.comboBox("yearsCombobox").selectItem(Pattern.compile("" + 2024));
-		logger.info("value: {}", window.list("clientsList").item(1).value());
 		verify(orderController).findOrdersByYearAndClient(secondClient, 2024);
 	}
 
@@ -1127,7 +1121,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order order2 = new Order("2", firstClient,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
-		logger.info("order1: {}", order1);
 		GuiActionRunner.execute(() -> {
 			DefaultListModel<Client> listClientModel = orderSwingView.getClientListModel();
 			listClientModel.addElement(firstClient);
@@ -1156,7 +1149,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order orderOfClient1YearFixture = new Order("2", firstClient,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
-		logger.info("orderOfClient1CurrentYear: {}", orderOfClient1CurrentYear);
 		GuiActionRunner.execute(() -> {
 			DefaultListModel<Client> listClientModel = orderSwingView.getClientListModel();
 			listClientModel.addElement(firstClient);
@@ -1250,7 +1242,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2025, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 10);
 		Order orderOfClient1YearFixture = new Order("2", firstClient,
 				Date.from(LocalDate.of(2024, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()), 20);
-		logger.info("ordine del cliente 1 e dell'anno corrente: {}", orderOfClient1CurrentYear);
 
 		window.textBox("panelOrderErrorMessage").setText(" ");
 
@@ -1719,7 +1710,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).requireEnabled();
 
-		window.table("OrdersTable").unselectRows(1); // gli ordini sono ordinati per data e non per identificativo
+		window.table("OrdersTable").unselectRows(1);
 		window.comboBox("comboboxClients").requireNoSelection();
 		window.textBox("textField_dayOfDateOrder").requireText("");
 		window.textBox("textField_monthOfDateOrder").requireText("");
@@ -1758,7 +1749,7 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 			orderSwingView.getComboboxClientsModel().addElement(secondClient);
 
 		});
-		window.table("OrdersTable").selectRows(1); // gli ordini sono ordinati per data e non per identificativo
+		window.table("OrdersTable").selectRows(1);
 		window.comboBox("comboboxClients").requireSelection(0);
 		window.textBox("textField_dayOfDateOrder").requireText("1");
 		window.textBox("textField_monthOfDateOrder").requireText("1");
@@ -2040,7 +2031,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		});
 		window.table("OrdersTable").selectRows(0);
-		// pulisco il date text field dalla data attuale dell'ordine
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
 		window.textBox("textField_yearOfDateOrder").setText("");
@@ -2085,7 +2075,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		});
 		window.table("OrdersTable").selectRows(0);
-		// pulisco il date text field dalla data attuale dell'ordine
 		window.textBox("textField_dayOfDateOrder").setText("");
 		window.textBox("textField_monthOfDateOrder").setText("");
 		window.textBox("textField_yearOfDateOrder").setText("");

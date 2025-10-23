@@ -82,7 +82,7 @@ public class OrderMongoRepository implements OrderRepository {
 				.append(PRICE, obj.getPrice());
 		orderCollection.insertOne(clientSession, docToInsert);
 		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier())).first();
-		logger.info("Inserted order document: {}", docToInsert);
+		logger.debug("Inserted order document: {}", docToInsert);
 		return new Order(docInserted.get("id").toString(),
 				clientMongoRepository.findById(((DBRef) docInserted.get(CLIENT)).getId().toString()),
 				docInserted.getDate("date"), docInserted.getDouble(PRICE));
@@ -179,8 +179,8 @@ public class OrderMongoRepository implements OrderRepository {
 			Document docModified = new Document("$set", docOfUpdates);
 			UpdateResult result = orderCollection.updateOne(clientSession, Filters.eq("id", orderID), docModified);
 
-			logger.info("Matched count: {}", result.getMatchedCount());
-			logger.info("Modified count: {}", result.getModifiedCount());
+			logger.debug("Matched count: {}", result.getMatchedCount());
+			logger.debug("Modified count: {}", result.getModifiedCount());
 			return findById(orderID);
 		}
 		return null;
