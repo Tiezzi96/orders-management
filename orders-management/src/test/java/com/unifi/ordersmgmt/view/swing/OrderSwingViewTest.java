@@ -30,7 +30,6 @@ import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.text.JTextComponent;
 import org.assertj.swing.annotation.GUITest;
-import org.assertj.swing.annotation.RunsInEDT;
 import org.assertj.swing.core.MouseButton;
 import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.core.matcher.JLabelMatcher;
@@ -613,7 +612,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	}
 
-	@RunsInEDT
 	@Test
 	@GUITest
 	public void testOnlyCorrectValuesShouldBeAcceptedInPriceTextField() {
@@ -2197,7 +2195,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	}
 
-	@RunsInEDT
 	@Test
 	@GUITest
 	public void testAllOrdersButtonWhenAClientSelectionChangesShouldBeVisibleOnlyIfClientIsSelected() {
@@ -2213,7 +2210,6 @@ public class OrderSwingViewTest extends AssertJSwingJUnitTestCase {
 
 	}
 
-	@RunsInEDT
 	@Test
 	@GUITest
 	public void testShowAllOrdersShouldDelegateToControllerAndRemoveClientSelectionAndHideShowAllOrdersButton() {

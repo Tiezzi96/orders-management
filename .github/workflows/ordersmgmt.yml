@@ -46,7 +46,11 @@ jobs:
         working-directory: orders-management
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-        run: xvfb-run mvn -DrepoToken=$COVERALLS_REPO_TOKEN coveralls:report
+        run: >
+          xvfb-run mvn 
+          -DrepoToken=$COVERALLS_REPO_TOKEN 
+          -DpullRequest=${{ github.event.pull_request.number }} 
+          coveralls:report
 
 
   sonarcloud:
