@@ -35,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
@@ -52,13 +53,23 @@ import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 import com.unifi.ordersmgmt.view.OrderView;
 
+import com.unifi.ordersmgmt.utils.*;
+
 public class OrderSwingView extends JFrame implements OrderView {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final String NO_YEAR_ITEM = "-- Nessun anno --";
+	private static final Color LIGHT_GREEN = new Color(207, 234, 217);
+	private static final Color DARK_GREEN = new Color(15, 81, 50);
+	private static final String NO_YEAR_ITEM = "Tutti gli anni";
+	private static final Color NIGHT_BLUE = new Color(23, 35, 51);
+	private static final Color LIGHT_GRAY = new Color(245, 245, 245);
+	private static final Color GRAY = new Color(89, 89, 89);
+	private static final Color LIGHT_RED = new Color(255, 102, 102);
+	private static final Color MEDIUM_GREEN = new Color(24, 103, 64);
+	private static final Color ORANGE_RED = new Color(255, 51, 51);
 	private static final Logger logger = LogManager.getLogger(OrderSwingView.class);
 	private JPanel contentPane;
 	private static final String FONT_TEXT = "Segoe UI";
@@ -87,6 +98,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private JButton btnModifyOrder;
 	private JButton btnRemoveOrder;
 	private JButton btnShowAllClientsOrders;
+	private transient Object lastYearsLoaded;
 
 	public OrderSwingView() {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -99,7 +111,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		contentPane.setLayout(null);
 		// racchiude l'intero pannello cliente
 		JPanel panel_clientManagement = new JPanel();
-		panel_clientManagement.setBackground(new Color(1, 1, 1));
+		panel_clientManagement.setBackground(Color.BLACK);
 		panel_clientManagement.setBounds(0, 52, 1000, 304);
 		contentPane.add(panel_clientManagement);
 		panel_clientManagement.setLayout(null);
@@ -107,7 +119,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		JPanel panel_clientTitle = new JPanel();
 		panel_clientTitle.setForeground(Color.WHITE);
 		panel_clientTitle.setBounds(360, 0, 640, 58);
-		panel_clientTitle.setBackground(new Color(24, 103, 64));
+		panel_clientTitle.setBackground(MEDIUM_GREEN);
 
 		panel_clientManagement.add(panel_clientTitle);
 		panel_clientTitle.setLayout(null);
@@ -134,7 +146,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		listClients.setName("clientsList");
 		listClients.setSelectionBackground(Color.LIGHT_GRAY);
 		listClients.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listClients.setBackground(new Color(207, 234, 217)); // #CFEAD9
+		listClients.setBackground(LIGHT_GREEN);
 		listClients.setFixedCellHeight(35);
 		scrollPaneClientsList.setViewportView(listClients);
 
@@ -151,14 +163,14 @@ public class OrderSwingView extends JFrame implements OrderView {
 		paneClientError.setText("");
 		paneClientError.setEditable(false);
 		paneClientError.setName("panelClientErrorMessage");
-		paneClientError.setForeground(new Color(255, 102, 102));
-		paneClientError.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		paneClientError.setForeground(LIGHT_RED);
+		paneClientError.setBackground(DARK_GREEN);
 		paneClientError.setBounds(10, 5, 340, 43);
 		panel_clientManagement.add(paneClientError);
 
 		JPanel panel_newClient = new JPanel();
 		panel_newClient.setBounds(0, 58, 360, 243);
-		panel_newClient.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		panel_newClient.setBackground(DARK_GREEN);
 		panel_clientManagement.add(panel_newClient);
 		panel_newClient.setLayout(null);
 
@@ -182,13 +194,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldNewClient.setName("textField_clientName");
 		textFieldNewClient.setBorder(null);
 		textFieldNewClient.setBounds(133, 60, 180, 16);
-		textFieldNewClient.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		textFieldNewClient.setBackground(DARK_GREEN);
 		textFieldNewClient.setCaretColor(Color.WHITE);
 		textFieldNewClient.setForeground(Color.WHITE);
 		textFieldNewClient.setColumns(10);
 		panel_newClient.add(textFieldNewClient);
 
-		lblClientName = new JLabel("Identificativo");
+		lblClientName = new JLabel("Nominativo");
 		lblClientName.setHorizontalAlignment(SwingConstants.CENTER);
 		lblClientName.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		lblClientName.setForeground(Color.WHITE);
@@ -215,7 +227,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		JPanel panel_revenueLabel = new JPanel();
 		panel_revenueLabel.setBorder(null);
 		panel_revenueLabel.setBounds(0, 5, 360, 88);
-		panel_revenueLabel.setBackground(new Color(245, 245, 245));
+		panel_revenueLabel.setBackground(LIGHT_GRAY);
 		panel_orderManagement.add(panel_revenueLabel);
 		panel_revenueLabel.setLayout(null);
 
@@ -223,13 +235,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 		lblrevenue.setText(" ");
 		lblrevenue.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
 		lblrevenue.setBounds(2, 0, 355, 88);
-		lblrevenue.setForeground(new Color(89, 89, 89));
+		lblrevenue.setForeground(GRAY);
 		lblrevenue.setHorizontalAlignment(SwingConstants.CENTER);
 		lblrevenue.setName("revenueLabel");
 		panel_revenueLabel.add(lblrevenue);
 
 		JPanel panel_orderViewAndAdd = new JPanel();
-		panel_orderViewAndAdd.setBackground(new Color(207, 234, 217)); // #CFEAD9
+		panel_orderViewAndAdd.setBackground(LIGHT_GREEN);
 		panel_orderViewAndAdd.setBounds(0, 95, 360, 355);
 		panel_orderManagement.add(panel_orderViewAndAdd);
 		panel_orderViewAndAdd.setLayout(null);
@@ -243,17 +255,17 @@ public class OrderSwingView extends JFrame implements OrderView {
 		comboboxYearsModel = new DefaultComboBoxModel<>();
 		comboboxYears = new JComboBox<>(comboboxYearsModel);
 		comboboxYears.setBackground(Color.WHITE);
-		comboboxYears.setBounds(523, 20, 101, 27);
+		comboboxYears.setBounds(490, 5, 131, 40);
 		panel_orderView.add(comboboxYears);
 		comboboxYears.setFont(new Font(FONT_TEXT, Font.BOLD, 16));
 		comboboxYears.setName("yearsCombobox");
 		comboboxYears.setBorder(null);
-		comboboxYears.setBackground(new Color(245, 245, 245));
+		comboboxYears.setBackground(LIGHT_GRAY);
 
 		JScrollPane scrollPanelOrdersList = new JScrollPane();
 
-		scrollPanelOrdersList.setBackground(new Color(207, 234, 217)); // #CFEAD9
-		scrollPanelOrdersList.getViewport().setBackground(new Color(207, 234, 217));
+		scrollPanelOrdersList.setBackground(LIGHT_GREEN);
+		scrollPanelOrdersList.getViewport().setBackground(LIGHT_GREEN);
 
 		scrollPanelOrdersList.setBounds(3, 48, 620, 350);
 		scrollPanelOrdersList.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
@@ -270,12 +282,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		JLabel lblNewOrder = new JLabel("INFO ORDINE");
 		lblNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblNewOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 16));
 		lblNewOrder.setBounds(6, 6, 350, 22);
 		panel_orderViewAndAdd.add(lblNewOrder);
 
 		JLabel lblClientNewOrder = new JLabel("Cliente");
-		lblClientNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
+		lblClientNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 15));
 		lblClientNewOrder.setBounds(33, 47, 84, 16);
 		panel_orderViewAndAdd.add(lblClientNewOrder);
 		// combobox selezione clienti
@@ -286,41 +298,41 @@ public class OrderSwingView extends JFrame implements OrderView {
 		panel_orderViewAndAdd.add(comboboxClients);
 
 		JLabel lblDateNewOrder = new JLabel("Data");
-		lblDateNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
-		lblDateNewOrder.setBounds(33, 91, 84, 16);
+		lblDateNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 15));
+		lblDateNewOrder.setBounds(33, 111, 84, 16);
 		panel_orderViewAndAdd.add(lblDateNewOrder);
 
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setForeground(Color.BLACK);
-		separator_1.setBounds(124, 103, 33, 12);
+		separator_1.setBounds(124, 126, 33, 12);
 		panel_orderViewAndAdd.add(separator_1);
 
 		JLabel lblSlashDate1NewOrder = new JLabel("/");
 		lblSlashDate1NewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 16));
-		lblSlashDate1NewOrder.setBounds(161, 87, 8, 16);
+		lblSlashDate1NewOrder.setBounds(161, 107, 8, 17);
 		panel_orderViewAndAdd.add(lblSlashDate1NewOrder);
 
 		JSeparator separator_1_1 = new JSeparator();
 		separator_1_1.setForeground(Color.BLACK);
-		separator_1_1.setBounds(167, 103, 33, 12);
+		separator_1_1.setBounds(167, 126, 33, 12);
 		panel_orderViewAndAdd.add(separator_1_1);
 
 		JLabel lblSlashDate2NewOrder = new JLabel("/");
 		lblSlashDate2NewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 16));
-		lblSlashDate2NewOrder.setBounds(203, 87, 8, 16);
+		lblSlashDate2NewOrder.setBounds(203, 107, 8, 17);
 		panel_orderViewAndAdd.add(lblSlashDate2NewOrder);
 
 		JSeparator separator_1_1_1 = new JSeparator();
 		separator_1_1_1.setForeground(Color.BLACK);
-		separator_1_1_1.setBounds(211, 103, 57, 12);
+		separator_1_1_1.setBounds(211, 126, 57, 12);
 		panel_orderViewAndAdd.add(separator_1_1_1);
 
 		textFieldDayNewOrder = new JTextField();
 		textFieldDayNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
 		textFieldDayNewOrder.setBorder(null);
 		textFieldDayNewOrder.setName("textField_dayOfDateOrder");
-		textFieldDayNewOrder.setBounds(125, 82, 31, 22);
-		textFieldDayNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldDayNewOrder.setBounds(125, 103, 31, 22);
+		textFieldDayNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldDayNewOrder);
 		textFieldDayNewOrder.setColumns(10);
 
@@ -328,8 +340,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldMonthNewOrder.setHorizontalAlignment(SwingConstants.CENTER);
 		textFieldMonthNewOrder.setBorder(null);
 		textFieldMonthNewOrder.setName("textField_monthOfDateOrder");
-		textFieldMonthNewOrder.setBounds(169, 82, 31, 22);
-		textFieldMonthNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldMonthNewOrder.setBounds(169, 103, 31, 22);
+		textFieldMonthNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldMonthNewOrder);
 		textFieldMonthNewOrder.setColumns(10);
 
@@ -338,23 +350,23 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldYearNewOrder.setName("textField_yearOfDateOrder");
 		textFieldYearNewOrder.setColumns(10);
 		textFieldYearNewOrder.setBorder(null);
-		textFieldYearNewOrder.setBounds(212, 82, 56, 22);
-		textFieldYearNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldYearNewOrder.setBounds(212, 103, 56, 22);
+		textFieldYearNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldYearNewOrder);
 
 		JLabel lblRevenueNewOrder = new JLabel("Importo");
-		lblRevenueNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
-		lblRevenueNewOrder.setBounds(33, 129, 84, 16);
+		lblRevenueNewOrder.setFont(new Font(FONT_TEXT, Font.PLAIN, 15));
+		lblRevenueNewOrder.setBounds(33, 175, 84, 16);
 		panel_orderViewAndAdd.add(lblRevenueNewOrder);
 
 		JLabel lblRevenueNewOrder_1 = new JLabel("€");
 		lblRevenueNewOrder_1.setFont(new Font(FONT_TEXT, Font.PLAIN, 14));
-		lblRevenueNewOrder_1.setBounds(270, 124, 15, 16);
+		lblRevenueNewOrder_1.setBounds(270, 175, 15, 16);
 		panel_orderViewAndAdd.add(lblRevenueNewOrder_1);
 
 		JSeparator separator_1_1_1_1 = new JSeparator();
-		separator_1_1_1_1.setForeground(new Color(0, 0, 0));
-		separator_1_1_1_1.setBounds(118, 140, 150, 12);
+		separator_1_1_1_1.setForeground(Color.BLACK);
+		separator_1_1_1_1.setBounds(118, 191, 150, 12);
 		panel_orderViewAndAdd.add(separator_1_1_1_1);
 
 		textFieldRevenueNewOrder = new JTextField();
@@ -362,54 +374,56 @@ public class OrderSwingView extends JFrame implements OrderView {
 		textFieldRevenueNewOrder.setName("textField_revenueOrder");
 		textFieldRevenueNewOrder.setColumns(10);
 		textFieldRevenueNewOrder.setBorder(null);
-		textFieldRevenueNewOrder.setBounds(118, 118, 150, 22);
-		textFieldRevenueNewOrder.setBackground(new Color(245, 245, 245));
+		textFieldRevenueNewOrder.setBounds(118, 168, 150, 22);
+		textFieldRevenueNewOrder.setBackground(LIGHT_GRAY);
 		panel_orderViewAndAdd.add(textFieldRevenueNewOrder);
-
-		btnNewOrder = new JButton("Aggiungi ordine");
-		btnNewOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnNewOrder.setEnabled(false);
-		btnNewOrder.setBorder(new LineBorder(new Color(23, 35, 51), 1, true));
-		btnNewOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
-		btnNewOrder.setBounds(50, 200, 250, 50);
-		panel_orderViewAndAdd.add(btnNewOrder);
 
 		panelOrderError = new JTextPane();
 		panelOrderError.setText("");
 		panelOrderError.setEditable(false);
-		panelOrderError.setForeground(new Color(255, 51, 51));
+		panelOrderError.setForeground(ORANGE_RED);
 		panelOrderError.setName("panelOrderErrorMessage");
 		panelOrderError.setBounds(10, 255, 340, 93);
 		panel_orderViewAndAdd.add(panelOrderError);
+
+		btnNewOrder = new JButton("<html><center>Aggiungi<br>ordine</center></html>");
+		btnNewOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnNewOrder.setEnabled(false);
+		btnNewOrder.setBorder(new LineBorder(NIGHT_BLUE, 1, true));
+		btnNewOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+		btnNewOrder.setBounds(3, 400, 204, 45);
+		panel_orderView.add(btnNewOrder);
 
 		btnModifyOrder = new JButton();
 		btnModifyOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnModifyOrder.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnModifyOrder.setText("<html><center>Modifica<br>ordine</center></html>");
-		btnModifyOrder.setBounds(2, 400, 200, 45);
+		btnModifyOrder.setBounds(209, 400, 204, 45);
 		panel_orderView.add(btnModifyOrder);
 		btnModifyOrder.setEnabled(false);
 		btnModifyOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+		btnModifyOrder.setBorder(new LineBorder(NIGHT_BLUE, 1, true));
 
 		btnRemoveOrder = new JButton();
 		btnRemoveOrder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnRemoveOrder.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnRemoveOrder.setText("<html><center>Rimuovi<br>ordine</center></html>");
-		btnRemoveOrder.setBounds(2, 2, 200, 45);
+		btnRemoveOrder.setBounds(415, 400, 204, 45);
 		btnRemoveOrder.setEnabled(false);
 		panel_orderView.add(btnRemoveOrder);
 		btnRemoveOrder.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
+		btnRemoveOrder.setBorder(new LineBorder(NIGHT_BLUE, 1, true));
 
 		btnShowAllClientsOrders = new JButton("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>");
 		btnShowAllClientsOrders.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnShowAllClientsOrders.setVisible(false);
 		btnShowAllClientsOrders.setHorizontalTextPosition(SwingConstants.CENTER);
-		btnShowAllClientsOrders.setBounds(204, 2, 200, 45);
+		btnShowAllClientsOrders.setBounds(3, 1, 310, 45);
 		btnShowAllClientsOrders.setFont(new Font(FONT_TEXT, Font.BOLD, 14));
 		panel_orderView.add(btnShowAllClientsOrders);
 
 		JPanel panel_headBar = new JPanel();
-		panel_headBar.setBackground(new Color(15, 81, 50)); // #0F5132 verde scuro
+		panel_headBar.setBackground(DARK_GREEN);
 		panel_headBar.setBounds(0, 0, 1000, 53);
 		contentPane.add(panel_headBar);
 
@@ -425,7 +439,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		});
 
 		btnNewOrder.addActionListener(e -> {
-			logger.info("new Order");
+			logger.debug("Creating new order (UI)");
 			newOrder();
 		});
 
@@ -453,38 +467,26 @@ public class OrderSwingView extends JFrame implements OrderView {
 		comboboxClients.addActionListener(e -> checkCompleteModifyOrderInfo());
 
 		tableOrders.getSelectionModel().addListSelectionListener(e -> {
-			if (tableOrders.getSelectedRow() != -1) {
-				Order order = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
-				logger.info("row of table order selected: {}", tableOrders.getSelectedRow());
-				LocalDate localDate = order.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-				comboboxClients.setSelectedItem(order.getClient());
-				textFieldDayNewOrder.setText(String.valueOf(localDate.getDayOfMonth()));
-				textFieldMonthNewOrder.setText(String.valueOf(localDate.getMonthValue()));
-				textFieldYearNewOrder.setText(String.valueOf(localDate.getYear()));
-				textFieldRevenueNewOrder.setText(String.valueOf(order.getPrice()));
-				btnModifyOrder.setEnabled(true);
-				btnRemoveOrder.setEnabled(true);
-
-			} else {
-				comboboxClients.setSelectedIndex(-1);
-				textFieldDayNewOrder.setText("");
-				textFieldMonthNewOrder.setText("");
-				textFieldYearNewOrder.setText("");
-				textFieldRevenueNewOrder.setText("");
-				btnModifyOrder.setEnabled(false);
-				btnRemoveOrder.setEnabled(false);
-
+			if (e.getValueIsAdjusting()) {
+				return;
 			}
-			checkCompleteModifyOrderInfo();
+
+			int selectedRow = tableOrders.getSelectedRow();
+			if (selectedRow == -1) {
+				clearOrderFields();
+			} else {
+				updateOrderFields(selectedRow);
+			}
+
 		});
 
 		btnModifyOrder.addActionListener(e -> {
-			logger.info("Update order");
+			logger.debug("Updating order (UI)");
 			updateOrder();
 		});
 
 		btnRemoveOrder.addActionListener(e -> {
-			logger.info("remove order");
+			logger.debug("Removing order (UI)");
 			removeOrder();
 		});
 
@@ -492,6 +494,43 @@ public class OrderSwingView extends JFrame implements OrderView {
 			btnShowAllClientsOrders.setVisible(false);
 			listClients.clearSelection();
 		});
+	}
+
+	/**
+	 * @param selectedRow
+	 */
+	private void updateOrderFields(int selectedRow) {
+		comboboxClients.setSelectedIndex(-1);
+		textFieldDayNewOrder.setText("");
+		textFieldMonthNewOrder.setText("");
+		textFieldYearNewOrder.setText("");
+		textFieldRevenueNewOrder.setText("");
+		Order order = orderTableModel.getOrderAt(selectedRow);
+		logger.debug("Order table row selected: {}", selectedRow);
+		LocalDate localDate = order.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		comboboxClients.setSelectedItem(order.getClient());
+		textFieldDayNewOrder.setText(String.valueOf(localDate.getDayOfMonth()));
+		textFieldMonthNewOrder.setText(String.valueOf(localDate.getMonthValue()));
+		textFieldYearNewOrder.setText(String.valueOf(localDate.getYear()));
+		textFieldRevenueNewOrder.setText(String.valueOf(order.getPrice()));
+		btnModifyOrder.setEnabled(true);
+		btnRemoveOrder.setEnabled(true);
+		checkCompleteModifyOrderInfo();
+
+	}
+
+	/**
+	 * 
+	 */
+	private void clearOrderFields() {
+		comboboxClients.setSelectedIndex(-1);
+		textFieldDayNewOrder.setText("");
+		textFieldMonthNewOrder.setText("");
+		textFieldYearNewOrder.setText("");
+		textFieldRevenueNewOrder.setText("");
+		btnModifyOrder.setEnabled(false);
+		btnRemoveOrder.setEnabled(false);
+		checkCompleteModifyOrderInfo();
 	}
 
 	private void checkCompleteInfo() {
@@ -523,7 +562,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() != -1) {
 			Integer yearSelected = (Integer) comboboxYears.getSelectedItem();
 			Client clientSelected = listClients.getSelectedValue();
-			logger.info("yearselected: {}", yearSelected);
+			logger.debug("year selected: {}", yearSelected);
 			if (clientSelected != null) {
 				orderController.findOrdersByYearAndClient(clientSelected, yearSelected);
 			} else {
@@ -533,9 +572,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 		if (!e.getValueIsAdjusting() && comboboxYears.getSelectedIndex() == -1) {
 			Client clientSelected = listClients.getSelectedValue();
 			if (clientSelected != null) {
-				logger.info("cliente selezionato, nessun anno selezionato: {}", clientSelected);
+				logger.debug("client selected, no year selected: {}", clientSelected);
 				orderController.allOrdersByClient(clientSelected);
-			}else {
+			} else {
 				orderController.getAllOrders();
 			}
 		}
@@ -543,11 +582,10 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	public void yearSelection(ActionEvent e) {
-		logger.info("selezione anno avviata");
 		Object selectedItem = comboboxYears.getSelectedItem();
 		Integer selectedIndex = comboboxYears.getSelectedIndex();
 		Client clientselected = listClients.getSelectedValue();
-
+		logger.debug("year selection changed: selectedItem = {}, selectedIndex = {}", selectedItem, selectedIndex);
 		boolean noYearSelected = selectedIndex != -1 && selectedItem.equals(NO_YEAR_ITEM);
 		boolean validYearSelected = selectedIndex != -1 && selectedItem instanceof Integer;
 
@@ -555,10 +593,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 			comboboxYears.setSelectedIndex(-1);
 			if (clientselected != null) {
 				orderController.allOrdersByClient(clientselected);
-				logger.info("selected index on combobobox Years: {}", selectedIndex);
 			} else {
-				// bisogna mostrare tutti i clienti
-				logger.info("mostra tutti gli ordini dei client di tutti gli anni");
 				orderController.getAllOrders();
 			}
 		}
@@ -575,7 +610,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void updateOrder() {
-		logger.info("richiesta aggiornamento ordine");
+		logger.debug("request order updated");
 		Order orderToModify = orderTableModel.getOrderAt(tableOrders.getSelectedRow());
 		Map<String, Object> updates = new HashMap<>();
 		updates.put("client", comboboxClientsModel.getElementAt(comboboxClients.getSelectedIndex()));
@@ -589,7 +624,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		year = Integer.valueOf(textFieldYearNewOrder.getText());
 
-		if (isValidDate(day, month, year)) {
+		if (AppUtils.isValidDate(day, month, year)) {
 
 			Date newDate = Date.from(LocalDate.of(year, month, day).atStartOfDay(ZoneId.systemDefault()).toInstant());
 			updates.put("date", newDate);
@@ -614,7 +649,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty()) && (comboboxClients.getSelectedIndex() != -1)
 				&& tableOrders.getSelectedRow() != -1) {
 
-			logger.info("Data for modify order are completed");
+			logger.debug("Data info to modify order are completed");
 			btnModifyOrder.setEnabled(true);
 		} else {
 			btnModifyOrder.setEnabled(false);
@@ -622,7 +657,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void newOrder() {
-		logger.info("richiesta aggiunta ordine");
+		logger.debug("add order request");
 		int day = Integer.parseInt(textFieldDayNewOrder.getText());
 
 		int month = Integer.parseInt(textFieldMonthNewOrder.getText());
@@ -633,13 +668,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		double price = Double.parseDouble(textFieldRevenueNewOrder.getText().replace(",", "."));
 
-		if (isValidDate(day, month, year)) {
+		if (AppUtils.isValidDate(day, month, year)) {
 			LocalDateTime localDate = LocalDateTime.of(year, month, day, 0, 0);
 			orderController.addOrder(
 					new Order("", client, Date.from(localDate.atZone(ZoneId.systemDefault()).toInstant()), price));
 			panelOrderError.setText("");
 		} else {
-			logger.info("data non valida: {}/{}/{}", day, month, year);
+			logger.warn("invalid date: {}/{}/{}", day, month, year);
 			panelOrderError.setText("La data " + day + "/" + month + "/" + year + " non è corretta");
 		}
 		textFieldDayNewOrder.setText("");
@@ -650,42 +685,19 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	}
 
-	private boolean isValidDate(int day, int month, int year) {
-		// anno bisestile se divisibile per 4 non per 100 ma divisibile per 400
-		boolean isLeap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
-		int maxDay;
-
-		switch (month) {
-		case 2:
-			maxDay = isLeap ? 29 : 28;
-			break;
-		case 4:
-		case 6:
-		case 9:
-		case 11:
-			maxDay = 30;
-			break;
-		default:
-			maxDay = 31;
-		}
-		return year >= (2025 - 100) && year <= 2025 && month >= 1 && month <= 12 && (day >= 1 && day <= maxDay);
-
-	}
-
 	private DocumentFilter createTextFilter(int maxLength, String regex, Runnable onChange, String spaces) {
 		return new TextDocumentFilter(maxLength, regex, onChange, spaces);
 	}
 
 	private void checkCompleteNewOrderInfo() {
-		if ((!textFieldDayNewOrder.getText().trim().isEmpty()) && (!textFieldMonthNewOrder.getText().trim().isEmpty())
-				&& (!textFieldYearNewOrder.getText().trim().isEmpty())
-				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty())
-				&& (comboboxClients.getSelectedIndex() != -1)) {
+		btnNewOrder.setEnabled(isNewOrderInfoCompleted());
+	}
 
-			btnNewOrder.setEnabled(true);
-		} else {
-			btnNewOrder.setEnabled(false);
-		}
+	private boolean isNewOrderInfoCompleted() {
+		return (!textFieldDayNewOrder.getText().trim().isEmpty())
+				&& (!textFieldMonthNewOrder.getText().trim().isEmpty())
+				&& (!textFieldYearNewOrder.getText().trim().isEmpty())
+				&& (!textFieldRevenueNewOrder.getText().trim().isEmpty()) && (comboboxClients.getSelectedIndex() != -1);
 	}
 
 	@Override
@@ -703,6 +715,15 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void setYearsOrders(List<Integer> yearsOfOrders) {
+		List<Integer> sorted = new ArrayList<>(yearsOfOrders);
+		Collections.sort(sorted, Collections.reverseOrder());
+
+		if (sorted.equals(lastYearsLoaded)) {
+			return;
+		}
+
+		lastYearsLoaded = new ArrayList<>(sorted);
+
 		boolean wasEmpty = comboboxYears.getItemCount() == 0;
 		Integer prevSelection = (Integer) comboboxYears.getSelectedItem();
 
@@ -712,7 +733,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		comboboxYearsModel.removeAllElements();
 		Collections.sort(yearsOfOrders, Collections.reverseOrder());
-		logger.info("yearsOfTheOrders: {}", yearsOfOrders);
+		logger.debug("Years of the orders: {}", yearsOfOrders);
 		if (!yearsOfOrders.contains(2025)) {
 			comboboxYearsModel.addElement(2025);
 		}
@@ -730,10 +751,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 		} else {
 			Integer toSelect = (prevSelection != null && yearsOfOrders.contains(prevSelection)) ? prevSelection : null;
+
 			if (toSelect != null) {
 				comboboxYears.setSelectedItem(toSelect); // nessun evento perché i listener sono staccati
 			} else {
-				comboboxYears.setSelectedIndex(-1);
+				comboboxYears.setSelectedItem(NO_YEAR_ITEM);
 			}
 		}
 
@@ -741,11 +763,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void showAllOrders(List<Order> orders) {
-		logger.info("mostra gli ordini in tabella");
+		logger.debug("show all orders in table");
 		boolean currentYearIsNotSelected = false;
 		boolean aYearIsSelected = false;
-		logger.info("comboboxYears.getSelectedIndex(): {}", comboboxYears.getSelectedIndex());
-		// --- stato selezione anno ---
 		Integer yearSelected = getYearSelected();
 		if (yearSelected != null) {
 			aYearIsSelected = true;
@@ -754,18 +774,20 @@ public class OrderSwingView extends JFrame implements OrderView {
 			}
 
 		} else {
-			logger.info("show all orders anno non selezionato");
+			logger.debug("Show all orders: year not selected");
 			orderController.yearsOfTheOrders(); // se aggiungo un ordine che non appartiene al cliente selezionato devo
 												// chiamare il metodo per controllare che l'anno, se non presente nel
 												// combobox, sia aggiunto
 			comboboxYears.setSelectedIndex(-1);
 		}
 		if (orders.isEmpty()) {
-			logger.info("orders is Empty");
-			logger.debug("listClients.getSelectedIndex() != -1 : {}", (listClients.getSelectedIndex() != -1));
+			logger.debug("Order list is empty");
 			Client clientSelected = getClientSelected();
-			if (currentYearIsNotSelected && listClients.getSelectedIndex() == -1) {
-				orderController.yearsOfTheOrders();
+			if (currentYearIsNotSelected) {
+				// es: nel caso siamo nell'anno 2024 e ho eliminato l'ultimo ordine
+				logger.debug("empty table, year selected (different by current year): {}", yearSelected);
+				SwingUtilities.invokeLater(() -> orderController.yearsOfTheOrders());
+				handleTableEmptyCase(currentYearIsNotSelected, aYearIsSelected, yearSelected, clientSelected);
 			} else {
 
 				handleTableEmptyCase(currentYearIsNotSelected, aYearIsSelected, yearSelected, clientSelected);
@@ -783,10 +805,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	private void handleTableEmptyCase(boolean currentYearIsNotSelected, boolean aYearIsSelected, Integer yearSelected,
 			Client clientSelected) {
-		// anno selezionato (qualsiasi) ma non ci sono ordini
+		// anno selezionato (diverso dall'anno corrente) ma non ci sono ordini
 		if (!currentYearIsNotSelected && aYearIsSelected) {
 			getOrderTableModel().removedAllOrders();
 			panelOrderError.setText("Non sono presenti ordini per il " + yearSelected);
+			lblrevenue.setText("");
 		}
 		if (clientSelected != null && !aYearIsSelected) {
 			getOrderTableModel().removedAllOrders();
@@ -796,10 +819,9 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 
 		if (clientSelected != null && aYearIsSelected) {
-			logger.info("cliente selezionato, anno selezionato ma non ci sono ordini");
 			getOrderTableModel().removedAllOrders();
-			panelOrderError.setText("Non sono presenti ordini del " + comboboxYears.getSelectedItem()
-					+ " per il cliente " + clientSelected.getIdentifier());
+			SwingUtilities.invokeLater(() -> panelOrderError.setText("Non sono presenti ordini del " + yearSelected
+					+ " per il cliente " + clientSelected.getIdentifier()));
 			lblrevenue.setText("");
 		}
 
@@ -807,6 +829,13 @@ public class OrderSwingView extends JFrame implements OrderView {
 			getOrderTableModel().removedAllOrders();
 			panelOrderError.setText("Non sono presenti ordini");
 			lblrevenue.setText("");
+
+		}
+
+		if (clientSelected == null && currentYearIsNotSelected) {
+			getOrderTableModel().removedAllOrders();
+			SwingUtilities
+					.invokeLater(() -> panelOrderError.setText("Non sono presenti ordini per il " + yearSelected));
 
 		}
 	}
@@ -833,10 +862,10 @@ public class OrderSwingView extends JFrame implements OrderView {
 	}
 
 	private void resetRevenueLabel(List<Order> orders) {
-		logger.info("reimposta totale prezzo");
+		logger.debug("reset total price");
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() != -1) {
 			Client clientSelected = listClients.getSelectedValue();
-			String totalCostTemplate = "Il costo totale degli ordini del cliente %s nel %s è di %s€";
+			String totalCostTemplate = "<html><center>Il costo totale degli ordini del cliente <br>%s nel %s è di %s€</center></html>";
 			String message = String
 					.format(totalCostTemplate, clientSelected.getIdentifier(), comboboxYears.getSelectedItem(),
 							String.format("%.2f", (orders.stream()
@@ -847,7 +876,7 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 		if (listClients.getSelectedIndex() != -1 && comboboxYears.getSelectedIndex() == -1) {
 			Client clientSelected = listClients.getSelectedValue();
-			String totalCostTemplate = "Il costo totale degli ordini del cliente %s è di %s€";
+			String totalCostTemplate = "<html><center>Il costo totale degli ordini del cliente <br>%s è di %s€</center></html>";
 			String message = String.format(totalCostTemplate, clientSelected.getIdentifier(),
 					String.format("%.2f", (orders.stream().mapToDouble(Order::getPrice).sum())).replace(".", ","));
 			lblrevenue.setText(message);
@@ -880,8 +909,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 	public void clientRemoved(Client clientRemoved) {
 		clientListModel.removeElement(clientRemoved);
 		comboboxClients.removeItem(clientRemoved);
-		logger.info("client to remove: {}", clientRemoved);
-		logger.info("comboboxclients size: {}", comboboxClients.getItemCount());
+		logger.debug("client to remove: {}", clientRemoved);
+		logger.debug("comboboxclients size: {}", comboboxClients.getItemCount());
 		listClients.clearSelection();
 
 	}
@@ -904,9 +933,6 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private void sortClientsById() {
 		Client selectedValue = null;
 		Client selectedItemValue = null;
-
-		logger.info("listClients.getSelectedValue(): {}", listClients.getSelectedValue());
-		logger.info("comboboxClients.getSelectedItem(): {}", comboboxClients.getSelectedItem());
 
 		if (listClients.getSelectedValue() != null) {
 			selectedValue = listClients.getSelectedValue();
@@ -943,12 +969,11 @@ public class OrderSwingView extends JFrame implements OrderView {
 
 	@Override
 	public void orderAdded(Order orderAdded) {
-		// TODO Auto-generated method stub
 		Order orderSelected = getOrderTableModel().getOrderAt(tableOrders.getSelectedRow());
 		int yearOfOrder = orderAdded.getDate().toInstant().atZone(ZoneId.systemDefault()).getYear();
 
 		Object selectedItem = getComboboxYearsModel().getSelectedItem();
-		logger.info(": {}", selectedItem);
+		logger.debug("order Added, year combo selectedItem: {}", selectedItem);
 		if (selectedItem != null) {
 			handleYearSelectedCase(orderAdded, orderSelected, yearOfOrder, selectedItem);
 
@@ -985,8 +1010,8 @@ public class OrderSwingView extends JFrame implements OrderView {
 	private void handleYearSelectedCase(Order orderAdded, Order orderSelected, int yearOfOrder, Object selectedItem) {
 		int yearSelected;
 		yearSelected = (Integer) selectedItem;
-		logger.info("orderselected: {}", orderSelected);
-		logger.info("yearsoFOrder: {}", yearOfOrder);
+		logger.debug("orderselected: {}", orderSelected);
+		logger.debug("yearsOfOrder: {}", yearOfOrder);
 
 		if (getComboboxYearsModel().getIndexOf(yearOfOrder) == -1) {
 			List<Object> yearsCombobox = getAllElements(getComboboxYearsModel());
@@ -997,12 +1022,12 @@ public class OrderSwingView extends JFrame implements OrderView {
 		}
 
 		if (yearSelected == yearOfOrder) {
-			logger.info("orderAdded function: orders: {}", getOrderTableModel().getOrders());
+			logger.debug("orderAdded function: orders: {}", getOrderTableModel().getOrders());
 			addOrderAndRefreshtable(orderAdded);
 
 		}
 		if (orderSelected != null) {
-			logger.info("order select index");
+			logger.debug("order select index");
 			int orderSelectedIndex = getOrderTableModel().getOrderIndex(orderSelected);
 			tableOrders.setRowSelectionInterval(orderSelectedIndex, orderSelectedIndex);
 		}

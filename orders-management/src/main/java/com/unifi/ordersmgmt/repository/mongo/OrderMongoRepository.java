@@ -74,7 +74,7 @@ public class OrderMongoRepository implements OrderRepository {
 	@Override
 	public Order save(Order obj) {
 		if (obj.getIdentifier().trim().isEmpty()) {
-			obj.setIdentifier(seqGen.generateCodiceCliente(clientSession));
+			obj.setIdentifier(seqGen.generateCodiceOrdine(clientSession));
 			logger.info("Generated new order id {}", obj.getIdentifier());
 		}
 		Document docToInsert = new Document().append("id", obj.getIdentifier())
@@ -82,11 +82,10 @@ public class OrderMongoRepository implements OrderRepository {
 				.append(PRICE, obj.getPrice());
 		orderCollection.insertOne(clientSession, docToInsert);
 		Document docInserted = orderCollection.find(clientSession, Filters.eq("id", obj.getIdentifier())).first();
-		logger.info("Inserted order document: {}", docToInsert);
-		Order orderInserted = new Order(docInserted.get("id").toString(),
+		logger.debug("Inserted order document: {}", docToInsert);
+		return new Order(docInserted.get("id").toString(),
 				clientMongoRepository.findById(((DBRef) docInserted.get(CLIENT)).getId().toString()),
 				docInserted.getDate("date"), docInserted.getDouble(PRICE));
-		return orderInserted;
 	}
 
 	@Override
@@ -125,8 +124,7 @@ public class OrderMongoRepository implements OrderRepository {
 					calendar.setTime(date);
 					return calendar.get(Calendar.YEAR);
 				}).collect(Collectors.toCollection(TreeSet::new));
-		List<Integer> years = new ArrayList<>(setOfYears);
-		return years;
+		return new ArrayList<>(setOfYears);
 	}
 
 	@Override
@@ -152,19 +150,15 @@ public class OrderMongoRepository implements OrderRepository {
 
 	@Override
 	public List<Order> findOrdersByClientAndYear(Client client, int year) {
-		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
-				.filter(d -> {
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(d.getDate("date"));
-					return calendar.get(Calendar.YEAR) == year
-							&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
-				})
-				.map(d -> new Order(d.getString("id"),
-						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
-						d.getDouble(PRICE)))
-				.collect(Collectors.toList());
+		return StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false).filter(d -> {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(d.getDate("date"));
+			return calendar.get(Calendar.YEAR) == year
+					&& ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier());
+		}).map(d -> new Order(d.getString("id"),
+				clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
+				d.getDouble(PRICE))).collect(Collectors.toList());
 
-		return orders;
 	}
 
 	@Override
@@ -185,23 +179,21 @@ public class OrderMongoRepository implements OrderRepository {
 			Document docModified = new Document("$set", docOfUpdates);
 			UpdateResult result = orderCollection.updateOne(clientSession, Filters.eq("id", orderID), docModified);
 
-			logger.info("Matched count: {}", result.getMatchedCount());
-			logger.info("Modified count: {}", result.getModifiedCount());
-			Order orderModified = findById(orderID);
-			return orderModified;
+			logger.debug("Matched count: {}", result.getMatchedCount());
+			logger.debug("Modified count: {}", result.getModifiedCount());
+			return findById(orderID);
 		}
 		return null;
 	}
 
 	@Override
 	public List<Order> findOrdersByClient(Client client) {
-		List<Order> orders = StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
+		return StreamSupport.stream(orderCollection.find(clientSession).spliterator(), false)
 				.filter(d -> ((DBRef) d.get(CLIENT)).getId().toString().equals(client.getIdentifier()))
 				.map(d -> new Order(d.get("id").toString(),
 						clientMongoRepository.findById(((DBRef) d.get(CLIENT)).getId().toString()), d.getDate("date"),
 						d.getDouble(PRICE)))
 				.collect(Collectors.toList());
-		return orders;
 	}
 
 }

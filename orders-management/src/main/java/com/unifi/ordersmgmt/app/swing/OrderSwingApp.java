@@ -28,7 +28,7 @@ public class OrderSwingApp implements Callable<Void> {
 	private int mongoPort = 27017;
 
 	@Option(names = { "--db-name" }, description = "Database name")
-	private String databaseName = "budget";
+	private String databaseName = "ordersmgmt";
 
 	@Option(names = { "--db-clients-collection" }, description = "Collection clients name")
 	private String clientsCollection = "clients";
@@ -47,28 +47,23 @@ public class OrderSwingApp implements Callable<Void> {
 	public Void call() throws Exception {
 		EventQueue.invokeLater(() -> {
 			try {
-				logger.info("1. Building connection string...");
 				String connectionString = String.format("mongodb://%s:%d/?replicaSet=rs0", mongoHost, mongoPort);
-				logger.info(mongoHost);
-
-				logger.info(mongoPort);
+				logger.info("mongoHost: {}", mongoHost);
+				logger.info("mongoPort: {}", mongoPort);
 				logger.info(connectionString);
-				logger.info("2. Creating mongo client...");
+				logger.info("Creating mongo client");
 				MongoClient mongoClient = MongoClients.create(connectionString);
-				logger.info("2b. Mongo client created.");
+				logger.info("Mongo client created");
 
-				logger.info("2c. Creating transaction manager...");
 				MongoTransactionManager transactionManager = new MongoTransactionManager(mongoClient, clientsCollection,
 						orderCollection, databaseName);
-				logger.info("2d. Transaction manager created.");
-				logger.info("3. Creating services...");
 				TransactionalClientService clientService = new TransactionalClientService(transactionManager);
 				TransactionalOrderService orderService = new TransactionalOrderService(transactionManager);
 				OrderSwingView newGui = new OrderSwingView();
 				OrderController controller = new OrderController(newGui, orderService, clientService);
 				newGui.setOrderController(controller);
 				newGui.setVisible(true);
-				controller.InitializeView();
+				controller.setupView();
 
 			} catch (Exception e) {
 				logger.error("Startup error", e);

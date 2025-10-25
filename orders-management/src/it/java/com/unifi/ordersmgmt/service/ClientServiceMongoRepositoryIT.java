@@ -69,27 +69,26 @@ public class ClientServiceMongoRepositoryIT {
 		List<Client> clients = clientService.findAllClients();
 		assertThat(clients).contains(newClient, secondClient);
 	}
-	
+
 	@Test
-	public void testRemoveClientWhenClientExistingInDatabase() {
-		Client clientToRemove=clientRepository.save(new Client("CLIENT-00001", "CLIENT 1"));
+	public void testRemoveClientWhenClientExistsInDatabase() {
+		Client clientToRemove = clientRepository.save(new Client("CLIENT-00001", "CLIENT 1"));
 		clientRepository.save(new Client("CLIENT-00002", "CLIENT 2"));
 		clientService.removeClient(clientToRemove);
-		Client clientFound=clientRepository.findById(clientToRemove.getIdentifier());
+		Client clientFound = clientRepository.findById(clientToRemove.getIdentifier());
 		assertThat(clientFound).isNull();
 	}
-	
+
 	@Test
-	public void testRemoveClientWhenClienNotExistingInDatabase() {
+	public void testRemoveClientWhenClientDoesNotExistInDatabase() {
 		Client clientNotExistInDB = new Client("CLIENT-00001", "client not exist in db");
 		try {
 			clientService.removeClient(clientNotExistInDB);
 			fail("Excpected a ClientNotFoundException to be thrown");
-		}
-		catch(NotFoundClientException e) {
-			assertThat("Il cliente con id "+clientNotExistInDB.getIdentifier()+" non è presente nel database")
+		} catch (NotFoundClientException e) {
+			assertThat("Il cliente con id " + clientNotExistInDB.getIdentifier() + " non è presente nel database")
 					.isEqualTo(e.getMessage());
-		}	
+		}
 	}
 
 }

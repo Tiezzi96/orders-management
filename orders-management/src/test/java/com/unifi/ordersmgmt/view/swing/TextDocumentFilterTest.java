@@ -46,7 +46,7 @@ public class TextDocumentFilterTest {
 	}
 
 	@Test
-	public void shouldRejectDecimalWithThreePlaces() throws Exception {
+	public void testShouldRejectDecimalWithThreePlaces() throws Exception {
 		onChangeCalled.set(false);
 		doc.insertString(0, input, null);
 		assertEquals(expectedOutput, doc.getText(0, doc.getLength()));

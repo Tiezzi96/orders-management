@@ -32,6 +32,8 @@ import com.mongodb.client.model.UpdateOptions;
 @RunWith(GUITestRunner.class)
 public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
+	private static final String NO_YEAR_ITEM = "Tutti gli anni";
+
 	private static final String DB_NAME = "test-db";
 
 	private static final String COLLECTION_NAME = "clients";
@@ -166,8 +168,9 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		assertThat(tableContents[0]).containsExactly("ORDER-00004", "client 2",
 				Date.from(LocalDate.of(2024, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"40.0");
-		window.label("revenueLabel").requireText(
-				"Il costo totale degli ordini del cliente CLIENT-00002" + " nel 2024" + " è di " + "40,00€");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00002" + " nel 2024"
+						+ " è di " + "40,00€</center></html>");
 	}
 
 	@Test
@@ -180,8 +183,9 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		assertThat(tableContents[0]).containsExactly("ORDER-00001", "client 1",
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"10.0");
-		window.label("revenueLabel").requireText(
-				"Il costo totale degli ordini del cliente CLIENT-00001" + " nel 2025" + " è di " + "10,00€");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00001" + " nel 2025"
+						+ " è di " + "10,00€</center></html>");
 	}
 
 	@Test
@@ -292,7 +296,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2024);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		window.list("clientsList").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00003", "client 1",
@@ -318,7 +323,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2024);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		window.list("clientsList").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00001", "client 1",
@@ -334,7 +340,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddNewOrderWhenClientSelectedNoExists() {
+	public void testAddNewOrderWhenClientSelectedDoesNotExists() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
 		window.textBox("textField_dayOfDateOrder").enterText("13");
@@ -342,7 +348,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2025);
 		window.textBox("textField_revenueOrder").enterText("100.25");
 		removeClientFromDatabase("CLIENT-00001");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		assertThat(window.textBox("panelClientErrorMessage").text()).contains("CLIENT-00001");
 		String[] clientListContents = window.list("clientsList").contents();
 		assertThat(clientListContents).noneMatch(e -> e.contains("CLIENT-00001"));
@@ -384,7 +391,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testDeleteOrderWhenOrderNoExists() {
+	public void testDeleteOrderWhenOrderDoesNotExists() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(0);
 		removeOrderFromDatabase("ORDER-00003");
@@ -408,7 +415,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testDeleteOrderWhenClientNoExists() {
+	public void testDeleteOrderWhenClientDoesNotExists() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.table("OrdersTable").selectRows(1);
 		removeClientFromDatabase("CLIENT-00002");
@@ -460,7 +467,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenYearChangedIsDifferentThanYearSelected() {
+	public void testModifyOrderWhenYearOrderChangedIsDifferentThanYearSelected() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(1);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -486,7 +493,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenClientChangedIsDifferentThanClientSelected() {
+	public void testModifyOrderWhenClientOrderChangedIsDifferentThanClientSelected() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.list("clientsList").selectItem("CLIENT-00001, client 1");
 		window.table("OrdersTable").selectRows(0);
@@ -509,7 +516,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenClientNoExists() {
+	public void testModifyOrderWhenClientDoesNotExist() {
 		window.comboBox("yearsCombobox").selectItem("2024");
 		window.table("OrdersTable").selectRows(0);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
@@ -537,7 +544,7 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenOrderNoExist() {
+	public void testModifyOrderWhenOrderDoesNotExist() {
 		window.comboBox("yearsCombobox").selectItem("2025");
 		window.table("OrdersTable").selectRows(1);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -565,8 +572,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testAddNewOrderForClientDifferentFromClientSelectedWithNewYear() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+	public void testAddOrderToClientDifferentFromClientSelectedWithNewYear() {
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 
 		window.list("clientsList").selectItem(1);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -574,7 +581,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2021);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 		window.comboBox("yearsCombobox").requireNoSelection();
 		String[][] tableContents = window.table("OrdersTable").contents();
 		assertThat(tableContents[0]).containsExactly(new String[] { "ORDER-00004", "client 2",
@@ -584,15 +592,15 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"20.0" });
 
-		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + "CLIENT-00002" + " è di " + "60,00€");
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
+				+ "CLIENT-00002" + " è di " + "60,00€</center></html>");
 		assertThat(window.comboBox("yearsCombobox").contents()).contains("2021");
 	}
 
 	@Test
 	@GUITest
-	public void testAddNewOrderWithNoClientSelectedNoYearSelected() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+	public void testAddOrderWithNoClientSelectedNoYearSelected() {
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00001, client 1"));
@@ -600,7 +608,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.textBox("textField_monthOfDateOrder").enterText("5");
 		window.textBox("textField_yearOfDateOrder").enterText("" + 2021);
 		window.textBox("textField_revenueOrder").enterText("100.25");
-		window.button(JButtonMatcher.withText(Pattern.compile("Aggiungi ordine"))).click();
+		window.button(JButtonMatcher.withText(Pattern.compile("<html><center>Aggiungi<br>ordine</center></html>")))
+				.click();
 
 		window.comboBox("yearsCombobox").requireNoSelection();
 		window.list("clientsList").requireNoSelection();
@@ -628,8 +637,8 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testModifyOrderWhenNoYearsSelectedAndClientChangedIsDifferentFromClientSelected() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+	public void testModifyOrderWhenNoYearsSelectedAndClientOrderChangedIsDifferentFromClientSelected() {
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").selectItem("CLIENT-00001, client 1");
 		window.table("OrdersTable").selectRows(0);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
@@ -646,14 +655,14 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 		window.table("OrdersTable").requireRowCount(1);
 		window.textBox("panelOrderErrorMessage").requireEmpty();
 		assertThat(window.comboBox("yearsCombobox").contents()).contains("" + 2019);
-		window.label("revenueLabel")
-				.requireText("Il costo totale degli ordini del cliente " + "CLIENT-00001" + " è di " + "10,00€");
+		window.label("revenueLabel").requireText("<html><center>Il costo totale degli ordini del cliente <br>"
+				+ "CLIENT-00001" + " è di " + "10,00€</center></html>");
 	}
 
 	@Test
 	@GUITest
 	public void testModifyOrderWhenNoYearsSelectedNoClientSelected() {
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.list("clientsList").clearSelection();
 		window.table("OrdersTable").selectRows(0);
 		window.comboBox("comboboxClients").selectItem(Pattern.compile("CLIENT-00002, client 2"));
@@ -688,9 +697,9 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 
 	@Test
 	@GUITest
-	public void testShowAllOrdersClientsNoYearsSelected() {
+	public void testShowAllClientsOrdersWhenNoYearsSelected() {
 		window.list("clientsList").selectItem(0);
-		window.comboBox("yearsCombobox").selectItem("-- Nessun anno --");
+		window.comboBox("yearsCombobox").selectItem(NO_YEAR_ITEM);
 		window.button(JButtonMatcher.withText("<html><center>Visualizza ordini<br>di tutti i clienti</center></html>"))
 				.click();
 		window.table("OrdersTable").requireRowCount(4);
@@ -708,6 +717,111 @@ public class OrderSwingAppE2ETest extends AssertJSwingJUnitTestCase {
 				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
 				"20.0");
 		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di " + "100,00€");
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseRemovedLastOrderOfNotCurrentYearWhenYearSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0");
+		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di " + "30,00€");
+		window.textBox("panelOrderErrorMessage").requireText("Non sono presenti ordini per il 2024");
+
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseRemovedLastOrderOfANotCurrentYearWhenYearAndClientAreSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(1);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.list("clientsList").selectItem(0);
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(1);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00001 è di "
+						+ "10,00€</center></html>");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente CLIENT-00001");
+
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearWhenYearAndClientAreSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(1);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.list("clientsList").selectItem(0);
+		window.table("OrdersTable").selectRows(0);
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2022);
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(2);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(tableContents[0]).containsExactly("ORDER-00003", "client 1",
+				Date.from(LocalDate.of(2022, 5, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"30.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+
+		assertThat(window.comboBox("yearsCombobox").contents()).contains("2022");
+		window.label("revenueLabel")
+				.requireText("<html><center>Il costo totale degli ordini del cliente <br>CLIENT-00001 è di "
+						+ "40,00€</center></html>");
+		window.textBox("panelOrderErrorMessage")
+				.requireText("Non sono presenti ordini del 2024 per il cliente CLIENT-00001");
+
+	}
+
+	@Test
+	@GUITest
+	public void testEdgeCaseUpdateYearOfLastOrderOfANotCurrentYearWhenYearSelected() {
+		window.comboBox("yearsCombobox").selectItem("2024");
+		window.table("OrdersTable").selectRows(0);
+		window.button(JButtonMatcher.withText("<html><center>Rimuovi<br>ordine</center></html>")).click();
+		window.table("OrdersTable").selectRows(0);
+		window.textBox("textField_monthOfDateOrder").setText("");
+		window.textBox("textField_monthOfDateOrder").enterText("" + 8);
+		window.textBox("textField_yearOfDateOrder").setText("");
+		window.textBox("textField_yearOfDateOrder").enterText("" + 2018);
+		window.button(JButtonMatcher.withText("<html><center>Modifica<br>ordine</center></html>")).click();
+		window.table("OrdersTable").requireRowCount(3);
+		String[][] tableContents = window.table("OrdersTable").contents();
+		assertThat(window.comboBox("yearsCombobox").contents()).doesNotContain("2024");
+		assertThat(window.comboBox("yearsCombobox").contents()).contains("2018");
+		assertThat(tableContents[0]).containsExactly("ORDER-00004", "client 2",
+				Date.from(LocalDate.of(2018, 8, 1).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"40.0");
+		assertThat(tableContents[1]).containsExactly("ORDER-00001", "client 1",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"10.0");
+		assertThat(tableContents[2]).containsExactly("ORDER-00002", "client 2",
+				Date.from(LocalDate.of(2025, 7, 31).atStartOfDay(ZoneId.systemDefault()).toInstant()).toString(),
+				"20.0");
+		window.label("revenueLabel").requireText("Il costo totale degli ordini presenti nel DB è di " + "70,00€");
+		window.textBox("panelOrderErrorMessage").requireText("Non sono presenti ordini per il 2024");
+
 	}
 
 }

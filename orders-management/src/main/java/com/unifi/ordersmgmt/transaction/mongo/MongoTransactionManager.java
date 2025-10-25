@@ -2,7 +2,6 @@ package com.unifi.ordersmgmt.transaction.mongo;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import com.mongodb.MongoException;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
@@ -25,6 +24,7 @@ public class MongoTransactionManager implements TransactionManager {
 	private String ordersCollectionName;
 	private String databaseName;
 	private static final Logger logger = LogManager.getLogger(MongoTransactionManager.class);
+
 	public MongoTransactionManager(MongoClient mongoclient, String clientsCollectionName, String ordersCollectionName,
 			String databaseName) {
 		super();
@@ -36,13 +36,9 @@ public class MongoTransactionManager implements TransactionManager {
 
 	@Override
 	public <R> R executeTransaction(TransactionalFunction<R> transactionalFunction) {
-		// TODO Auto-generated method stub
-		logger.info("clientService initializate successfully.");
-
 		TransactionOptions options = TransactionOptions.builder().readPreference(ReadPreference.primary())
 				.readConcern(ReadConcern.LOCAL).writeConcern(WriteConcern.MAJORITY).build();
-		logger.info("transaction op initializate successfully.");
-
+		logger.info("transaction op initialized successfully.");
 
 		ClientSession clientSession = mongoclient.startSession();
 		logger.info("mongoclient session started");
@@ -57,8 +53,7 @@ public class MongoTransactionManager implements TransactionManager {
 			TransactionBody<R> body = () -> transactionalFunction.apply(clientMongoRepository, orderMongoRepository);
 			return clientSession.withTransaction(body, options);
 		} catch (MongoException e) {
-			// TODO: handle exception
-			logger.info("eccezione lanciata: {}", e.getMessage(), e);
+			logger.error("exception thrown", e);
 			throw e;
 		}
 

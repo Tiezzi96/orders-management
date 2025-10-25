@@ -7,7 +7,6 @@ public class Client extends BaseElement {
 	private String name;
 
 	public Client() {
-		// TODO Auto-generated constructor stub
 		this.identifier = null;
 		this.name = null;
 	}
@@ -18,28 +17,23 @@ public class Client extends BaseElement {
 	}
 
 	public Client(String name) {
-		// TODO Auto-generated constructor stub
 		this.name = name;
 		this.identifier = null;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return Objects.toString(identifier, "null") + ", " +
-        Objects.toString(name, "null");
+		return Objects.toString(identifier, "null") + ", " + Objects.toString(name, "null");
 	}
-	
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
@@ -58,9 +52,9 @@ public class Client extends BaseElement {
 		return true;
 
 	}
-	
+
 	@Override
 	public int hashCode() {
-	    return Objects.hash(identifier); 
+		return Objects.hash(identifier);
 	}
 }

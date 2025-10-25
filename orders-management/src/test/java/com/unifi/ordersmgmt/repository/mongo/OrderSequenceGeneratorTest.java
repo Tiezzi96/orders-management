@@ -46,10 +46,10 @@ public class OrderSequenceGeneratorTest {
 	}
 
 	@Test
-	public void testGenerateCodiceClienteIncrementsSequence() {
+	public void testGenerateCodiceOrdineIncrementsSequence() {
 		try (ClientSession session = mongoClient.startSession()) {
-			String codice1 = generator.generateCodiceCliente(session);
-			String codice2 = generator.generateCodiceCliente(session);
+			String codice1 = generator.generateCodiceOrdine(session);
+			String codice2 = generator.generateCodiceOrdine(session);
 
 			assertNotNull(codice1);
 			assertNotNull(codice2);
@@ -68,7 +68,7 @@ public class OrderSequenceGeneratorTest {
 	@Test
 	public void testInitialSequenceStartsAtOne() {
 		try (ClientSession session = mongoClient.startSession()) {
-			String codice = generator.generateCodiceCliente(session);
+			String codice = generator.generateCodiceOrdine(session);
 			assertEquals("ORDER-00001", codice);
 		}
 	}

@@ -44,12 +44,8 @@ public class TransactionalOrderService implements OrderService {
 	public Order addOrder(Order order) {
 		Order orderInserted = mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 
-			logger.info("client of the order: {}", order.getClient());
-
-			logger.info("Client ID of the client of the order: {}", order.getClient().getIdentifier());
-
-			logger.info("result of findById() method of clientRepository for client of the order: {}",
-					clientRepo.findById(order.getClient().getIdentifier()));
+			logger.debug("client of the order: clientID={}, name={}", order.getClient().getIdentifier(),
+					order.getClient().getName());
 
 			if (clientRepo.findById(order.getClient().getIdentifier()) == null) {
 				throw new NotFoundClientException(
@@ -57,7 +53,7 @@ public class TransactionalOrderService implements OrderService {
 			}
 			return orderRepo.save(order);
 		});
-		logger.info("Order Inserted by service: {}", orderInserted);
+		logger.debug("Order Inserted by service: {}", orderInserted);
 		return orderInserted;
 	}
 
@@ -94,8 +90,8 @@ public class TransactionalOrderService implements OrderService {
 						String.format("Il cliente originale con id %s non è presente nel database",
 								orderToModify.getClient().getIdentifier()));
 			}
-			logger.info("client of the order to modify: {}", orderToModify.getClient());
-			logger.info("ID of the client of the order to modify: {}", orderToModify.getClient().getIdentifier());
+			logger.debug("Order to modify: orderID={}, client={}", orderToModify.getIdentifier(),
+					orderToModify.getClient());
 			if (clientRepo.findById(((Client) updates.get("client")).getIdentifier()) == null) {
 				throw new NotFoundClientException(
 						String.format(CLIENT_MESSAGE_EXCEPTION, ((Client) updates.get("client")).getIdentifier()));
@@ -108,13 +104,12 @@ public class TransactionalOrderService implements OrderService {
 	public List<Order> allOrdersByClient(Client client) {
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> {
 			if (clientRepo.findById(client.getIdentifier()) == null) {
-				throw new NotFoundClientException(
-						String.format(CLIENT_MESSAGE_EXCEPTION, client.getIdentifier()));
+				throw new NotFoundClientException(String.format(CLIENT_MESSAGE_EXCEPTION, client.getIdentifier()));
 			}
 			return orderRepo.findOrdersByClient(client);
 		});
 	}
-	
+
 	@Override
 	public List<Order> findAllOrders() {
 		return mongoTransactionManager.executeTransaction((clientRepo, orderRepo) -> orderRepo.findAll());

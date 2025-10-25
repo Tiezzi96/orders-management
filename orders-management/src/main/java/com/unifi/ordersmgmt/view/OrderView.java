@@ -30,6 +30,3 @@ public interface OrderView {
 	public void orderUpdated(Order orderModified);
 
 }
-
-
-

@@ -64,14 +64,16 @@ public class ClientMongoRepositoryTest {
 	@BeforeClass
 	public static void initialize() throws Exception {
 		mongo.start();
-		// Initialized replica set
+		// Inizializza replica set
 		mongo.execInContainer("/bin/bash", "-c", "mongo --eval 'rs.initiate()' --quiet");
 
-		// It waits until the node becomes primary by checking the isMaster field. The
-		// until-do-done loop keeps running until isMaster is set to true.
+		// Bisogna attendere finche il nodo non diventa primary controllando il campo
+		// isMaster. Il
+		// loop until-do-done viene ripetuto finche isMaster non è settato a true,
+		// attendendo 1 sec tra un loop e il successivo.
 		mongo.execInContainer("/bin/bash", "-c",
 				"until mongo --eval 'rs.isMaster()' | grep ismaster | grep true > /dev/null 2>&1; do sleep 1; done");
-		logger.info("Replica set URL: {}", mongo.getReplicaSetUrl());
+		logger.debug("Replica set URL: {}", mongo.getReplicaSetUrl());
 
 	}
 
@@ -82,9 +84,9 @@ public class ClientMongoRepositoryTest {
 
 		}
 	}
-	
+
 	@Test
-	public void testCreateClientCollectionIfNotExistingInDatabase() {
+	public void testCreateClientCollectionIfDoesNotExistInDatabase() {
 		String clientCollectionNotExisting = "client_collection_not_existing_in_db";
 		clientRepository = new ClientMongoRepository(mongoClient, mongoClient.startSession(), "budget",
 				clientCollectionNotExisting, seqGen);
@@ -101,13 +103,11 @@ public class ClientMongoRepositoryTest {
 		List<Client> clients = clientRepository.findAll();
 		assertThat(clients).isEmpty();
 	}
-	
 
 	@Test
 	public void testFindAllClientsWhenDBIsNotEmpty() {
 		String cod1 = "CLIENT-00001";
 		String cod2 = "CLIENT-00002";
-		logger.info("cod1: {}", cod1);
 		Client firstClient = new Client(cod1, "first client");
 		Client secondClient = new Client(cod2, "second client");
 		Document firstClientDoc = new Document().append("id", firstClient.getIdentifier()).append("name",
@@ -120,7 +120,7 @@ public class ClientMongoRepositoryTest {
 		logger.debug("clients in database: {}", clients);
 		assertThat(clients).containsExactly(firstClient, secondClient);
 	}
-	
+
 	@Test
 	public void testFindByIdNotFound() {
 		Client clientFound = clientRepository.findById("CLIENT-00001");
@@ -131,7 +131,6 @@ public class ClientMongoRepositoryTest {
 	public void testFindByIdIsFound() {
 		String cod1 = "CLIENT-00001";
 		String cod2 = "CLIENT-00002";
-		logger.info("cod1: {}", cod1);
 		Client firstClient = new Client(cod1, "first client");
 		Client secondClient = new Client(cod2, "second client");
 		Document firstClientDoc = new Document().append("id", firstClient.getIdentifier()).append("name",
@@ -176,7 +175,7 @@ public class ClientMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteWhenClientNotExistInDB() {
+	public void testDeleteWhenClientDoesNotExistInDB() {
 		String cod1 = "CLIENT-00001";
 		Client removed = clientRepository.delete(cod1);
 		assertThat(removed).isNull();

@@ -84,12 +84,12 @@ public class OrderMongoRepositoryTest {
 
 	@After
 	public void tearDown() {
-		mongoClient.close();
 		session.close();
+		mongoClient.close();
 	}
 
 	@Test
-	public void testCreateClientCollectionIfNotExistingInDatabase() {
+	public void testCreateClientCollectionIfDoesNotExistInDatabase() {
 		String orderCollectionNotExisting = "order_collection_not_existing_in_db";
 		orderRepository = new OrderMongoRepository(mongoClient, mongoClient.startSession(), "budget",
 				orderCollectionNotExisting, clientMongoRepository, seqGen);
@@ -97,7 +97,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testNotCreateClientCollectionIfExistingInDatabase() {
+	public void testNotCreateClientCollectionIfExistsInDatabase() {
 		String orderCollectionExisting = "order";
 		MongoDatabase db = mongoClient.getDatabase("budget");
 		List<String> previousCollectionsDB = new ArrayList<String>();
@@ -125,7 +125,6 @@ public class OrderMongoRepositoryTest {
 	public void testFindAllOrdersWhenDBIsNotEmpty() {
 		String cod1 = "ORDER-00001";
 		String cod2 = "ORDER-00002";
-		logger.info("cod1: {}", cod1);
 		Client client = new Client("CLIENT-00001", "client");
 		Order firstOrder = new Order(cod1, client, new Date(), 10);
 		Order secondOrder = new Order(cod2, client, new Date(), 20);
@@ -153,7 +152,6 @@ public class OrderMongoRepositoryTest {
 	public void testFindByIdIsFound() {
 		String cod1 = "ORDER-00001";
 		String cod2 = "ORDER-00002";
-		logger.info("cod1: {}", cod1);
 		Client firstClient = new Client("CLIENT-00001", "first client");
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(firstClient);
 		Order firstOrder = new Order(cod1, firstClient, new Date(), 10.0);
@@ -175,8 +173,7 @@ public class OrderMongoRepositoryTest {
 		String cod1 = "ORDER-00001";
 		Client newClient = new Client("CLIENT-00001", "firstClient");
 		Order newOrder = new Order("", newClient, new Date(), 10.0);
-		logger.info("new Order: {}", newOrder);
-		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
+		when(seqGen.generateCodiceOrdine(session)).thenReturn("ORDER-00001");
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
 		Order orderSaved = orderRepository.save(newOrder);
 		assertThat(orderSaved)
@@ -192,7 +189,6 @@ public class OrderMongoRepositoryTest {
 		String cod1 = "ORDER-00001";
 		Client newClient = new Client("CLIENT-00001", "firstClient");
 		Order newOrder = new Order(cod1, newClient, new Date(), 10.0);
-		logger.info("new Order: {}", newOrder);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(newClient);
 		Order orderSaved = orderRepository.save(newOrder);
 		assertThat(orderSaved)
@@ -204,20 +200,20 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testDeleteWhenOrderNotExistInDB() {
-		when(seqGen.generateCodiceCliente(session)).thenReturn("ORDER-00001");
-		Order orderRemoved = orderRepository.delete(seqGen.generateCodiceCliente(session));
+	public void testDeleteWhenOrderDoesNotExistInDB() {
+		when(seqGen.generateCodiceOrdine(session)).thenReturn("ORDER-00001");
+		Order orderRemoved = orderRepository.delete(seqGen.generateCodiceOrdine(session));
 		assertThat(orderRemoved).isNull();
 
 	}
 
 	@Test
-	public void testDeleteWhenOrderExistInDB() {
+	public void testDeleteWhenOrderExistsInDB() {
 		String orderID = insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
-		Date currentDate = new Date(); // Data corrente
+		Date currentDate = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(currentDate);
-		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 anno
+		calendar.add(Calendar.YEAR, -1);
 		Order orderDeleted = orderRepository.delete(orderID);
 		List<Order> ordersInDatabase = getAllOrdersFromDB();
 		assertThat(orderDeleted).isNotNull();
@@ -234,10 +230,10 @@ public class OrderMongoRepositoryTest {
 	@Test
 	public void testFindOrdersByYearWhenDBContainsOrdersOfTheYearSelected() {
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
-		Date currentDate = new Date(); // Data corrente
+		Date currentDate = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(currentDate);
-		calendar.add(Calendar.DAY_OF_MONTH, -1); // Rimuovi 1 giorno
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
 		Date previousDate = calendar.getTime();
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 2);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
@@ -251,13 +247,13 @@ public class OrderMongoRepositoryTest {
 
 	@Test
 	public void testFindOrdersByYearWhenDBContainsOrdersOfDifferentYears() {
-		Date currentDate = new Date(); // Data corrente
+		Date currentDate = new Date();
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), currentDate, 10.0, 1);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(currentDate);
-		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 giorno
+		calendar.add(Calendar.YEAR, -1);
 		Date previousDate = calendar.getTime();
-		logger.info("previous Date : {}", previousDate);
+		logger.debug("previous Date : {}", previousDate);
 
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 1);
 		when(clientMongoRepository.findById("CLIENT-00001")).thenReturn(new Client("CLIENT-00001", "firstClient"));
@@ -301,14 +297,14 @@ public class OrderMongoRepositoryTest {
 	@Test
 	public void testGetYearsOfOrderWhenDBIsNotEmpty() {
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
-		Date currentDate = new Date(); // Data corrente
+		Date currentDate = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(currentDate);
-		calendar.add(Calendar.YEAR, -1); // Rimuovi 1 giorno
+		calendar.add(Calendar.YEAR, -1);
 		Date previousDate = calendar.getTime();
 		calendar.add(Calendar.YEAR, -1);
 		Date twoYearsAgoDate = calendar.getTime();
-		logger.info("revious date: {}", previousDate);
+		logger.debug("Previous date: {}", previousDate);
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 1);
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), twoYearsAgoDate, 30.0, 2);
 
@@ -443,7 +439,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testModifyOrderWhenOrderExistInDB() {
+	public void testModifyOrderWhenOrderExistsInDB() {
 		Client newClient = new Client("CLIENT-00001", "new Client");
 		Date date1 = new Date();
 		String orderID = insertNewOrderInDB(newClient, date1, 10, 1);
@@ -478,7 +474,7 @@ public class OrderMongoRepositoryTest {
 	}
 
 	@Test
-	public void testModifyOrderWhenOrderNotExistInDB() {
+	public void testModifyOrderWhenOrderDoesNotExistInDB() {
 		String orderID = "ORDER-00001";
 		Map<String, Object> updates = new HashMap<String, Object>();
 		Order orderModified = orderRepository.updateOrder(orderID, updates);
@@ -503,7 +499,7 @@ public class OrderMongoRepositoryTest {
 		orderCollection.insertOne(orderToInsert);
 		return orderID;
 	}
-	
+
 	@Test
 	public void testFindOrdersByClientWhenDBIsEmpty() {
 		List<Order> ordersOfClientSelected = orderRepository
@@ -514,10 +510,10 @@ public class OrderMongoRepositoryTest {
 	@Test
 	public void testFindOrdersByClientWhenDBContainsOrdersOfTheClientSelected() {
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), new Date(), 10.0, 1);
-		Date currentDate = new Date(); // Data corrente
+		Date currentDate = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(currentDate);
-		calendar.add(Calendar.DAY_OF_MONTH, -1); // Rimuovi 1 giorno
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
 		Date previousDate = calendar.getTime();
 		insertNewOrderInDB(new Client("CLIENT-00001", "firstClient"), previousDate, 20.0, 2);
 		insertNewOrderInDB(new Client("CLIENT-00002", "secondClient"), previousDate, 20.0, 3);

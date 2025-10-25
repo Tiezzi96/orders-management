@@ -9,9 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.unifi.ordersmgmt.model.Client;
 import com.unifi.ordersmgmt.model.Order;
 
@@ -21,9 +18,8 @@ public class OrderTableModel extends AbstractTableModel {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LogManager.getLogger(OrderTableModel.class);
 	private transient List<Order> orders;
-	private static final String[] columns = { "Id", "Cliente", "Data", "Importo ($)" };
+	private static final String[] columns = { "Id", "Cliente", "Data", "Importo (€)" };
 
 	public OrderTableModel() {
 		this.orders = new ArrayList<>();
@@ -62,7 +58,6 @@ public class OrderTableModel extends AbstractTableModel {
 
 	public void addOrder(Order order) {
 		orders.add(order);
-		logger.info("ORDER: {}", order);
 		Collections.sort(orders, Comparator.comparing(Order::getDate));
 		fireTableDataChanged();
 	}
@@ -96,6 +91,7 @@ public class OrderTableModel extends AbstractTableModel {
 
 	public void removeOrder(Order orderRemoved) {
 		orders.remove(orderRemoved);
+		fireTableDataChanged();
 	}
 
 }

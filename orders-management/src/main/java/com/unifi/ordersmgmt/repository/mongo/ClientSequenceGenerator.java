@@ -22,12 +22,12 @@ public class ClientSequenceGenerator {
 		Document result = db.getCollection("counters").findOneAndUpdate(session, Filters.eq("_id", sequenceName),
 				Updates.inc("seq", 1), new FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER));
 		Number seqValue = result.get("seq", Number.class);
-		long nextSeq = seqValue.longValue();
-		return nextSeq;
+		return seqValue.longValue();
+
 	}
 
 	public String generateCodiceCliente(ClientSession session) {
-		long nextId = getNextSequence(session, "client");// clients era il nome precedente
+		long nextId = getNextSequence(session, "client");
 		return String.format("CLIENT-%05d", nextId);
 	}
 

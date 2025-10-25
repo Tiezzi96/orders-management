@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import com.mongodb.client.ClientSession;
@@ -19,7 +16,6 @@ import com.unifi.ordersmgmt.repository.ClientRepository;
 
 public class ClientMongoRepository implements ClientRepository {
 
-	private static final Logger logger = LogManager.getLogger(ClientMongoRepository.class); 
 	private ClientSession clientSession;
 	private MongoCollection<Document> clientCollection;
 	private ClientSequenceGenerator seqGen;
@@ -42,15 +38,12 @@ public class ClientMongoRepository implements ClientRepository {
 
 	@Override
 	public List<Client> findAll() {
-		// TODO Auto-generated method stub
-		List<Client> clients = StreamSupport.stream(clientCollection.find(clientSession).spliterator(), false)
+		return StreamSupport.stream(clientCollection.find(clientSession).spliterator(), false)
 				.map(d -> new Client(d.getString("id"), d.getString("name"))).collect(Collectors.toList());
-		return clients;
 	}
 
 	@Override
 	public Client findById(String id) {
-		// TODO Auto-generated method stub
 		Document d = clientCollection.find(clientSession, Filters.eq("id", id)).first();
 		if (d != null) {
 			return new Client(d.getString("id"), d.getString("name"));
@@ -60,32 +53,28 @@ public class ClientMongoRepository implements ClientRepository {
 
 	@Override
 	public Client save(Client clientToSave) {
-		// TODO Auto-generated method stub
 		if (clientToSave.getIdentifier() == null) {
 			clientToSave.setIdentifier(seqGen.generateCodiceCliente(clientSession));
 		}
-		logger.info("CLIENT TO SAVE: {}", clientToSave);
 		Document doc = new Document().append("id", clientToSave.getIdentifier()).append("name", clientToSave.getName());
 		clientCollection.insertOne(clientSession, doc);
-		Client saved = new Client(doc.getString("id"), doc.getString("name"));
-		return saved;
+		return new Client(doc.getString("id"), doc.getString("name"));
 	}
 
 	@Override
 	public Client delete(String idToDelete) {
 		Client clientToDelete = findById(idToDelete);
-		
-		if(clientToDelete!=null) {
+
+		if (clientToDelete != null) {
 			clientCollection.deleteOne(clientSession, Filters.eq("id", clientToDelete.getIdentifier()));
 			return clientToDelete;
-			
+
 		}
 		return null;
 	}
-	
-	@Override 
+
+	@Override
 	public ClientSession getSession() {
-		// TODO Auto-generated method stub
 		return clientSession;
 	}
 
