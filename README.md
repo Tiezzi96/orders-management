@@ -41,6 +41,10 @@ Per avviare l'applicazione è possibile definire dei parametri da passare da lin
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
 
 ---
 
