@@ -16,20 +16,20 @@
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
 
-		<sonar.coverage.exclusions> **/model/*.*, **/app/swing/*.*
-
-		</sonar.coverage.exclusions>
+		<sonar.coverage.exclusions>**/model/*.*, **/app/swing/*.*</sonar.coverage.exclusions>
 
 		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
-		<!-- ignore sonar rule "Tests should include assertions" for UI tests
-		with assertj swing-->
+		<!-- ignora la regola sonar "Tests should include assertions" per UI
+		tests
+		con assertj swing-->
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>
 			java:S2699
 		</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>
 			**/swing/**/*.java
 		</sonar.issue.ignore.multicriteria.e1.resourceKey>
-		<!-- ignore sonar rule "Local variable and method parameter names should
+		<!-- ignora la regola sonar "Local variable and method parameter names
+		should
 		comply with a naming convention"-->
 		<sonar.issue.ignore.multicriteria.e2.ruleKey>
 			java:S117
@@ -37,16 +37,16 @@
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>
 			**/OrderSwingView.java
 		</sonar.issue.ignore.multicriteria.e2.resourceKey>
-		<!-- Dependencies version  -->
+		<!-- Dependency versions  -->
 		<mongo.java.driver.version>3.12.14</mongo.java.driver.version>
 		<picocli.version>4.3.0</picocli.version>
-		<org.assertj.mockito.version>4.11.0</org.assertj.mockito.version>
+		<org.mockito.version>4.11.0</org.mockito.version>
 		<org.testcontainers.version>1.19.1</org.testcontainers.version>
 		<org.assertj.swing.version>3.17.1</org.assertj.swing.version>
 		<org.apache.commons.version>3.12.0</org.apache.commons.version>
-		<ch.qos.logpack.version>1.2.3</ch.qos.logpack.version>
+		<ch.qos.logback.version>1.2.3</ch.qos.logback.version>
 		<javax.xml.bind.version>2.3.1</javax.xml.bind.version>
-		<!-- Plugins versions -->
+		<!-- Plugin versions -->
 		<maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
 		<maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
 		<maven.docker.plugin.version>0.34.1</maven.docker.plugin.version>
@@ -86,10 +86,10 @@
 
 
 		<dependency>
-			<!-- required to see Mongo Java Driver-->
+			<!-- necessario per vedere i log del Mongo Java Driver-->
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>${ch.qos.logpack.version}</version>
+			<version>${ch.qos.logback.version}</version>
 		</dependency>
 
 		<dependency>
@@ -102,7 +102,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>${org.assertj.mockito.version}</version>
+			<version>${org.mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -121,7 +121,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency><!-- dependency per javax.utils.pair-->
+		<dependency><!-- dependency per ImmutablePair e Pair-->
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>${org.apache.commons.version}</version>
@@ -322,7 +322,7 @@
 					<artifactId>coveralls-maven-plugin</artifactId>
 					<version>${maven.coveralls.plugin.version}</version>
 					<dependencies>
-						<dependency> <!-- Required when using JDK 9 or higher -->
+						<dependency> <!-- Richiesto quando usi JDK 9 o superiore -->
 							<groupId>javax.xml.bind</groupId>
 							<artifactId>jaxb-api</artifactId>
 							<version>${javax.xml.bind.version}</version>
