@@ -1,7 +1,7 @@
 # Orders Management Project
 ---
 
-Il progetto **Orders Management** è stato sviluppato per l'esame di Advanced Programming Techniques dell'Università degli studi di Firenze. Il progetto consiste in un'applicazione Java per la gestione di clienti e dei rispettivi ordini di un'attività commerciale. 
+Il progetto **Orders Management** è stato sviluppato per l'esame di Advanced Programming Techniques dell'Università degli Studi di Firenze. Il progetto consiste in un'applicazione Java per la gestione di clienti e dei rispettivi ordini di un'attività commerciale. 
 
 ---
 
@@ -13,13 +13,13 @@ Il progetto è stato implementato tramite l'utilizzo dell'ambiente di sviluppo *
 
 ---
 # Esecuzione dell'applicazione
-Al fine di eseguire l'applicazione è necessario:
+Al fine di eseguire l'applicazione, dopo essersi spostati nella root del progetto, è necessario:
 
 - Costruire il file JAR (il quale viene generalmente generato nella directory **target/**) attraverso il comando:<br> `mvn -f orders-management/pom.xml clean package`
-- L'applicazione necessita che **Docker Desktop** sia avviato e che il docker deamon sia in esecuzione. L'avvio dei container definito nel progetto avviene attraverso il comando: <br> `mvn -f orders-management/pom.xml docker:start`
+- L'applicazione necessita che **Docker Desktop** sia avviato e che il Docker daemon sia in esecuzione. L'avvio dei container definito nel progetto avviene attraverso il comando: <br> `mvn -f orders-management/pom.xml docker:start`
 - Successivamente è possibile avviare l'applicazione, attraverso il comando: <br> `java -jar orders-management/target/orders-management-0.0.1-SNAPSHOT-jar-with-dependencies.jar`
 
-Per avviare l'applicazione è possibile definire dei paramentri da passare da linea di comando, utilizzando la libreria **[Picocli](https://picocli.info/)** per gestire tali parametri. In questo modo è possibile personalizzare l'avvio specificando:
+Per avviare l'applicazione è possibile definire dei parametri da passare da linea di comando, utilizzando la libreria **[Picocli](https://picocli.info/)** per gestire tali parametri. In questo modo è possibile personalizzare l'avvio specificando:
 
 | Parametro | Descrizione | Valore di default | Esempio |
 | --------- | ----------- | ----------------- | ------- |
@@ -41,28 +41,28 @@ Per avviare l'applicazione è possibile definire dei paramentri da passare da li
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Tiezzi96_orders-management&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Tiezzi96_orders-management)
 
 ---
 
 # Fase di Testing
 ---
 ## Esecuzione dei test
-Per eseguire i test è necessario è necessario:
-- assicurarsi che **Docker Desktop** sia avviato (il Docker deamon deve essere in esecuzione)
+Per eseguire i test è necessario:
+- assicurarsi che **Docker Desktop** sia avviato (il Docker daemon deve essere in esecuzione)
 - posizionarsi nella root del progetto ed eseguire il comando:<br> `mvn -f orders-management/pom.xml clean verify`
 
-Il comando permette di ripulire i target precedenti e lanciare la suite di test contenuto nal modulo *orders-management*. 
-Per eseguire i test da Eclipse è possibile utilizzare la procedura `Run As -> Junit Test`. Per gli Integration e gli E2E test deve essere avviato il comando `mvn -f orders-management/pom.xml docker:start` in precedenza.
+Il comando permette di ripulire i target precedenti e lanciare la suite di test contenuta nel modulo *orders-management*. 
+Per eseguire i test da Eclipse è possibile utilizzare la procedura `Run As -> JUnit Test`. Per gli Integration e gli E2E test deve essere avviato il comando `mvn -f orders-management/pom.xml docker:start` in precedenza.
 
 
-## Esecuzione del Code Coverage e del Mutation Testing
-Al fine di eseguire il calcolo della code coverage ed il mutation testing, devono essere eseguiti il plugin jacoco ed il plugin pit. A tal fine il comando precedente deve essere modificato come segue, attivando i rispettivi profili:
+## Esecuzione della Code Coverage e del Mutation Testing
+Al fine di eseguire il calcolo della Code Coverage ed il Mutation Testing, devono essere abilitati i plugin *JaCoCo* e *PIT*. A tal fine il comando precedente deve essere modificato come segue, attivando i rispettivi profili `jacoco` e `pitest`:
 `mvn -f orders-management/pom.xml clean verify -Pjacoco -Ppitest`
 
 ---
 
-Tutti i comandi Maven (mvn ...) e Java (java ...) mostrati sono stati verificati in **Windows PowerShell**
-
-
-
-
+Tutti i comandi Maven (`mvn ...`) e Java (`java ...`) mostrati sono stati verificati in **Windows PowerShell**
